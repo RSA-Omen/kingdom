@@ -1,0 +1,107 @@
+@import "tailwindcss";
+
+/* Newsroom Design Tokens — see ../docs/DESIGN_SYSTEM.md */
+
+@theme {
+  /* Typography */
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* Radii — 4px and 8px only */
+  --radius-sm: 0.25rem; /* 4px — buttons, inputs, badges */
+  --radius-lg: 0.5rem;  /* 8px — cards, surfaces */
+}
+
+/* Light mode is default; dark mode via .dark class on <html> */
+:root {
+  --color-bg-page: theme(colors.neutral.50);
+  --color-bg-surface: theme(colors.white);
+  --color-bg-surface-elevated: theme(colors.white);
+  --color-bg-subtle: theme(colors.neutral.100);
+
+  --color-text-primary: theme(colors.neutral.900);
+  --color-text-secondary: theme(colors.neutral.600);
+  --color-text-tertiary: theme(colors.neutral.500);
+
+  --color-border: theme(colors.neutral.200);
+
+  --color-accent: theme(colors.indigo.600);
+  --color-accent-hover: theme(colors.indigo.700);
+  --color-accent-fg: theme(colors.white);
+
+  --color-success: theme(colors.emerald.600);
+  --color-warning: theme(colors.amber.600);
+  --color-danger: theme(colors.rose.600);
+  --color-info: theme(colors.sky.600);
+}
+
+.dark {
+  --color-bg-page: theme(colors.neutral.950);
+  --color-bg-surface: theme(colors.neutral.900);
+  --color-bg-surface-elevated: theme(colors.neutral.800);
+  --color-bg-subtle: theme(colors.neutral.800);
+
+  --color-text-primary: theme(colors.neutral.50);
+  --color-text-secondary: theme(colors.neutral.400);
+  --color-text-tertiary: theme(colors.neutral.500);
+
+  --color-border: theme(colors.neutral.800);
+
+  --color-accent: theme(colors.indigo.400);
+  --color-accent-hover: theme(colors.indigo.300);
+  --color-accent-fg: theme(colors.neutral.950);
+
+  --color-success: theme(colors.emerald.400);
+  --color-warning: theme(colors.amber.400);
+  --color-danger: theme(colors.rose.400);
+  --color-info: theme(colors.sky.400);
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  body {
+    background-color: var(--color-bg-page);
+    color: var(--color-text-primary);
+  }
+
+  *:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--color-accent);
+  }
+
+  /* Scrollbar — subtle, themed */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-border);
+    border-radius: var(--radius-lg);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-text-tertiary);
+  }
+}
+
+@layer components {
+  /* Surface — the base for every card */
+  .surface {
+    background-color: var(--color-bg-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+  }
+
+  .surface-elevated {
+    background-color: var(--color-bg-surface-elevated);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+  }
+}

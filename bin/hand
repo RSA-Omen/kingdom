@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Wrapper so you can call: ~/Kingdom/bin/hand brief
+# without fighting the dashed module name.
+KINGDOM_DIR="${KINGDOM_DIR:-$HOME/Kingdom}"
+exec python3 "$KINGDOM_DIR/council/the-hand-of-the-king/hand.py" "$@"

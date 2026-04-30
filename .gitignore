@@ -1,0 +1,38 @@
+# Local environment
+.env
+.env.local
+.env.*.local
+.venv
+venv/
+__pycache__/
+*.pyc
+node_modules/
+dist/
+build/
+
+# Secrets and credentials
+.bash_history
+.zsh_history
+.ssh/
+.aws/
+.config/gh/
+.config/git/credentials
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Submodule tracking (handle separately)
+Management/
+Operations/
+Platform/
+admin-center/

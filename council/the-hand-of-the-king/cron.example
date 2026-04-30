@@ -1,0 +1,16 @@
+# The Hand of the King — schedule
+#
+# Install with: crontab -e   (then paste the lines below)
+# Or:           crontab ~/Kingdom/council/the-hand-of-the-king/cron.example
+#
+# Times are in the server's local timezone. If the server is UTC,
+# 04:00 UTC = 06:00 CAT (Africa/Johannesburg, UTC+2).
+# Confirm with: timedatectl  | grep "Time zone"
+# If the server is already on Africa/Johannesburg, change "0 4" to "0 6".
+
+# Daily 06:00 CAT — morning brief to the king's Telegram
+# (assumes UTC server)
+0 4 * * * /home/lauchlandupreez/Kingdom/bin/hand telegram >> /home/lauchlandupreez/Kingdom/.hand-cron.log 2>&1
+
+# Every 30 minutes — refresh the dashboard snapshot
+*/30 * * * * /home/lauchlandupreez/Kingdom/bin/hand snapshot >> /home/lauchlandupreez/Kingdom/.hand-cron.log 2>&1

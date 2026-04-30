@@ -1,0 +1,5 @@
+#!/bin/bash
+# Wrapper for The Maester. Same as 'python -m council.the-maester' but shorter.
+
+cd ~/Kingdom || exit 1
+python -m council.the-maester "$@"
