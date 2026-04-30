@@ -131,9 +131,93 @@ class CaptainIndex:
 class CaptainChecker:
     def __init__(self, index: CaptainIndex):
         self.index = index
+        self.known_projects = {
+            "admin-center/backend": Path.home() / "admin-center" / "backend",
+            "admin-center/frontend": Path.home() / "admin-center" / "frontend",
+            "Kingdom": Path.home() / "Kingdom",
+        }
+
+    def _scan_npm_vulnerabilities(self, project_path: Path, project_name: str) -> List[Dict]:
+        """Scan npm project for vulnerabilities using npm audit."""
+        incidents = []
+
+        if not (project_path / "package.json").exists():
+            return incidents
+
+        try:
+            result = subprocess.run(
+                ["npm", "audit", "--json"],
+                capture_output=True,
+                text=True,
+                timeout=30,
+                cwd=str(project_path)
+            )
+
+            if not result.stdout:
+                return incidents
+
+            audit_data = json.loads(result.stdout)
+            vulnerabilities = audit_data.get("vulnerabilities", {})
+            metadata = audit_data.get("metadata", {})
+
+            # Count severity levels from metadata
+            vuln_summary = metadata.get("vulnerabilities", {})
+            critical_count = vuln_summary.get("critical", 0)
+            high_count = vuln_summary.get("high", 0)
+            moderate_count = vuln_summary.get("moderate", 0)
+            low_count = vuln_summary.get("low", 0)
+            total_count = critical_count + high_count + moderate_count + low_count
+
+            # Create incidents for critical and high vulnerabilities
+            if critical_count > 0 or high_count > 0:
+                incident_id = f"security-npm-{project_name.lower().replace('/', '-')}"
+                severity = "critical" if critical_count > 0 else "high"
+
+                summary = f"{critical_count} critical, {high_count} high"
+                if moderate_count > 0:
+                    summary += f", {moderate_count} moderate"
+
+                message = f"npm vulnerabilities in {project_name}: {summary}"
+
+                # List critical/high vulns
+                critical_vulns = []
+                for pkg_name, vuln_data in vulnerabilities.items():
+                    pkg_severity = vuln_data.get("severity", "unknown")
+                    if pkg_severity in ["critical", "high"]:
+                        critical_vulns.append(f"  • {pkg_name} ({pkg_severity})")
+
+                details = f"npm audit found:\n"
+                details += f"  Critical: {critical_count}\n"
+                details += f"  High: {high_count}\n"
+                details += f"  Moderate: {moderate_count}\n"
+                details += f"  Low: {low_count}\n\n"
+                if critical_vulns:
+                    details += "Critical/High vulnerabilities:\n"
+                    details += "\n".join(critical_vulns[:5])
+
+                incident = {
+                    "incident_id": incident_id,
+                    "severity": severity,
+                    "category": "security_vulnerability",
+                    "service": project_name,
+                    "message": message,
+                    "details": details
+                }
+                incidents.append(incident)
+        except json.JSONDecodeError:
+            print(f"Error parsing npm audit JSON for {project_name}")
+        except Exception as e:
+            print(f"Error scanning {project_name} for vulnerabilities: {e}")
+
+        return incidents
 
     def check_incidents(self) -> List[Dict]:
         incidents = []
+
+        # Check npm projects for security vulnerabilities
+        for project_name, project_path in self.known_projects.items():
+            if project_path.exists():
+                incidents.extend(self._scan_npm_vulnerabilities(project_path, project_name))
 
         # Check health status from Steward
         try:
