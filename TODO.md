@@ -14,7 +14,7 @@ The interim backlog for the Kingdom and the broader cleanup of the realm. This f
 - [x] [P1] Build the **Bureau bridge** — wire the dashboard's Throne Room to the existing `/api/bureau/*` endpoints so the kingdom has something visible immediately
 - [x] [P1] Migrate **Groq → Claude** for all AI-assisted work currently in admin-center (Log Guru error analysis, fix generation, briefing composition)
 - [x] [P2] Write `docs/ROYAL_COURT.md` — canonical roster of agents, beats, schedules, escalation paths
-- [ ] [P2] Create the GitHub repo `kingdom`, `git init` this directory, push first commit
+- [x] [P2] Create the GitHub repo `kingdom`, `git init` this directory, push first commit
 - [ ] [P2] Build a kingdom-themed landing page for `capital/dashboard/app/page.tsx` (replacing the placeholder)
 
 ## The Royal Court — agents to build (one at a time, only when needed)
@@ -37,7 +37,7 @@ Each gets a `council/<role>/` subfolder when its build begins, not before. Names
 
 ## Telegraph — the daily paper
 
-- [ ] [P2] Telegraph digest engine (built and run by **The Herald**) — pulls findings from agents, ranks them, generates the paper
+- 🟡 [P2] Telegraph digest engine (built and run by **The Herald**) — pulls findings from agents, ranks them, generates the paper
 - [ ] [P2] Three editions: **Daily** (king), **Brief** (Barry — technical light), **Weekly** (subjects — friendly, inclusive)
 - [ ] [P2] Section structure: Front Page (urgent/new), Today's Work (todos), The Long Read (system self-reflection), Arts & Tech (AI/IT news), Classifieds (feedback/requests)
 - [ ] [P2] Delivery: Telegram (primary), web edition, email
