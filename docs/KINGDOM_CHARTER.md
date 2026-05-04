@@ -14,6 +14,8 @@ A team of AI agents that acts as Gekko's systems analysis and automation design 
 
 The Royal Court operates as an autonomous project team. Each engagement is owned by a Lead Agent who coordinates specialists, manages the analysis and design work, and reports outcomes — not activity. Multiple engagements run concurrently, time-sliced to prevent resource conflicts. The King sets desired outcomes and priorities; the team determines how to achieve them. Progress is reviewed in a daily morning briefing focused entirely on what was accomplished and what decisions are needed from the King.
 
+The Kingdom evolves in three stages: supervised execution, proactive recommendation, and graduated autonomy. In Stage 1, the King tells the system what to do — the system tracks and delivers. In Stage 2, the system reads the strategy, analyses the villages, and surfaces improvement opportunities unprompted — the King decides what to action. In Stage 3, the system has learned enough of the King's judgment through approval and rejection history to act on high-confidence decisions independently, surfacing only exceptions. Trust is earned through demonstrated alignment, not granted upfront.
+
 ---
 
 ## 3. Problem Statement
@@ -66,6 +68,7 @@ The Kingdom exists to solve both problems: multiply throughput across concurrent
 6. **Engagements never die silently.** A stuck Knight escalates. A stalled project is always visible.
 7. **The Yarl is the village's voice, not the Knight's puppet.** Knights facilitate. Villages retain autonomy over their own operations.
 8. **Expertise is declared, not assumed.** Agents operate within their defined domain. Out-of-scope problems are routed, not attempted.
+9. **The system earns autonomy, it is not granted it.** The Kingdom begins fully supervised. As it learns the King's patterns through approval and rejection history, it graduates to acting on high-certainty decisions independently. The King's role shifts from approving everything to reviewing edge cases.
 
 ---
 
@@ -77,7 +80,7 @@ The Kingdom exists to solve both problems: multiply throughput across concurrent
 |---|---|---|
 | **The Hand of the King** | King's agenda | Daily prioritised list of 3-5 decisions and actions requiring the King — nothing important dropped |
 | **The Maester** | Institutional memory | Answers any question about the kingdom in under 30 seconds |
-| **The Lord Marshal** | Engagement orchestration | Live engagement dashboard — active projects, Knight progress, what's blocked |
+| **The Lord Marshal** | Engagement orchestration | Live engagement dashboard — active projects, Knight progress, what's blocked; owns all active Kingdom-to-village communication channels and delivers a weekly village progress report to the King |
 | **The Herald** | Telegraph (morning paper) | Daily 06:00 outcomes briefing across the whole kingdom |
 | **The Steward** | Village operations | Weekly village health report — running, degrading, or silent |
 | **The Captain of the Guard** | Incident response | First-response brief within minutes of a failure — cause, impact, draft response |
@@ -170,7 +173,21 @@ Each recognised village maintains a **Yarl** — a standardised AI interface tha
 
 ---
 
-## 9. Non-Goals
+## 9. Village Communication Protocol
+
+The Kingdom communicates with village Yarls through a defined hierarchy:
+
+- **The King** opens the relationship — decides which village is engaged and sets the desired outcome
+- **The Lord Marshal** owns the channel — issues formal instructions to the Yarl, tracks what has been asked and what has been built, and delivers a weekly village progress report to the King
+- **The Knight** coordinates the work — day-to-day collaboration with the Yarl on specific tasks within the engagement
+
+Every instruction issued to a Yarl is logged. Every completion reported by a Yarl is verified by the Knight of Quality before it is considered done. The Lord Marshal surfaces any village that goes quiet, misses a milestone, or falls out of compliance.
+
+Villages without a compliant Yarl interface cannot receive formal engagements from the Kingdom.
+
+---
+
+## 10. Non-Goals
 
 **The Kingdom does not communicate with stakeholders.**
 The Kingdom monitors communications and flags what needs the King's attention. It does not send messages, reply to teams, or represent the King in any external conversation.
