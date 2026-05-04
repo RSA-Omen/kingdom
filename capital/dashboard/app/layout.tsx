@@ -57,6 +57,13 @@ function Sidebar() {
       ],
     },
     {
+      heading: "Kingdom Watch",
+      items: [
+        { label: "Errors", slug: "/errors" },
+        { label: "To-Dos", slug: "/todos" },
+      ],
+    },
+    {
       heading: "The Realm",
       items: [
         { label: "Villages", slug: "/villages" },
