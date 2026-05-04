@@ -3,6 +3,8 @@ import { MaesterCard } from "../components/kingdom/MaesterCard";
 import { SearchMaester } from "../components/kingdom/SearchMaester";
 import { BureauCard } from "../components/kingdom/BureauCard";
 import { MasterOfWorksCard } from "../components/kingdom/MasterOfWorksCard";
+import { SummaryCards } from "@/components/kingdom/SummaryCards";
+import { ErrorFeed } from "@/components/kingdom/ErrorFeed";
 
 export default function ThroneRoom() {
   const today = new Date().toLocaleDateString("en-GB", {
@@ -20,6 +22,17 @@ export default function ThroneRoom() {
       <BureauCard />
       <MasterOfWorksCard />
       <SearchMaester />
+      <section className="mt-10 space-y-4">
+        <div>
+          <p className="text-xs uppercase tracking-wider text-[var(--color-text-tertiary)] font-medium">Kingdom Watch</p>
+          <h2 className="text-xl font-semibold mt-1 text-[var(--color-text-primary)]">Realm at a glance</h2>
+        </div>
+        <SummaryCards />
+        <div className="mt-6">
+          <h3 className="text-sm font-medium text-[var(--color-text-secondary)] mb-3">Recent Errors</h3>
+          <ErrorFeed limit={5} />
+        </div>
+      </section>
       <RealmMap />
       <RoyalCourt />
       <FromTheMasterBuilder />
