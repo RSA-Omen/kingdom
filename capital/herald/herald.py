@@ -266,7 +266,7 @@ class Herald:
         # The Steward's health report
         try:
             result = subprocess.run(
-                ["python3", "-m", "council.the-steward", "brief"],
+                ["python3", "-m", "council.the-steward", "report"],
                 capture_output=True,
                 text=True,
                 timeout=10,
