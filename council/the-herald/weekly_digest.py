@@ -31,15 +31,24 @@ from typing import Optional
 
 KINGDOM_ROOT = Path(__file__).resolve().parents[2]
 UPDATES_DIR = KINGDOM_ROOT / "docs" / "updates"
-ENV_FILE = Path.home() / "telegram_notify_service" / ".env"
+# Use the weekly-updates bot's credentials — same bot that handles /inbox.
+# Kingdom communication is consolidated on @Claude_weekly_updates_bot so the
+# user never has to context-switch between bots.
+ENV_FILE_PRIMARY = Path.home() / "scripts" / "telegram_weekly" / ".env"
+ENV_FILE_FALLBACK = Path.home() / "telegram_notify_service" / ".env"
 GH_REPO = "RSA-Omen/kingdom"
 
 
 def load_creds() -> tuple[str, str]:
+    """Load token + chat from env; prefer the weekly-updates bot's .env."""
     token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
     chat_id = os.environ.get("TELEGRAM_CHAT_ID", "")
-    if not (token and chat_id) and ENV_FILE.exists():
-        for line in ENV_FILE.read_text().splitlines():
+    for env_file in (ENV_FILE_PRIMARY, ENV_FILE_FALLBACK):
+        if token and chat_id:
+            break
+        if not env_file.exists():
+            continue
+        for line in env_file.read_text().splitlines():
             line = line.strip()
             if not line or line.startswith("#") or "=" not in line:
                 continue
