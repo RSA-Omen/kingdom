@@ -188,6 +188,48 @@ def build_pr_card(pr: dict) -> dict:
 # Build command
 
 
+def cmd_next() -> int:
+    """Output JSON: ONE card (the next pending action), in priority order.
+
+    Priority:
+      1. PRs awaiting review (most actionable — closest to closing the loop)
+      2. Dispatched issues awaiting `ready-to-fix`
+      3. Scout-reviewed issues awaiting `approved`
+
+    Within each tier, lowest issue/PR number wins (FIFO).
+    """
+    prs = fetch_open_prs()
+    if prs:
+        pr = min(prs, key=lambda p: p["number"])
+        card = build_pr_card(pr)
+        card["type"] = "pr"
+        print(json.dumps([card], indent=2))
+        return 0
+
+    marshal_issues = fetch_issues("dispatched", ["ready-to-fix", "assigned:operator"])
+    if marshal_issues:
+        issue = min(marshal_issues, key=lambda i: i["number"])
+        card = build_marshal_card(issue)
+        card["type"] = "marshal"
+        print(json.dumps([card], indent=2))
+        return 0
+
+    scout_issues = fetch_issues("scout-reviewed", ["approved"])
+    if scout_issues:
+        issue = min(scout_issues, key=lambda i: i["number"])
+        card = build_scout_card(issue)
+        card["type"] = "scout"
+        print(json.dumps([card], indent=2))
+        return 0
+
+    print(json.dumps([{
+        "type": "empty",
+        "text": "🏰 *Kingdom Inbox*\n\nNo pending actions. The kingdom is at peace.",
+        "parse_mode": "Markdown",
+    }], indent=2))
+    return 0
+
+
 def cmd_build() -> int:
     """Output JSON: a list of cards for the bot to send."""
     cards: list[dict] = []
@@ -314,13 +356,16 @@ def cmd_callback(data: str) -> int:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Kingdom Inbox CLI")
     sub = parser.add_subparsers(dest="cmd", required=True)
-    sub.add_parser("build")
-    p_cb = sub.add_parser("callback")
+    sub.add_parser("build", help="Output all pending action cards")
+    sub.add_parser("next", help="Output just the single highest-priority pending card")
+    p_cb = sub.add_parser("callback", help="Process a button press")
     p_cb.add_argument("data", help="callback_data string from Telegram")
     args = parser.parse_args()
 
     if args.cmd == "build":
         return cmd_build()
+    if args.cmd == "next":
+        return cmd_next()
     if args.cmd == "callback":
         return cmd_callback(args.data)
     return 1
