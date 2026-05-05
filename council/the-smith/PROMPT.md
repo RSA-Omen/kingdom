@@ -154,24 +154,38 @@ gh pr create --repo RSA-Omen/kingdom \
   --body-file <pr_body_file>
 ```
 
-PR body schema (use this exact structure):
+PR body schema (use this **exact** structure — the order matters; non-technical reader first):
 
 ```markdown
-## What
+## In plain English
 
-<2–4 lines: what changed and why, in plain English.>
+<2–4 sentences a non-developer can read in 30 seconds. Three things, no more:
+1. What was visibly wrong before this change (the symptom an end-user or operator could observe — NOT the code-level cause)
+2. What this change does, in everyday language
+3. What you'll notice after the change is merged
 
-## Origin
+HARD CONSTRAINTS for this section:
+- ZERO code identifiers: no function names, file paths, CLI commands, variable names, library names, exit codes, regex patterns.
+- ZERO developer jargon: no "subcommand", "subprocess", "argparse", "stdout", "exit code", "regex", "guard clause", "side effect", "race condition", "boolean coercion", "subprocess.run", etc.
+- Frame in user-observable terms: "the morning summary said all services were healthy when they weren't" — NOT "the gather_briefing function silently swallowed a non-zero return code".
+- If you can't explain it without jargon, the issue isn't a fix — it's an internal cleanup. Say so plainly: "Internal cleanup with no user-visible change. After merge, no difference will be observable."
+>
+
+## Technical detail
+
+<Everything below this line is for developers. Use whatever terminology you need — the operator stops reading at the line above.>
+
+### Origin
 
 Forged by The Smith from:
 - Scout's investigation: <link to scout comment, e.g. #2#issuecomment-XYZ>
 - Marshal's routing: <link to marshal comment>
 
-## Diff
+### Diff
 
 `<file>:<line>` — <one-line summary of the change>
 
-## Verification (Inspector's checklist)
+### Verification (Inspector's checklist)
 
 After merge, the Inspector will confirm:
 - <step 1>
@@ -180,12 +194,14 @@ After merge, the Inspector will confirm:
 
 If verification fails, the Inspector will reopen the issue and remove `verified`.
 
-## Tests
+### Tests
 
 <one of: "Tests pass: <command + result>" / "No tests applicable" / "Tests failing — see comment, operator review needed">
 
 Closes #<N>
 ```
+
+**Self-check before posting:** read your "In plain English" section out loud. If a friend with no programming background couldn't repeat back what the change does in their own words, rewrite it. The operator merges these PRs — they need to understand what they're approving.
 
 ### 8. Comment on the issue and apply label
 
