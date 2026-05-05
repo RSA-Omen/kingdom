@@ -1,0 +1,39 @@
+# ── Legacy scripts (unchanged) ────────────────────────────────────────────────
+0 2 1 * * /usr/bin/python3 /home/lauchlandupreez/scripts/telegram_weekly/pronto_monthly_nudge.py >> /home/lauchlandupreez/scripts/telegram_weekly/cron.log 2>&1
+0 2 * * 5 /usr/bin/python3 /home/lauchlandupreez/scripts/telegram_weekly/report.py >> /home/lauchlandupreez/scripts/telegram_weekly/cron.log 2>&1
+0 2 * * * /home/lauchlandupreez/scripts/telegram_weekly/backup_wrapper.sh "Admin Center" bash -c 'cd /home/lauchlandupreez/admin-center/backend/scripts && /usr/bin/python3 /home/lauchlandupreez/admin-center/backend/scripts/backup_database.py' >> /tmp/admin-center-backup.log 2>&1
+0 3 * * 1 /usr/bin/python3 /home/lauchlandupreez/scripts/telegram_weekly/work_log_rollover.py --week >> /home/lauchlandupreez/scripts/telegram_weekly/cron.log 2>&1
+0 3 * * * /home/lauchlandupreez/scripts/telegram_weekly/backup_wrapper.sh "Gekko Tracks" bash -c 'cd /home/lauchlandupreez/Operations/Gekko-Tracks/backend && /usr/bin/python3 /home/lauchlandupreez/Operations/Gekko-Tracks/backend/backup_database.py' >> /tmp/gekko-tracks-ccc-backup.log 2>&1
+30 3 1 * * /usr/bin/python3 /home/lauchlandupreez/scripts/telegram_weekly/work_log_rollover.py --month >> /home/lauchlandupreez/scripts/telegram_weekly/cron.log 2>&1
+*/30 * * * * /home/lauchlandupreez/Kingdom/bin/hand snapshot >> /home/lauchlandupreez/Kingdom/.hand-cron.log 2>&1
+3 6 * * 1-5 /usr/bin/python3 /home/lauchlandupreez/scripts/telegram_weekly/dirty_repos_check.py >> /home/lauchlandupreez/scripts/telegram_weekly/cron.log 2>&1
+*/5 * * * * /usr/bin/python3 /home/lauchlandupreez/scripts/telegram_weekly/service_monitor.py 2>&1 | tail -1 >> /home/lauchlandupreez/scripts/telegram_weekly/cron.log
+
+# ── Kingdom: continuous checks (unchanged) ────────────────────────────────────
+*/5 * * * * python3 -m council.the-steward check >> /home/lauchlandupreez/Kingdom/.steward-cron.log 2>&1
+*/5 * * * * cd /home/lauchlandupreez/Kingdom && python3 -m council.the-master-of-works check >> /home/lauchlandupreez/Kingdom/.master-of-works-cron.log 2>&1
+0 * * * * cd /home/lauchlandupreez/Kingdom && python3 -m council.the-quartermaster check >> /home/lauchlandupreez/Kingdom/.quartermaster-cron.log 2>&1
+*/5 * * * * cd /home/lauchlandupreez/Kingdom && python3 -m council.the-captain-of-the-guard scan >> /home/lauchlandupreez/Kingdom/.captain-cron.log 2>&1
+
+# ── Kingdom: daily briefings — ALL before 3AM CAT (= 1AM UTC) ─────────────────
+# Times below are UTC. CAT = UTC+2.
+# 22:30 UTC = 00:30 CAT  → Maester scans the realm
+30 22 * * * cd /home/lauchlandupreez/Kingdom && python3 -m council.the-maester scan && python3 -m council.the-maester telegram >> /home/lauchlandupreez/Kingdom/.maester-cron.log 2>&1
+# 22:45 UTC = 00:45 CAT  → Steward daily health summary
+45 22 * * * cd /home/lauchlandupreez/Kingdom && python3 -m council.the-steward telegram >> /home/lauchlandupreez/Kingdom/.steward-cron.log 2>&1
+# 23:00 UTC = 01:00 CAT  → Master of Works infrastructure report
+0 23 * * * cd /home/lauchlandupreez/Kingdom && python3 -m council.the-master-of-works report >> /home/lauchlandupreez/Kingdom/.master-of-works-cron.log 2>&1
+# 23:15 UTC = 01:15 CAT  → Captain overnight incident summary
+15 23 * * * cd /home/lauchlandupreez/Kingdom && python3 -m council.the-captain-of-the-guard report >> /home/lauchlandupreez/Kingdom/.captain-cron.log 2>&1
+# 23:30 UTC = 01:30 CAT  → Quartermaster resource report
+30 23 * * * cd /home/lauchlandupreez/Kingdom && python3 -m council.the-quartermaster report >> /home/lauchlandupreez/Kingdom/.quartermaster-cron.log 2>&1
+# 00:00 UTC = 02:00 CAT  → The Herald publishes Telegraph
+0 0 * * * cd /home/lauchlandupreez/Kingdom && python3 -m capital.herald publish >> /home/lauchlandupreez/Kingdom/.herald-cron.log 2>&1
+# 00:30 UTC = 02:30 CAT  → The Hand delivers the day's agenda
+30 0 * * * /home/lauchlandupreez/Kingdom/bin/hand telegram >> /home/lauchlandupreez/Kingdom/.hand-cron.log 2>&1
+# 00:45 UTC = 02:45 CAT  → Master of Laws weekly compliance (Sunday only)
+45 0 * * 0 cd /home/lauchlandupreez/Kingdom && python3 -m council.the-master-of-laws report >> /home/lauchlandupreez/Kingdom/.master-of-laws-cron.log 2>&1
+
+# ── Kingdom: daytime Captain check-ins (noon + 6PM CAT) ─────────────────────
+0 10 * * * cd /home/lauchlandupreez/Kingdom && python3 -m council.the-captain-of-the-guard report >> /home/lauchlandupreez/Kingdom/.captain-cron.log 2>&1
+0 16 * * * cd /home/lauchlandupreez/Kingdom && python3 -m council.the-captain-of-the-guard report >> /home/lauchlandupreez/Kingdom/.captain-cron.log 2>&1
