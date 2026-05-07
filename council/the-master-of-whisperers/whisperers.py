@@ -49,6 +49,18 @@ FEEDS = [
         "url": "https://www.technologyreview.com/feed/",
         "kind": "rss",
     },
+    {
+        "name": "Anthropic Blog",
+        # Anthropic has no official RSS; community-maintained mirror of anthropic.com/news
+        "url": "https://raw.githubusercontent.com/taobojlen/anthropic-rss-feed/main/anthropic_news_rss.xml",
+        "kind": "rss",
+    },
+    {
+        "name": "The Batch (DeepLearning.AI)",
+        # Official RSS was retired; community-maintained mirror of deeplearning.ai/the-batch
+        "url": "https://raw.githubusercontent.com/cnzhujie/ai-rss-feed/main/rss/deeplearning_the_batch_rss.xml",
+        "kind": "rss",
+    },
 ]
 
 NS_ATOM = "http://www.w3.org/2005/Atom"
