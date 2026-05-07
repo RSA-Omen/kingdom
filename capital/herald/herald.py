@@ -349,6 +349,20 @@ class Herald:
         except Exception as e:
             print(f"Error getting Whisperers briefing: {e}")
 
+        # The Castellan's brief (castle cleanliness)
+        try:
+            result = subprocess.run(
+                ["python3", "-m", "council.the-castellan", "brief"],
+                capture_output=True,
+                text=True,
+                timeout=15,
+                cwd=os.path.expanduser("~/Kingdom")
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                briefings["castellan"] = result.stdout.strip()
+        except Exception as e:
+            print(f"Error getting Castellan briefing: {e}")
+
         return briefings
 
     def compose_telegraph(self, briefings: Dict[str, str], edition: str = "daily") -> str:
@@ -451,6 +465,13 @@ class Herald:
             lines.append("")
             for line in briefings["whisperers"].split("\n")[:12]:
                 lines.append(line)
+            lines.append("")
+
+        # Castle — Castellan's brief
+        if "castellan" in briefings and briefings["castellan"]:
+            lines.append("🏰 THE CASTLE")
+            lines.append("")
+            lines.append(briefings["castellan"])
             lines.append("")
 
         # Footer

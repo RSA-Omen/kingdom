@@ -73,11 +73,15 @@ To be written into `docs/GEKKO_STANDARD.md`. Captured here from design discussio
 
 ## Kingdom cleanup (delegate to The Castellan once it exists)
 
-These are tasks to defer until **The Castellan** can do them on schedule. Don't do them by hand.
+These tasks now run on Castellan's weekly schedule (Mon 06:30 CAT — scan → execute → Telegram report). Add paths here for the Castellan to pick up on its next run.
 
+- [x] [P3] Archive `~/worker-agent/` sub-dirs → `~/Archive/` *(Castellan executed 2026-05-07)*
+- [x] [P3] Archive `~/Operations/pronto-api-deployment`, `~/Operations/tools` → `~/Archive/` *(Castellan executed 2026-05-07)*
+- [x] [P3] Archive `~/backend/app` → `~/Archive/` *(Castellan executed 2026-05-07)*
+- [x] [P3] Demolish empty dirs `~/bureau/archive`, `~/bureau/files` *(Castellan executed 2026-05-07)*
 - [ ] [P3] Demolish `~/Platform/newsroom/` (now empty after move into Kingdom; old CLAUDE.md and TODO.md remain for reference until verified)
 - [ ] [P3] Run safe demolitions at home root: `=0.40.0`, `hello_world.py`, `morning-context.txt`, `gvdi-30-morning-a1418c4b.jsonl.bak`, `gvdi-30-morning-a1418c4b-state.bak/`, `testfolder/`
-- [ ] [P3] Archive `~/worker-agent/` → `~/Archive/worker-agent/` (early agent attempt, superseded)
+- [ ] [P3] Archive `~/worker-agent/` → `~/Archive/worker-agent/` (early agent attempt, superseded — remaining shell after sub-dirs archived)
 - [ ] [P3] Archive `~/bureau/` → `~/Archive/bureau-aider-workflow/` (Aider dev workflow; not the same as `Operations/The Bureau/`)
 - [ ] [P3] Archive `~/Operations/D-2510-004-credit-card-coding/` and `~/Operations/D-2511-002 AP Processing Implied Links/` → `~/Archive/` (project-coded folders from OneDrive era; preserved for documentation; link from current projects when documentation system is built)
 - [ ] [P3] Consolidate 6× `windows_ssh_config*.txt` files at home root → one file under `~/Scripts/` or in the Kingdom's `docs/setup/`
