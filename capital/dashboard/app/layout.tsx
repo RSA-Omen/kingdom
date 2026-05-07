@@ -13,7 +13,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="dark" suppressHydrationWarning>
       <body>
         <div className="min-h-screen flex flex-col">
           <TopBar />
@@ -53,6 +53,7 @@ function Sidebar() {
       heading: "The Capital",
       items: [
         { label: "Throne Room", slug: "/" },
+        { label: "Matters", slug: "/matters" },
         { label: "Telegraph", slug: "/telegraph" },
       ],
     },

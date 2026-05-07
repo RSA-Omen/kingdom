@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kingdom — Hexagon Theme Test</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    min-height: 100vh;
+    transition: all 0.4s ease;
+    overflow-x: hidden;
+  }
+
+  /* ── THEMES ── */
+  .theme-0 {
+    --bg: #0a0f1e;
+    --bg2: #0f1629;
+    --hex-stroke: rgba(99, 179, 237, 0.15);
+    --hex-fill: rgba(99, 179, 237, 0.04);
+    --hex-hover: rgba(99, 179, 237, 0.12);
+    --accent: #63b3ed;
+    --accent2: #4299e1;
+    --text: #e2e8f0;
+    --text-dim: #718096;
+    --card-bg: rgba(15, 22, 41, 0.8);
+    --border: rgba(99, 179, 237, 0.2);
+    --glow: rgba(99, 179, 237, 0.4);
+    --name: "Arctic Blueprint";
+  }
+  .theme-1 {
+    --bg: #0d0a1e;
+    --bg2: #120f2a;
+    --hex-stroke: rgba(167, 139, 250, 0.15);
+    --hex-fill: rgba(167, 139, 250, 0.04);
+    --hex-hover: rgba(167, 139, 250, 0.12);
+    --accent: #a78bfa;
+    --accent2: #7c3aed;
+    --text: #ede9fe;
+    --text-dim: #7c6fa0;
+    --card-bg: rgba(18, 15, 42, 0.8);
+    --border: rgba(167, 139, 250, 0.2);
+    --glow: rgba(167, 139, 250, 0.4);
+    --name: "Royal Amethyst";
+  }
+  .theme-2 {
+    --bg: #0a1a0f;
+    --bg2: #0d2114;
+    --hex-stroke: rgba(52, 211, 153, 0.15);
+    --hex-fill: rgba(52, 211, 153, 0.04);
+    --hex-hover: rgba(52, 211, 153, 0.12);
+    --accent: #34d399;
+    --accent2: #059669;
+    --text: #d1fae5;
+    --text-dim: #4b7a5e;
+    --card-bg: rgba(13, 33, 20, 0.8);
+    --border: rgba(52, 211, 153, 0.2);
+    --glow: rgba(52, 211, 153, 0.4);
+    --name: "Emerald Kingdom";
+  }
+  .theme-3 {
+    --bg: #1a0a09;
+    --bg2: #210d0c;
+    --hex-stroke: rgba(252, 129, 74, 0.15);
+    --hex-fill: rgba(252, 129, 74, 0.04);
+    --hex-hover: rgba(252, 129, 74, 0.12);
+    --accent: #fc814a;
+    --accent2: #ea580c;
+    --text: #fff0e8;
+    --text-dim: #8a5a42;
+    --card-bg: rgba(33, 13, 12, 0.8);
+    --border: rgba(252, 129, 74, 0.2);
+    --glow: rgba(252, 129, 74, 0.4);
+    --name: "Forge Ember";
+  }
+  .theme-4 {
+    --bg: #f0f4ff;
+    --bg2: #e8eeff;
+    --hex-stroke: rgba(79, 70, 229, 0.15);
+    --hex-fill: rgba(79, 70, 229, 0.04);
+    --hex-hover: rgba(79, 70, 229, 0.1);
+    --accent: #4f46e5;
+    --accent2: #3730a3;
+    --text: #1e1b4b;
+    --text-dim: #6b7280;
+    --card-bg: rgba(240, 244, 255, 0.9);
+    --border: rgba(79, 70, 229, 0.2);
+    --glow: rgba(79, 70, 229, 0.3);
+    --name: "Crystal Daylight";
+  }
+  .theme-5 {
+    --bg: #0a0a0a;
+    --bg2: #111111;
+    --hex-stroke: rgba(250, 204, 21, 0.15);
+    --hex-fill: rgba(250, 204, 21, 0.03);
+    --hex-hover: rgba(250, 204, 21, 0.1);
+    --accent: #facc15;
+    --accent2: #ca8a04;
+    --text: #fefce8;
+    --text-dim: #5a5020;
+    --card-bg: rgba(17, 17, 17, 0.9);
+    --border: rgba(250, 204, 21, 0.2);
+    --glow: rgba(250, 204, 21, 0.4);
+    --name: "Obsidian Gold";
+  }
+  .theme-6 {
+    --bg: #0a1520;
+    --bg2: #0c1c2c;
+    --hex-stroke: rgba(56, 189, 248, 0.15);
+    --hex-fill: rgba(56, 189, 248, 0.04);
+    --hex-hover: rgba(56, 189, 248, 0.12);
+    --accent: #38bdf8;
+    --accent2: #0ea5e9;
+    --text: #e0f2fe;
+    --text-dim: #4a7a96;
+    --card-bg: rgba(12, 28, 44, 0.8);
+    --border: rgba(56, 189, 248, 0.2);
+    --glow: rgba(56, 189, 248, 0.4);
+    --name: "Deep Ocean";
+  }
+  .theme-7 {
+    --bg: #1a0a1a;
+    --bg2: #200c20;
+    --hex-stroke: rgba(244, 114, 182, 0.15);
+    --hex-fill: rgba(244, 114, 182, 0.04);
+    --hex-hover: rgba(244, 114, 182, 0.12);
+    --accent: #f472b6;
+    --accent2: #db2777;
+    --text: #fce7f3;
+    --text-dim: #8a4a70;
+    --card-bg: rgba(32, 12, 32, 0.8);
+    --border: rgba(244, 114, 182, 0.2);
+    --glow: rgba(244, 114, 182, 0.4);
+    --name: "Crimson Court";
+  }
+  .theme-8 {
+    --bg: #f8f6f0;
+    --bg2: #f0ebe0;
+    --hex-stroke: rgba(120, 90, 40, 0.15);
+    --hex-fill: rgba(120, 90, 40, 0.04);
+    --hex-hover: rgba(120, 90, 40, 0.1);
+    --accent: #92400e;
+    --accent2: #78350f;
+    --text: #1c1009;
+    --text-dim: #78716c;
+    --card-bg: rgba(248, 246, 240, 0.9);
+    --border: rgba(120, 90, 40, 0.2);
+    --glow: rgba(120, 90, 40, 0.3);
+    --name: "Parchment Tome";
+  }
+  .theme-9 {
+    --bg: #050510;
+    --bg2: #080820;
+    --hex-stroke: rgba(129, 230, 217, 0.12);
+    --hex-fill: rgba(129, 230, 217, 0.03);
+    --hex-hover: rgba(129, 230, 217, 0.1);
+    --accent: #81e6d9;
+    --accent2: #2dd4bf;
+    --text: #ccfbf1;
+    --text-dim: #2a5a54;
+    --card-bg: rgba(8, 8, 32, 0.85);
+    --border: rgba(129, 230, 217, 0.15);
+    --glow: rgba(129, 230, 217, 0.35);
+    --name: "Void Teal";
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  /* ── HEX GRID BACKGROUND ── */
+  .hex-grid {
+    position: fixed;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .hex-grid svg {
+    width: 100%;
+    height: 100%;
+    opacity: 0.6;
+  }
+
+  /* ── LAYOUT ── */
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+
+  /* ── HEADER ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 2rem;
+    position: relative;
+    z-index: 10;
+    border-bottom: 1px solid var(--border);
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .logo-hex {
+    width: 36px;
+    height: 36px;
+  }
+
+  .logo-text {
+    font-size: 1.25rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--accent);
+  }
+
+  nav {
+    display: flex;
+    gap: 2rem;
+  }
+
+  nav a {
+    color: var(--text-dim);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+
+  nav a:hover { color: var(--accent); }
+
+  /* ── HERO ── */
+  .hero {
+    padding: 6rem 2rem 4rem;
+    text-align: center;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-size: 0.75rem;
+    color: var(--accent);
+    margin-bottom: 1.5rem;
+    background: var(--hex-fill);
+  }
+
+  .hero h1 {
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1.05;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(135deg, var(--text) 0%, var(--accent) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .hero p {
+    font-size: 1.125rem;
+    color: var(--text-dim);
+    max-width: 520px;
+    margin: 0 auto 2.5rem;
+    line-height: 1.7;
+  }
+
+  .hero-buttons {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    padding: 0.75rem 1.75rem;
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: 8px;
+    font-weight: 700;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 0 20px var(--glow);
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 32px var(--glow);
+  }
+
+  .btn-secondary {
+    padding: 0.75rem 1.75rem;
+    background: transparent;
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-secondary:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  /* ── HEXAGON CARDS (stats row) ── */
+  .hex-cards {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    padding: 2rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .hex-card-wrap {
+    position: relative;
+    width: 140px;
+    height: 162px;
+    cursor: pointer;
+    transition: transform 0.2s;
+  }
+
+  .hex-card-wrap:hover { transform: translateY(-4px); }
+
+  .hex-card-wrap svg.hex-shape {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  .hex-card-wrap svg.hex-shape polygon {
+    fill: var(--hex-fill);
+    stroke: var(--accent);
+    stroke-width: 1.5;
+    transition: fill 0.2s;
+    filter: drop-shadow(0 0 8px var(--glow));
+  }
+
+  .hex-card-wrap:hover svg.hex-shape polygon {
+    fill: var(--hex-hover);
+  }
+
+  .hex-card-inner {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    text-align: center;
+  }
+
+  .hex-card-value {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .hex-card-label {
+    font-size: 0.65rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 0.35rem;
+  }
+
+  /* ── GRID CARDS ── */
+  .grid-section {
+    padding: 2rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .section-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 1.5rem;
+  }
+
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1rem;
+  }
+
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    backdrop-filter: blur(12px);
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    right: 0; height: 2px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .card:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .card:hover::before { opacity: 1; }
+
+  .card-icon {
+    width: 40px; height: 40px;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--hex-fill);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-size: 1.25rem;
+  }
+
+  .card h3 {
+    font-size: 0.9375rem;
+    font-weight: 600;
+    margin-bottom: 0.375rem;
+  }
+
+  .card p {
+    font-size: 0.8125rem;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+
+  .card-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 1rem;
+    font-size: 0.75rem;
+    color: var(--accent);
+  }
+
+  .status-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 6px var(--glow);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  /* ── THEME SWITCHER ── */
+  .theme-switcher {
+    position: fixed;
+    bottom: 2rem;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    padding: 0.5rem 0.75rem;
+    backdrop-filter: blur(16px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+  }
+
+  .theme-switcher span {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    white-space: nowrap;
+    min-width: 120px;
+    text-align: center;
+  }
+
+  .theme-btn {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+
+  .theme-btn.active {
+    border-color: white;
+    transform: scale(1.2);
+  }
+
+  .theme-btn:hover { transform: scale(1.15); }
+
+  .theme-arrow {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--text);
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+
+  .theme-arrow:hover { background: var(--hex-hover); border-color: var(--accent); }
+
+  /* ── SIDEBAR PEEK ── */
+  .layout-demo {
+    display: flex;
+    gap: 1rem;
+    padding: 2rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .sidebar {
+    width: 200px;
+    flex-shrink: 0;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem;
+    backdrop-filter: blur(12px);
+  }
+
+  .sidebar-item {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    padding: 0.5rem 0.625rem;
+    border-radius: 6px;
+    font-size: 0.8125rem;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: 0.25rem;
+  }
+
+  .sidebar-item:hover, .sidebar-item.active {
+    background: var(--hex-hover);
+    color: var(--accent);
+  }
+
+  .sidebar-icon { font-size: 0.875rem; }
+
+  .main-panel {
+    flex: 1;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.5rem;
+    backdrop-filter: blur(12px);
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+  }
+
+  .panel-title {
+    font-size: 1.125rem;
+    font-weight: 700;
+  }
+
+  .mini-badge {
+    padding: 0.25rem 0.625rem;
+    border-radius: 100px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    background: var(--hex-fill);
+    border: 1px solid var(--border);
+    color: var(--accent);
+  }
+
+  .activity-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.625rem 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.8125rem;
+  }
+
+  .activity-row:last-child { border-bottom: none; }
+
+  .activity-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--accent);
+    flex-shrink: 0;
+  }
+
+  .activity-text { color: var(--text); flex: 1; }
+  .activity-time { color: var(--text-dim); font-size: 0.7rem; }
+</style>
+</head>
+<body class="theme-0">
+
+<!-- HEX BACKGROUND -->
+<div class="hex-grid">
+  <svg id="hex-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+</div>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">
+    <svg class="logo-hex" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="18,2 33,10.5 33,25.5 18,34 3,25.5 3,10.5"
+               fill="none" stroke="var(--accent)" stroke-width="2"/>
+      <polygon points="18,8 27,13 27,23 18,28 9,23 9,13"
+               fill="var(--hex-fill)" stroke="var(--accent)" stroke-width="1" opacity="0.5"/>
+      <circle cx="18" cy="18" r="3" fill="var(--accent)"/>
+    </svg>
+    <span class="logo-text">Kingdom</span>
+  </div>
+  <nav>
+    <a href="#">Dashboard</a>
+    <a href="#">Villages</a>
+    <a href="#">Royal Court</a>
+    <a href="#">Telegraph</a>
+    <a href="#">The Bureau</a>
+  </nav>
+</header>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-badge">
+    <span>⬡</span>
+    <span>Gekko's Internal Platform</span>
+  </div>
+  <h1>The Kingdom<br/>Central Command</h1>
+  <p>One platform. Every village. The Royal Court watches, the Herald writes, the king decides.</p>
+  <div class="hero-buttons">
+    <button class="btn-primary">Open Dashboard</button>
+    <button class="btn-secondary">Read Telegraph →</button>
+  </div>
+</div>
+
+<!-- HEX STAT CARDS -->
+<div class="hex-cards">
+  <div class="hex-card-wrap">
+    <svg class="hex-shape" viewBox="0 0 140 162" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="70,4 136,40 136,112 70,148 4,112 4,40"/>
+    </svg>
+    <div class="hex-card-inner">
+      <div class="hex-card-value">8</div>
+      <div class="hex-card-label">Villages Online</div>
+    </div>
+  </div>
+  <div class="hex-card-wrap">
+    <svg class="hex-shape" viewBox="0 0 140 162" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="70,4 136,40 136,112 70,148 4,112 4,40"/>
+    </svg>
+    <div class="hex-card-inner">
+      <div class="hex-card-value">4</div>
+      <div class="hex-card-label">Court Members</div>
+    </div>
+  </div>
+  <div class="hex-card-wrap">
+    <svg class="hex-shape" viewBox="0 0 140 162" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="70,4 136,40 136,112 70,148 4,112 4,40"/>
+    </svg>
+    <div class="hex-card-inner">
+      <div class="hex-card-value">99%</div>
+      <div class="hex-card-label">Uptime Today</div>
+    </div>
+  </div>
+  <div class="hex-card-wrap">
+    <svg class="hex-shape" viewBox="0 0 140 162" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="70,4 136,40 136,112 70,148 4,112 4,40"/>
+    </svg>
+    <div class="hex-card-inner">
+      <div class="hex-card-value">12</div>
+      <div class="hex-card-label">Open Issues</div>
+    </div>
+  </div>
+  <div class="hex-card-wrap">
+    <svg class="hex-shape" viewBox="0 0 140 162" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="70,4 136,40 136,112 70,148 4,112 4,40"/>
+    </svg>
+    <div class="hex-card-inner">
+      <div class="hex-card-value">06:42</div>
+      <div class="hex-card-label">Last Telegraph</div>
+    </div>
+  </div>
+</div>
+
+<!-- LAYOUT DEMO -->
+<div class="layout-demo">
+  <div class="sidebar">
+    <div class="sidebar-item active"><span class="sidebar-icon">⬡</span> Front Page</div>
+    <div class="sidebar-item"><span class="sidebar-icon">⚙</span> Villages</div>
+    <div class="sidebar-item"><span class="sidebar-icon">♟</span> Royal Court</div>
+    <div class="sidebar-item"><span class="sidebar-icon">📜</span> Telegraph</div>
+    <div class="sidebar-item"><span class="sidebar-icon">📁</span> To-Dos</div>
+    <div class="sidebar-item"><span class="sidebar-icon">🔗</span> Bridges</div>
+  </div>
+
+  <div class="main-panel">
+    <div class="panel-header">
+      <div class="panel-title">Today's Activity</div>
+      <span class="mini-badge">Live</span>
+    </div>
+    <div class="activity-row">
+      <div class="activity-dot"></div>
+      <div class="activity-text">Gekko Tracks — health check passed</div>
+      <div class="activity-time">2 min ago</div>
+    </div>
+    <div class="activity-row">
+      <div class="activity-dot"></div>
+      <div class="activity-text">The Herald published morning Telegraph</div>
+      <div class="activity-time">6:42 am</div>
+    </div>
+    <div class="activity-row">
+      <div class="activity-dot"></div>
+      <div class="activity-text">PDF Removal — 3 jobs processed</div>
+      <div class="activity-time">6:30 am</div>
+    </div>
+    <div class="activity-row">
+      <div class="activity-dot"></div>
+      <div class="activity-text">The Steward opened GitHub issue #47</div>
+      <div class="activity-time">Yesterday</div>
+    </div>
+    <div class="activity-row">
+      <div class="activity-dot" style="opacity:0.4"></div>
+      <div class="activity-text" style="opacity:0.5">Interceptor — 1 anomaly flagged</div>
+      <div class="activity-time" style="opacity:0.5">Yesterday</div>
+    </div>
+  </div>
+</div>
+
+<!-- AGENT CARDS -->
+<div class="grid-section">
+  <div class="section-title">Royal Court</div>
+  <div class="cards-grid">
+    <div class="card">
+      <div class="card-icon">📜</div>
+      <h3>The Herald</h3>
+      <p>Writes the daily Telegraph from council reports. Delivered at 06:30 each morning via Telegram.</p>
+      <div class="card-status"><div class="status-dot"></div> Active — last run 06:42</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">⚖️</div>
+      <h3>The Steward</h3>
+      <p>Watches GitHub repos for issues, PRs, and stale branches. Raises flags to the king.</p>
+      <div class="card-status"><div class="status-dot"></div> Active — 12 open issues</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">📚</div>
+      <h3>The Maester</h3>
+      <p>Holds institutional memory of every village. Answers the king's questions about the realm.</p>
+      <div class="card-status"><div class="status-dot"></div> Indexing — 8 villages</div>
+    </div>
+    <div class="card">
+      <div class="card-icon">🏛️</div>
+      <h3>The Bureau</h3>
+      <p>Tracks all external tasks, work orders, and AP items. Cross-references Pronto Xi data.</p>
+      <div class="card-status"><div class="status-dot"></div> 4 items pending</div>
+    </div>
+  </div>
+</div>
+
+<!-- THEME SWITCHER -->
+<div class="theme-switcher">
+  <button class="theme-arrow" onclick="prevTheme()">‹</button>
+  <span id="theme-name">Arctic Blueprint (1/10)</span>
+  <button class="theme-arrow" onclick="nextTheme()">›</button>
+</div>
+
+<script>
+const themes = [
+  "Arctic Blueprint",
+  "Royal Amethyst",
+  "Emerald Kingdom",
+  "Forge Ember",
+  "Crystal Daylight",
+  "Obsidian Gold",
+  "Deep Ocean",
+  "Crimson Court",
+  "Parchment Tome",
+  "Void Teal"
+];
+
+const themeColors = [
+  "#63b3ed", "#a78bfa", "#34d399", "#fc814a", "#4f46e5",
+  "#facc15", "#38bdf8", "#f472b6", "#92400e", "#81e6d9"
+];
+
+let current = 0;
+
+function applyTheme(n) {
+  document.body.className = `theme-${n}`;
+  document.getElementById('theme-name').textContent = `${themes[n]} (${n+1}/${themes.length})`;
+  drawHexGrid();
+}
+
+function nextTheme() {
+  current = (current + 1) % themes.length;
+  applyTheme(current);
+}
+
+function prevTheme() {
+  current = (current - 1 + themes.length) % themes.length;
+  applyTheme(current);
+}
+
+function drawHexGrid() {
+  const svg = document.getElementById('hex-svg');
+  const W = window.innerWidth;
+  const H = window.innerHeight * 1.5;
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.setAttribute('width', W);
+  svg.setAttribute('height', H);
+
+  const size = 48;
+  const w = size * 2;
+  const h = Math.sqrt(3) * size;
+  const rows = Math.ceil(H / h) + 2;
+  const cols = Math.ceil(W / (w * 0.75)) + 2;
+
+  let paths = '';
+  for (let row = -1; row < rows; row++) {
+    for (let col = -1; col < cols; col++) {
+      const x = col * w * 0.75;
+      const y = row * h + (col % 2 === 0 ? 0 : h / 2);
+      const pts = hexPoints(x, y, size - 3);
+      paths += `<polygon points="${pts}" fill="var(--hex-fill)" stroke="var(--hex-stroke)" stroke-width="1"/>`;
+    }
+  }
+
+  svg.innerHTML = paths;
+}
+
+function hexPoints(cx, cy, r) {
+  const pts = [];
+  for (let i = 0; i < 6; i++) {
+    const angle = (Math.PI / 180) * (60 * i - 30);
+    pts.push(`${cx + r * Math.cos(angle)},${cy + r * Math.sin(angle)}`);
+  }
+  return pts.join(' ');
+}
+
+// Keyboard navigation
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'ArrowRight' || e.key === 'ArrowDown') nextTheme();
+  if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') prevTheme();
+});
+
+drawHexGrid();
+window.addEventListener('resize', drawHexGrid);
+</script>
+</body>
+</html>

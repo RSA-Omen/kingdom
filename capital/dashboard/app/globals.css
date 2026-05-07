@@ -12,49 +12,33 @@
   --radius-lg: 0.5rem;  /* 8px — cards, surfaces */
 }
 
-/* Light mode is default; dark mode via .dark class on <html> */
-:root {
-  --color-bg-page: theme(colors.neutral.50);
-  --color-bg-surface: theme(colors.white);
-  --color-bg-surface-elevated: theme(colors.white);
-  --color-bg-subtle: theme(colors.neutral.100);
-
-  --color-text-primary: theme(colors.neutral.900);
-  --color-text-secondary: theme(colors.neutral.600);
-  --color-text-tertiary: theme(colors.neutral.500);
-
-  --color-border: theme(colors.neutral.200);
-
-  --color-accent: theme(colors.indigo.600);
-  --color-accent-hover: theme(colors.indigo.700);
-  --color-accent-fg: theme(colors.white);
-
-  --color-success: theme(colors.emerald.600);
-  --color-warning: theme(colors.amber.600);
-  --color-danger: theme(colors.rose.600);
-  --color-info: theme(colors.sky.600);
-}
-
+/* Void Teal — always dark */
+:root,
 .dark {
-  --color-bg-page: theme(colors.neutral.950);
-  --color-bg-surface: theme(colors.neutral.900);
-  --color-bg-surface-elevated: theme(colors.neutral.800);
-  --color-bg-subtle: theme(colors.neutral.800);
+  --color-bg-page: #050510;
+  --color-bg-surface: rgba(8, 8, 32, 0.85);
+  --color-bg-surface-elevated: rgba(10, 10, 42, 0.92);
+  --color-bg-subtle: rgba(129, 230, 217, 0.05);
 
-  --color-text-primary: theme(colors.neutral.50);
-  --color-text-secondary: theme(colors.neutral.400);
-  --color-text-tertiary: theme(colors.neutral.500);
+  --color-text-primary: #ccfbf1;
+  --color-text-secondary: #5eada3;
+  --color-text-tertiary: #2d6b64;
 
-  --color-border: theme(colors.neutral.800);
+  --color-border: rgba(129, 230, 217, 0.15);
 
-  --color-accent: theme(colors.indigo.400);
-  --color-accent-hover: theme(colors.indigo.300);
-  --color-accent-fg: theme(colors.neutral.950);
+  --color-accent: #81e6d9;
+  --color-accent-hover: #2dd4bf;
+  --color-accent-fg: #050510;
 
-  --color-success: theme(colors.emerald.400);
-  --color-warning: theme(colors.amber.400);
-  --color-danger: theme(colors.rose.400);
-  --color-info: theme(colors.sky.400);
+  --color-success: #34d399;
+  --color-warning: #fbbf24;
+  --color-danger: #f87171;
+  --color-info: #60a5fa;
+
+  /* Hex grid */
+  --color-glow: rgba(129, 230, 217, 0.35);
+  --color-hex-fill: rgba(129, 230, 217, 0.03);
+  --color-hex-stroke: rgba(129, 230, 217, 0.14);
 }
 
 @layer base {
@@ -66,6 +50,10 @@
   body {
     background-color: var(--color-bg-page);
     color: var(--color-text-primary);
+    /* Isometric triangle grid — s=48px, h=42px */
+    background-image: url("data:image/svg+xml,%3Csvg width='48' height='84' xmlns='http://www.w3.org/2000/svg'%3E%3Cline x1='-2' y1='0' x2='50' y2='0' stroke='rgba(129,230,217,0.12)' stroke-width='0.7'/%3E%3Cline x1='-2' y1='42' x2='50' y2='42' stroke='rgba(129,230,217,0.12)' stroke-width='0.7'/%3E%3Cline x1='0' y1='0' x2='24' y2='42' stroke='rgba(129,230,217,0.12)' stroke-width='0.7'/%3E%3Cline x1='48' y1='0' x2='24' y2='42' stroke='rgba(129,230,217,0.12)' stroke-width='0.7'/%3E%3Cline x1='24' y1='42' x2='48' y2='84' stroke='rgba(129,230,217,0.12)' stroke-width='0.7'/%3E%3Cline x1='24' y1='42' x2='0' y2='84' stroke='rgba(129,230,217,0.12)' stroke-width='0.7'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 48px 84px;
   }
 
   *:focus-visible {
@@ -91,17 +79,36 @@
 }
 
 @layer components {
-  /* Surface — the base for every card */
+  /* Surface — base for every card */
   .surface {
     background-color: var(--color-bg-surface);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--color-border);
     border-radius: var(--radius-lg);
-    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    box-shadow: 0 1px 16px 0 rgb(0 0 0 / 0.3);
+    transition: border-color 0.2s;
+  }
+
+  .surface:hover {
+    border-color: rgba(129, 230, 217, 0.28);
+  }
+
+  .sidebar-link {
+    color: var(--color-text-secondary);
+    transition: color 0.15s, background 0.15s;
+  }
+
+  .sidebar-link:hover {
+    color: var(--color-accent);
+    background: var(--color-bg-subtle);
   }
 
   .surface-elevated {
     background-color: var(--color-bg-surface-elevated);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     border-radius: var(--radius-lg);
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    box-shadow: 0 4px 24px -1px rgb(0 0 0 / 0.4);
   }
 }
