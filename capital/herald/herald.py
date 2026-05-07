@@ -353,15 +353,49 @@ class Herald:
         try:
             result = subprocess.run(
                 ["python3", "-m", "council.the-castellan", "brief"],
-                capture_output=True,
-                text=True,
-                timeout=15,
+                capture_output=True, text=True, timeout=15,
                 cwd=os.path.expanduser("~/Kingdom")
             )
             if result.returncode == 0 and result.stdout.strip():
                 briefings["castellan"] = result.stdout.strip()
         except Exception as e:
             print(f"Error getting Castellan briefing: {e}")
+
+        # The Lord Chamberlain's brief (user friction)
+        try:
+            result = subprocess.run(
+                ["python3", "-m", "council.the-lord-chamberlain", "brief"],
+                capture_output=True, text=True, timeout=15,
+                cwd=os.path.expanduser("~/Kingdom")
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                briefings["chamberlain"] = result.stdout.strip()
+        except Exception as e:
+            print(f"Error getting Chamberlain briefing: {e}")
+
+        # The Master of Coin's brief (costs and time saved)
+        try:
+            result = subprocess.run(
+                ["python3", "-m", "council.the-master-of-coin", "brief"],
+                capture_output=True, text=True, timeout=30,
+                cwd=os.path.expanduser("~/Kingdom")
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                briefings["coin"] = result.stdout.strip()
+        except Exception as e:
+            print(f"Error getting Master of Coin briefing: {e}")
+
+        # The Master Builder's brief (platform health)
+        try:
+            result = subprocess.run(
+                ["python3", "-m", "council.the-master-builder", "brief"],
+                capture_output=True, text=True, timeout=15,
+                cwd=os.path.expanduser("~/Kingdom")
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                briefings["builder"] = result.stdout.strip()
+        except Exception as e:
+            print(f"Error getting Master Builder briefing: {e}")
 
         return briefings
 
@@ -472,6 +506,27 @@ class Herald:
             lines.append("🏰 THE CASTLE")
             lines.append("")
             lines.append(briefings["castellan"])
+            lines.append("")
+
+        # The Subjects — Lord Chamberlain's brief
+        if "chamberlain" in briefings and briefings["chamberlain"]:
+            lines.append("👥 THE SUBJECTS")
+            lines.append("")
+            lines.append(briefings["chamberlain"])
+            lines.append("")
+
+        # The Coin — Master of Coin's brief
+        if "coin" in briefings and briefings["coin"]:
+            lines.append("💰 THE COIN")
+            lines.append("")
+            lines.append(briefings["coin"])
+            lines.append("")
+
+        # The Platform — Master Builder's brief
+        if "builder" in briefings and briefings["builder"]:
+            lines.append("🔨 THE PLATFORM")
+            lines.append("")
+            lines.append(briefings["builder"])
             lines.append("")
 
         # Footer

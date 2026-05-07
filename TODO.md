@@ -29,10 +29,10 @@ Each gets a `council/<role>/` subfolder when its build begins, not before. Names
 - [x] **The Steward** — day-to-day operations of villages; how each is performing, who's been quiet, who's busy
 - [x] **The Captain of the Guard** — first responder to incidents; sounds the alarm, gathers facts, drafts the reply
 - [x] **The Master of Laws** — enforces the Gekko Standard; audits villages for compliance
-- [ ] **The Lord Chamberlain** — relations with subjects (users); wellbeing, friction, complaints, abandoned flows
+- [x] **The Lord Chamberlain** — relations with subjects (users); wellbeing, friction, complaints, abandoned flows
 - [x] **The Castellan** — keeps the castle clean; identifies abandoned wings, recommends archive or demolish
-- [ ] **The Master Builder** — improves the platform itself; what gets ignored, what's missing
-- [ ] **The Master of Coin** — finance; tracks costs, infrastructure spend, cost-per-app, Azure/Anthropic bills
+- [x] **The Master Builder** — improves the platform itself; what gets ignored, what's missing
+- [x] **The Master of Coin** — finance; tracks costs, infrastructure spend, cost-per-app, Azure/Anthropic bills
 - [x] **The Herald** — publishes Telegraph; composes the morning paper from the Council's reports
 
 ## Telegraph — the daily paper
