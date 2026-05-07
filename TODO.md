@@ -38,9 +38,9 @@ Each gets a `council/<role>/` subfolder when its build begins, not before. Names
 ## Telegraph — the daily paper
 
 - [x] [P2] Telegraph digest engine (built and run by **The Herald**) — pulls findings from agents, ranks them, generates the paper
-- [ ] [P2] Three editions: **Daily** (king), **Brief** (Barry — technical light), **Weekly** (subjects — friendly, inclusive)
+- [x] [P2] Three editions: **Daily** (king), **Brief** (Barry — technical light), **Weekly** (subjects — friendly, inclusive)
 - [ ] [P2] Section structure: Front Page (urgent/new), Today's Work (todos), The Long Read (system self-reflection), Arts & Tech (AI/IT news), Classifieds (feedback/requests)
-- [ ] [P2] Delivery: Telegram (primary), web edition, email
+- [x] [P2] Delivery: Telegram (primary) *(web edition and email still pending)*
 - [x] [P2] Morning ritual: deliver around 06:00 CAT before the king wakes
 
 ## The Gekko Standard — what every village must meet
