@@ -5,15 +5,33 @@ Friendly tone, no raw stack traces, no system detail.
 Delivered Monday 06:00 CAT (04:00 UTC).
 Gracefully no-ops when SUBJECTS_CHAT_ID is unset.
 """
+import json
 import os
 import subprocess
 import sys
 import requests
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+from pathlib import Path
 
 KINGDOM_API = os.getenv("KINGDOM_API", "http://localhost:5001")
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 SUBJECTS_CHAT_ID = os.getenv("SUBJECTS_CHAT_ID", "")
+
+EDITIONS_PATH = Path.home() / "Kingdom" / "capital" / "herald" / "editions.json"
+
+
+def save_edition(edition: str, content: str) -> None:
+    try:
+        existing = json.loads(EDITIONS_PATH.read_text()) if EDITIONS_PATH.exists() else {}
+    except Exception:
+        existing = {}
+    existing[edition] = {
+        "published_at": datetime.now(timezone.utc).isoformat(),
+        "content": content,
+        "date_label": datetime.now().strftime("%A, %-d %B %Y"),
+    }
+    EDITIONS_PATH.parent.mkdir(parents=True, exist_ok=True)
+    EDITIONS_PATH.write_text(json.dumps(existing, indent=2))
 
 
 def send_telegram(message: str) -> None:
@@ -176,7 +194,9 @@ def main():
 
     lines += ["", "Have a good week.", "— The Kingdom team"]
 
-    send_telegram("\n".join(lines))
+    message = "\n".join(lines)
+    send_telegram(message)
+    save_edition("weekly", message)
     print("Weekly sent.")
 
 
