@@ -335,6 +335,20 @@ class Herald:
         except Exception as e:
             print(f"Error getting Captain briefing: {e}")
 
+        # The Master of Whisperers' intelligence report (Arts & Tech)
+        try:
+            result = subprocess.run(
+                ["python3", "-m", "council.the-master-of-whisperers", "report"],
+                capture_output=True,
+                text=True,
+                timeout=20,
+                cwd=os.path.expanduser("~/Kingdom")
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                briefings["whisperers"] = result.stdout.strip()
+        except Exception as e:
+            print(f"Error getting Whisperers briefing: {e}")
+
         return briefings
 
     def compose_telegraph(self, briefings: Dict[str, str], edition: str = "daily") -> str:
@@ -429,6 +443,14 @@ class Herald:
             # Keep Maester as-is (it's knowledge, not urgent)
             maester_brief = "\n".join(line for line in briefings["maester"].split("\n")[:10])
             lines.append(maester_brief)
+            lines.append("")
+
+        # Arts & Tech — intelligence from the Master of Whisperers
+        if "whisperers" in briefings and briefings["whisperers"]:
+            lines.append("👁 ARTS & TECH — Intelligence From Beyond the Walls")
+            lines.append("")
+            for line in briefings["whisperers"].split("\n")[:12]:
+                lines.append(line)
             lines.append("")
 
         # Footer

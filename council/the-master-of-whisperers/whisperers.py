@@ -40,13 +40,13 @@ FEEDS = [
         "kind": "rss",
     },
     {
-        "name": "Anthropic",
-        "url": "https://www.anthropic.com/feed.rss",
+        "name": "AI News",
+        "url": "https://buttondown.com/ainews/rss",
         "kind": "rss",
     },
     {
-        "name": "The Batch",
-        "url": "https://read.deeplearning.ai/the-batch/rss/",
+        "name": "MIT Tech Review",
+        "url": "https://www.technologyreview.com/feed/",
         "kind": "rss",
     },
 ]
