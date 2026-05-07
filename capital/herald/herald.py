@@ -88,6 +88,9 @@ class Herald:
         findings = []
         lines = text.split("\n")
         for line in lines:
+            # Skip summary/header lines (e.g. "**Status:** 4✅ 0⚠️ 2❌") — not per-service findings
+            if "Status:" in line or "**" in line:
+                continue
             if "❌" in line or "unhealthy" in line.lower():
                 finding = Finding(
                     source="steward",
@@ -232,19 +235,25 @@ class Herald:
         return result
 
     def gather_briefing(self) -> Dict[str, str]:
-        """Gather briefings from all active council members."""
+        """Gather briefings from all active council members.
+
+        RULE: Every subprocess call here MUST use a read-only subcommand
+        (brief/report/scan/status). Never call telegram, send, or any
+        subcommand that mutates state or sends external messages.
+        Violating this sends duplicate Telegram traffic on every Herald run.
+        """
         briefings = {}
 
         # The Hand's agenda
         try:
             result = subprocess.run(
-                ["python3", "-m", "council.the-hand-of-the-king", "telegram"],
+                ["python3", "-m", "council.the-hand-of-the-king", "brief"],
                 capture_output=True,
                 text=True,
                 timeout=10,
                 cwd=os.path.expanduser("~/Kingdom")
             )
-            if result.stdout:
+            if result.returncode == 0 and result.stdout:
                 briefings["hand"] = result.stdout
         except Exception as e:
             print(f"Error getting Hand briefing: {e}")
@@ -258,7 +267,7 @@ class Herald:
                 timeout=10,
                 cwd=os.path.expanduser("~/Kingdom")
             )
-            if result.stdout:
+            if result.returncode == 0 and result.stdout:
                 briefings["maester"] = result.stdout
         except Exception as e:
             print(f"Error getting Maester briefing: {e}")
@@ -272,7 +281,7 @@ class Herald:
                 timeout=10,
                 cwd=os.path.expanduser("~/Kingdom")
             )
-            if result.stdout:
+            if result.returncode == 0 and result.stdout:
                 briefings["steward"] = result.stdout
         except Exception as e:
             print(f"Error getting Steward briefing: {e}")
@@ -286,7 +295,7 @@ class Herald:
                 timeout=10,
                 cwd=os.path.expanduser("~/Kingdom")
             )
-            if result.stdout:
+            if result.returncode == 0 and result.stdout:
                 briefings["master_of_works"] = result.stdout.strip()
         except Exception as e:
             print(f"Error getting Master of Works briefing: {e}")
@@ -300,7 +309,7 @@ class Herald:
                 timeout=10,
                 cwd=os.path.expanduser("~/Kingdom")
             )
-            if result.stdout:
+            if result.returncode == 0 and result.stdout:
                 # Strip the JSON block — only keep the markdown section
                 text = result.stdout
                 json_start = text.find("\n```json")
@@ -321,10 +330,24 @@ class Herald:
                 timeout=10,
                 cwd=os.path.expanduser("~/Kingdom")
             )
-            if result.stdout:
+            if result.returncode == 0 and result.stdout:
                 briefings["captain"] = result.stdout
         except Exception as e:
             print(f"Error getting Captain briefing: {e}")
+
+        # The Master of Whisperers' intelligence report (Arts & Tech)
+        try:
+            result = subprocess.run(
+                ["python3", "-m", "council.the-master-of-whisperers", "report"],
+                capture_output=True,
+                text=True,
+                timeout=20,
+                cwd=os.path.expanduser("~/Kingdom")
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                briefings["whisperers"] = result.stdout.strip()
+        except Exception as e:
+            print(f"Error getting Whisperers briefing: {e}")
 
         return briefings
 
@@ -420,6 +443,14 @@ class Herald:
             # Keep Maester as-is (it's knowledge, not urgent)
             maester_brief = "\n".join(line for line in briefings["maester"].split("\n")[:10])
             lines.append(maester_brief)
+            lines.append("")
+
+        # Arts & Tech — intelligence from the Master of Whisperers
+        if "whisperers" in briefings and briefings["whisperers"]:
+            lines.append("👁 ARTS & TECH — Intelligence From Beyond the Walls")
+            lines.append("")
+            for line in briefings["whisperers"].split("\n")[:12]:
+                lines.append(line)
             lines.append("")
 
         # Footer

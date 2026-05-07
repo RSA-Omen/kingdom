@@ -118,13 +118,13 @@ def build_scout_card(issue: dict) -> dict:
     text = (
         f"🔍 *Scout report — \\#{n}*\n"
         f"{title}\n\n"
-        f"_Approve to dispatch, or read the full report first._"
+        f"_Queue for the Marshal to fix, or read the report first._"
     )
     keyboard = {
         "inline_keyboard": [
             [
-                {"text": "✅ Approve", "callback_data": f"approve:{n}"},
-                {"text": "🔍 Read", "callback_data": f"scout:{n}"},
+                {"text": "✅ Queue for Marshal", "callback_data": f"approve:{n}"},
+                {"text": "🔍 Read report", "callback_data": f"scout:{n}"},
             ],
             [
                 {"text": "⏭ Skip", "callback_data": f"skip:{n}"},
@@ -145,13 +145,13 @@ def build_marshal_card(issue: dict) -> dict:
         f"📜 *Dispatch — \\#{n}*\n"
         f"{title}\n\n"
         f"`{area}` → `{assigned}`\n\n"
-        f"_Authorise the fix, or read the full routing first._"
+        f"_Queue for the Smith to fix, or read the routing first._"
     )
     keyboard = {
         "inline_keyboard": [
             [
-                {"text": "🔨 Authorise fix", "callback_data": f"auth:{n}"},
-                {"text": "📜 Read", "callback_data": f"marshal:{n}"},
+                {"text": "🔨 Queue for Smith", "callback_data": f"auth:{n}"},
+                {"text": "📜 Read routing", "callback_data": f"marshal:{n}"},
             ],
             [
                 {"text": "⏭ Skip", "callback_data": f"skip:{n}"},
@@ -255,8 +255,8 @@ def cmd_build() -> int:
             "type": "header",
             "text": (
                 f"🏰 *Kingdom Inbox*\n"
-                f"{len(scout_issues)} to approve · "
-                f"{len(marshal_issues)} to authorise · "
+                f"{len(scout_issues)} for the Marshal · "
+                f"{len(marshal_issues)} for the Smith · "
                 f"{len(prs)} PR{'s' if len(prs) != 1 else ''} to review"
             ),
             "parse_mode": "Markdown",
@@ -293,43 +293,46 @@ def cmd_callback(data: str) -> int:
         return 1
 
     if verb == "approve":
-        rc, _ = gh("issue", "edit", str(target), "--add-label", "approved")
+        rc, out_text = gh("issue", "edit", str(target), "--add-label", "approved")
         if rc == 0:
             out = {
                 "ok": True,
-                "alert": f"#{target} approved — Marshal picks up next hour",
-                "edit_text": f"✅ *Approved \\#{target}* — queued for Marshal next hour.",
+                "alert": f"✅ Approved #{target} — Marshal picks up next hour",
+                "show_alert": True,
+                "edit_text": f"✅ Approved #{target}\nQueued for the Marshal — picks up at next hourly Court Scan.",
             }
         else:
-            out = {"ok": False, "alert": f"failed to label #{target}"}
+            out = {"ok": False, "alert": f"❌ Failed to approve #{target}: {out_text[:120]}", "show_alert": True}
 
     elif verb == "auth":
-        rc, _ = gh("issue", "edit", str(target), "--add-label", "ready-to-fix")
+        rc, out_text = gh("issue", "edit", str(target), "--add-label", "ready-to-fix")
         if rc == 0:
             out = {
                 "ok": True,
-                "alert": f"#{target} authorised — Smith picks up next hour",
-                "edit_text": f"🔨 *Authorised \\#{target}* — queued for Smith next hour.",
+                "alert": f"🔨 Authorised #{target} — Smith picks up next hour",
+                "show_alert": True,
+                "edit_text": f"🔨 Authorised #{target}\nQueued for the Smith — picks up at next hourly Court Scan.",
             }
         else:
-            out = {"ok": False, "alert": f"failed to label #{target}"}
+            out = {"ok": False, "alert": f"❌ Failed to authorise #{target}: {out_text[:120]}", "show_alert": True}
 
     elif verb == "merge":
-        rc, _ = gh("pr", "merge", str(target), "--merge", "--delete-branch")
+        rc, out_text = gh("pr", "merge", str(target), "--merge", "--delete-branch")
         if rc == 0:
             out = {
                 "ok": True,
-                "alert": f"PR #{target} merged",
-                "edit_text": f"🔀 *Merged PR \\#{target}* — Inspector picks up next hour.",
+                "alert": f"🔀 Merged PR #{target}",
+                "show_alert": True,
+                "edit_text": f"🔀 Merged PR #{target}\nInspector verifies at next hourly Court Scan.",
             }
         else:
-            out = {"ok": False, "alert": f"failed to merge PR #{target}"}
+            out = {"ok": False, "alert": f"❌ Failed to merge PR #{target}: {out_text[:120]}", "show_alert": True}
 
     elif verb == "skip":
         out = {
             "ok": True,
-            "alert": "skipped",
-            "edit_text": f"⏭ _Skipped \\#{target}_ (no action taken — still in queue)",
+            "alert": f"Skipped #{target}",
+            "edit_text": f"⏭ Skipped #{target}\nStill in queue — will reappear next /inbox.",
         }
 
     elif verb == "scout":

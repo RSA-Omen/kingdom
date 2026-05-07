@@ -252,7 +252,13 @@ class StewardHealthChecker:
 
                 try:
                     data = json.loads(resp.read().decode())
-                    status = data.get("status", "healthy")
+                    raw_status = data.get("status", "healthy")
+                    if isinstance(raw_status, bool):
+                        status = "healthy" if raw_status else "unhealthy"
+                    elif raw_status in ("ok", "OK", "up", "UP"):
+                        status = "healthy"
+                    else:
+                        status = str(raw_status) if raw_status is not None else "healthy"
                     details = json.dumps(data, indent=2) if data else None
                 except json.JSONDecodeError:
                     status = "healthy"

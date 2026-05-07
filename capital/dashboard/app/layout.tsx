@@ -41,7 +41,7 @@ function TopBar() {
       </a>
       <div className="flex-1" />
       <div className="text-xs text-[var(--color-text-tertiary)]">
-        Foundation phase — the realm is being built
+        gvdi-30 · Eight agents in council
       </div>
     </header>
   );

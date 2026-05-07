@@ -1,280 +1,204 @@
 #!/usr/bin/env python3
 """
-Kingdom Weekly Digest — published by The Herald on Fridays at 17:00 CAT.
-
-Reads activity-update files from docs/updates/YYYY-MM-DD-*.md filed during
-the past 7 days, augments with GitHub stats (issues opened/closed/verified,
-PRs merged), and sends one Telegram message.
-
-If no activity files exist for the week, the digest still sends — explicitly
-saying "quiet week". Silence is never an option (per the trust contract).
-
-Usage:
-  python3 council/the-herald/weekly_digest.py            # send to Telegram
-  python3 council/the-herald/weekly_digest.py --dry      # print only, don't send
-  python3 council/the-herald/weekly_digest.py --since=14 # last 14 days instead of 7
+Kingdom Weekly — Monday morning newsletter for the whole team (subjects).
+Friendly tone, no raw stack traces, no system detail.
+Delivered Monday 06:00 CAT (04:00 UTC).
+Gracefully no-ops when SUBJECTS_CHAT_ID is unset.
 """
-
-from __future__ import annotations
-
-import argparse
-import datetime as dt
 import json
 import os
-import re
 import subprocess
 import sys
-import urllib.parse
-import urllib.request
+import requests
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Optional
 
-KINGDOM_ROOT = Path(__file__).resolve().parents[2]
-UPDATES_DIR = KINGDOM_ROOT / "docs" / "updates"
-# Use the weekly-updates bot's credentials — same bot that handles /inbox.
-# Kingdom communication is consolidated on @Claude_weekly_updates_bot so the
-# user never has to context-switch between bots.
-ENV_FILE_PRIMARY = Path.home() / "scripts" / "telegram_weekly" / ".env"
-ENV_FILE_FALLBACK = Path.home() / "telegram_notify_service" / ".env"
-GH_REPO = "RSA-Omen/kingdom"
+KINGDOM_API = os.getenv("KINGDOM_API", "http://localhost:5001")
+TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
+SUBJECTS_CHAT_ID = os.getenv("SUBJECTS_CHAT_ID", "")
+
+EDITIONS_PATH = Path.home() / "Kingdom" / "capital" / "herald" / "editions.json"
 
 
-def load_creds() -> tuple[str, str]:
-    """Load token + chat from env; prefer the weekly-updates bot's .env."""
-    token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
-    chat_id = os.environ.get("TELEGRAM_CHAT_ID", "")
-    for env_file in (ENV_FILE_PRIMARY, ENV_FILE_FALLBACK):
-        if token and chat_id:
-            break
-        if not env_file.exists():
-            continue
-        for line in env_file.read_text().splitlines():
-            line = line.strip()
-            if not line or line.startswith("#") or "=" not in line:
-                continue
-            k, _, v = line.partition("=")
-            v = v.strip().strip('"').strip("'")
-            if k.strip() == "TELEGRAM_BOT_TOKEN":
-                token = token or v
-            elif k.strip() == "TELEGRAM_CHAT_ID":
-                chat_id = chat_id or v
-    if not (token and chat_id):
-        raise RuntimeError("TELEGRAM_BOT_TOKEN / TELEGRAM_CHAT_ID not set")
-    return token, chat_id
+def save_edition(edition: str, content: str) -> None:
+    try:
+        existing = json.loads(EDITIONS_PATH.read_text()) if EDITIONS_PATH.exists() else {}
+    except Exception:
+        existing = {}
+    existing[edition] = {
+        "published_at": datetime.now(timezone.utc).isoformat(),
+        "content": content,
+        "date_label": datetime.now().strftime("%A, %-d %B %Y"),
+    }
+    EDITIONS_PATH.parent.mkdir(parents=True, exist_ok=True)
+    EDITIONS_PATH.write_text(json.dumps(existing, indent=2))
 
 
-def find_updates(since_days: int) -> list[Path]:
-    """Find activity updates from the last `since_days` days.
-
-    Only files whose first non-blank line starts with '🏰' are included —
-    that is, files written in the established Kingdom activity-update
-    format (X/Y/Z). Long-form stakeholder docs are skipped.
-    """
-    if not UPDATES_DIR.exists():
-        return []
-    cutoff = dt.date.today() - dt.timedelta(days=since_days)
-    out: list[Path] = []
-    pattern = re.compile(r"^(\d{4})-(\d{2})-(\d{2})-(.+)\.md$")
-    for p in sorted(UPDATES_DIR.glob("*.md")):
-        m = pattern.match(p.name)
-        if not m:
-            continue
-        try:
-            date = dt.date(int(m.group(1)), int(m.group(2)), int(m.group(3)))
-        except ValueError:
-            continue
-        # Skip the weekly digest itself if it ever lands here
-        if "weekly" in m.group(4).lower():
-            continue
-        if date < cutoff:
-            continue
-        # Only include files in the activity-update format (🏰 marker)
-        try:
-            first_line = next(
-                (ln for ln in p.read_text().splitlines() if ln.strip()),
-                ""
-            )
-        except OSError:
-            continue
-        if not first_line.startswith("🏰"):
-            continue
-        out.append(p)
-    return out
+def send_telegram(message: str) -> None:
+    if not TELEGRAM_BOT_TOKEN or not SUBJECTS_CHAT_ID:
+        print("SUBJECTS_CHAT_ID not set — Weekly edition skipped.")
+        return
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+    for chunk in [message[i:i+4000] for i in range(0, len(message), 4000)]:
+        requests.post(url, json={"chat_id": SUBJECTS_CHAT_ID, "text": chunk, "parse_mode": "HTML"}, timeout=10)
 
 
-def gh(*args: str) -> str:
-    """Run `gh` and return stdout. Returns '' on failure (don't break the digest)."""
+def fetch(path: str) -> dict:
+    return requests.get(f"{KINGDOM_API}{path}", timeout=5).json()
+
+
+def week_start_ts() -> tuple[int, int]:
+    """Return (start_of_this_week, start_of_last_week) as Unix timestamps."""
+    now = datetime.now()
+    sow = (now - timedelta(days=now.weekday())).replace(hour=0, minute=0, second=0, microsecond=0)
+    return int(sow.timestamp()), int((sow - timedelta(days=7)).timestamp())
+
+
+def git_commits_this_week() -> list[str]:
     try:
         result = subprocess.run(
-            ["gh", *args, "--repo", GH_REPO],
-            capture_output=True,
-            text=True,
-            timeout=30,
+            ["git", "log", "--oneline", "--since=7 days ago"],
+            capture_output=True, text=True, timeout=5,
+            cwd=os.path.expanduser("~/Kingdom"),
         )
-        if result.returncode != 0:
-            return ""
-        return result.stdout
+        lines = [l.strip() for l in result.stdout.strip().split("\n") if l.strip()]
+        # Strip hash, keep message
+        return [" ".join(l.split()[1:]) for l in lines]
     except Exception:
-        return ""
+        return []
 
 
-def gh_count(query_args: list[str]) -> Optional[int]:
-    """Run a gh issue/pr list and return the count, or None on failure."""
-    out = gh(*query_args, "--json", "number", "--jq", "length")
-    if not out.strip():
-        return None
+def run_steward_brief() -> str:
     try:
-        return int(out.strip())
-    except ValueError:
-        return None
+        result = subprocess.run(
+            ["python3", "-m", "council.the-steward", "brief"],
+            capture_output=True, text=True, timeout=10,
+            cwd=os.path.expanduser("~/Kingdom"),
+        )
+        if result.returncode == 0:
+            return result.stdout.strip()
+    except Exception:
+        pass
+    return ""
 
 
-def collect_stats(since_days: int) -> dict:
-    """Best-effort GitHub stats for the period."""
-    cutoff_iso = (dt.date.today() - dt.timedelta(days=since_days)).isoformat()
-    return {
-        "issues_opened": gh_count(["issue", "list", "--state", "all",
-                                    "--search", f"created:>={cutoff_iso}", "--limit", "200"]),
-        "issues_closed": gh_count(["issue", "list", "--state", "closed",
-                                    "--search", f"closed:>={cutoff_iso}", "--limit", "200"]),
-        "issues_verified": gh_count(["issue", "list", "--state", "all",
-                                      "--label", "verified",
-                                      "--search", f"closed:>={cutoff_iso}", "--limit", "200"]),
-        "prs_merged": gh_count(["pr", "list", "--state", "merged",
-                                 "--search", f"merged:>={cutoff_iso}", "--limit", "200"]),
-        "scout_reviews_filed": gh_count(["issue", "list", "--state", "all",
-                                          "--label", "scout-reviewed",
-                                          "--search", f"updated:>={cutoff_iso}", "--limit", "200"]),
-    }
+def humanise_commit(msg: str) -> str:
+    """Turn a git commit message into something readable for non-developers."""
+    msg = msg.lower()
+    if msg.startswith("feat:"):
+        return "✨ " + msg[5:].strip().capitalize()
+    if msg.startswith("fix:"):
+        return "🔧 " + msg[4:].strip().capitalize()
+    if msg.startswith("docs:"):
+        return "📝 " + msg[5:].strip().capitalize()
+    if msg.startswith("refactor:"):
+        return "♻️  " + msg[9:].strip().capitalize()
+    return "· " + msg.capitalize()
 
 
-def collect_open_state() -> dict:
-    """Snapshot of what's open right now, by workflow state."""
-    return {
-        state: gh_count(["issue", "list", "--state", "open", "--label", state, "--limit", "200"]) or 0
-        for state in ("scout-reviewed", "dispatched", "ready-to-fix",
-                      "fix-attempted", "fix-merged")
-    }
+def main():
+    if not SUBJECTS_CHAT_ID:
+        print("SUBJECTS_CHAT_ID not set — Weekly edition skipped.")
+        return
 
+    now = datetime.now()
+    week_start_date = (now - timedelta(days=now.weekday())).strftime("%-d %b")
+    week_end_date = (now - timedelta(days=now.weekday()) + timedelta(days=6)).strftime("%-d %b %Y")
 
-def stat_line(stats: dict) -> str:
-    """Compose the 'by the numbers' section."""
+    try:
+        all_errors = fetch("/api/errors?limit=500")
+        todo_summary = fetch("/api/todos/summary")
+    except Exception as e:
+        send_telegram(f"⚠ Weekly digest fetch failed: {e}")
+        sys.exit(1)
 
-    def fmt(v: Optional[int]) -> str:
-        return "?" if v is None else str(v)
+    this_week_ts, last_week_ts = week_start_ts()
+    errors_list = all_errors.get("errors", [])
 
-    parts = [
-        f"📈 *By the numbers*",
-        f"• {fmt(stats['issues_opened'])} issues filed",
-        f"• {fmt(stats['scout_reviews_filed'])} Scout investigations",
-        f"• {fmt(stats['prs_merged'])} PRs merged",
-        f"• {fmt(stats['issues_verified'])} fixes verified",
-        f"• {fmt(stats['issues_closed'])} issues closed",
-    ]
-    return "\n".join(parts)
+    this_week = [e for e in errors_list if e.get("created_at", 0) >= this_week_ts]
+    last_week = [e for e in errors_list if last_week_ts <= e.get("created_at", 0) < this_week_ts]
+    resolved_this_week = [e for e in this_week if e.get("status") == "resolved"]
+    still_open = [e for e in this_week if e.get("status") == "open"]
 
+    # Village health from Steward
+    steward = run_steward_brief()
+    healthy = steward.count("✅") if steward else 0
+    degraded = steward.count("⚠") if steward else 0
+    down = steward.count("❌") if steward else 0
 
-def open_state_line(open_state: dict) -> str:
-    parts = [
-        f"🚧 *Still in flight*",
-        f"• {open_state['scout-reviewed']} awaiting your approval",
-        f"• {open_state['dispatched']} dispatched, awaiting ready-to-fix",
-        f"• {open_state['ready-to-fix']} authorised, queued for the Smith",
-        f"• {open_state['fix-attempted']} PRs awaiting your review",
-        f"• {open_state['fix-merged']} merged, awaiting verification",
-    ]
-    return "\n".join(parts)
+    # Git activity
+    commits = git_commits_this_week()
+    feats = [c for c in commits if c.lower().startswith("feat")]
+    fixes = [c for c in commits if c.lower().startswith("fix")]
 
+    open_todos = todo_summary.get("open", 0)
 
-def extract_update_body(path: Path) -> str:
-    """Strip the original header line and return the rest, lightly trimmed."""
-    text = path.read_text().strip()
-    # Drop the first line if it's a date+header (we'll have our own week header)
-    lines = text.splitlines()
-    if lines and lines[0].startswith("🏰"):
-        lines = lines[1:]
-    # Drop trailing signature line if present
-    while lines and (lines[-1].strip() == "" or lines[-1].strip().startswith("— *")):
-        lines.pop()
-    return "\n".join(lines).strip()
-
-
-def compose(updates: list[Path], stats: dict, open_state: dict, week_ending: dt.date) -> str:
-    header = f"🏰 *Kingdom Weekly — week ending {week_ending.strftime('%-d %b %Y')}*"
-
-    body_blocks: list[str] = [header, "", stat_line(stats), ""]
-
-    if updates:
-        body_blocks.append("📰 *Activity ledger*")
-        body_blocks.append("")
-        for p in updates:
-            m = re.match(r"^(\d{4}-\d{2}-\d{2})-", p.name)
-            date_str = m.group(1) if m else p.stem
-            body_blocks.append(f"━━ _{date_str}_")
-            body_blocks.append(extract_update_body(p))
-            body_blocks.append("")
+    # Trend vs last week
+    delta = len(this_week) - len(last_week)
+    if delta > 0:
+        trend = f"▲ {delta} more than last week"
+    elif delta < 0:
+        trend = f"▼ {abs(delta)} fewer than last week"
     else:
-        body_blocks.append("📰 *Activity ledger*")
-        body_blocks.append("")
-        body_blocks.append("_A quiet week. No activity updates filed under `docs/updates/`."
-                           " If work happened that should be visible here, the format is:_"
-                           " `docs/updates/YYYY-MM-DD-<slug>.md` _with X/Y/Z items._")
-        body_blocks.append("")
+        trend = "same as last week"
 
-    body_blocks.append(open_state_line(open_state))
-    body_blocks.append("")
-    body_blocks.append(f"— _Published by The Herald, {dt.datetime.now().astimezone().strftime('%a %-d %b %Y %H:%M %Z')}_")
-    return "\n".join(body_blocks)
+    lines = [
+        f"📰 <b>Gekko Weekly — {week_start_date}–{week_end_date}</b>",
+        "",
+    ]
 
+    # App health
+    if steward:
+        if down == 0 and degraded == 0:
+            lines.append(f"🟢 <b>All {healthy} apps running smoothly</b>")
+        elif down > 0:
+            lines.append(f"🔴 <b>Apps:</b> {healthy} healthy, {degraded} degraded, {down} down — check the dashboard")
+        else:
+            lines.append(f"🟡 <b>Apps:</b> {healthy} healthy, {degraded} need attention")
+    else:
+        lines.append("🏰 App health unavailable — check the dashboard")
 
-def send(text: str) -> dict:
-    token, chat_id = load_creds()
-    url = f"https://api.telegram.org/bot{token}/sendMessage"
-    data = urllib.parse.urlencode({
-        "chat_id": chat_id,
-        "text": text,
-        "parse_mode": "Markdown",
-    }).encode()
-    with urllib.request.urlopen(url, data=data, timeout=15) as resp:
-        return json.loads(resp.read().decode())
+    # Errors this week
+    lines.append("")
+    if not this_week:
+        lines.append("🎉 <b>Zero errors this week.</b> The realm was quiet.")
+    else:
+        lines.append(f"🔴 <b>Errors this week:</b> {len(this_week)} ({trend})")
+        if resolved_this_week:
+            lines.append(f"  ✅ {len(resolved_this_week)} resolved")
+        if still_open:
+            lines.append(f"  📋 {len(still_open)} still open")
 
+    # What shipped
+    lines.append("")
+    if commits:
+        lines.append(f"🔧 <b>What we shipped</b> ({len(commits)} change{'s' if len(commits) != 1 else ''})")
+        # Show features first, then fixes, cap at 6 total
+        highlights = feats[:3] + fixes[:3]
+        if not highlights:
+            highlights = commits[:4]
+        for c in highlights[:6]:
+            lines.append(f"  {humanise_commit(c)}")
+        remaining = len(commits) - len(highlights[:6])
+        if remaining > 0:
+            lines.append(f"  · ...and {remaining} more")
+    else:
+        lines.append("🔧 <b>What we shipped</b> — nothing committed this week")
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description="Kingdom Weekly Digest")
-    parser.add_argument("--dry", action="store_true",
-                        help="Print the digest, don't send to Telegram.")
-    parser.add_argument("--since", type=int, default=7,
-                        help="Days of activity to include (default 7).")
-    args = parser.parse_args()
+    # Open tasks
+    lines.append("")
+    if open_todos == 0:
+        lines.append("✅ <b>Task board is clear.</b>")
+    else:
+        lines.append(f"✅ <b>{open_todos} open task{'s' if open_todos != 1 else ''}</b> on the board")
 
-    updates = find_updates(args.since)
-    stats = collect_stats(args.since)
-    open_state = collect_open_state()
-    week_ending = dt.date.today()
+    lines += ["", "Have a good week.", "— The Kingdom team"]
 
-    msg = compose(updates, stats, open_state, week_ending)
-
-    if args.dry:
-        print(msg)
-        print(f"\n[dry-run] {len(msg)} chars; {len(updates)} update files this week")
-        return 0
-
-    # Telegram messages cap at 4096 chars; chunk if needed
-    MAX = 4000
-    chunks = [msg[i:i + MAX] for i in range(0, len(msg), MAX)]
-    for chunk in chunks:
-        try:
-            result = send(chunk)
-        except Exception as e:
-            print(f"Telegram delivery failed: {e}", file=sys.stderr)
-            return 2
-        if not result.get("ok"):
-            print(f"Telegram API: {result}", file=sys.stderr)
-            return 3
-
-    print(f"Sent {len(chunks)} chunk(s); total {len(msg)} chars; {len(updates)} update files.")
-    return 0
+    message = "\n".join(lines)
+    send_telegram(message)
+    save_edition("weekly", message)
+    print("Weekly sent.")
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()

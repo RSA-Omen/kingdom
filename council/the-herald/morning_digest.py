@@ -3,14 +3,32 @@
 Kingdom Morning Digest — delivered at 06:00 CAT by The Herald.
 Queries the Kingdom API for errors and todos, sends a Telegram summary.
 """
+import json
 import os
 import sys
 import requests
-from datetime import datetime
+from datetime import datetime, timezone
+from pathlib import Path
 
 KINGDOM_API = os.getenv("KINGDOM_API", "http://localhost:5001")
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHAT_ID = os.getenv("TELEGRAM_CHAT_ID", "")
+
+EDITIONS_PATH = Path.home() / "Kingdom" / "capital" / "herald" / "editions.json"
+
+
+def save_edition(edition: str, content: str) -> None:
+    try:
+        existing = json.loads(EDITIONS_PATH.read_text()) if EDITIONS_PATH.exists() else {}
+    except Exception:
+        existing = {}
+    existing[edition] = {
+        "published_at": datetime.now(timezone.utc).isoformat(),
+        "content": content,
+        "date_label": datetime.now().strftime("%A, %-d %B %Y"),
+    }
+    EDITIONS_PATH.parent.mkdir(parents=True, exist_ok=True)
+    EDITIONS_PATH.write_text(json.dumps(existing, indent=2))
 
 
 def send_telegram(message: str) -> None:
@@ -40,7 +58,6 @@ def main():
         send_telegram(f"⚠ Kingdom digest failed to fetch data: {e}")
         sys.exit(1)
 
-    # Build village breakdown
     by_village: dict[str, int] = {}
     for err in villages.get("errors", []):
         by_village[err["village"]] = by_village.get(err["village"], 0) + 1
@@ -49,7 +66,6 @@ def main():
     for village, count in sorted(by_village.items(), key=lambda x: -x[1]):
         village_lines.append(f"  • {village.capitalize()} — {count} open error{'s' if count > 1 else ''}")
 
-    # Build message
     lines = [
         f"⚔ <b>Kingdom Morning Brief — {today}</b>",
         "",
@@ -63,7 +79,9 @@ def main():
         f"  • {todo_summary.get('open', 0) - todo_summary.get('linked', 0)} manual",
     ]
 
-    send_telegram("\n".join(lines))
+    message = "\n".join(lines)
+    send_telegram(message)
+    save_edition("daily", message)
     print("Digest sent.")
 
 

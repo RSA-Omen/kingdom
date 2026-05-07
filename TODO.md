@@ -15,7 +15,7 @@ The interim backlog for the Kingdom and the broader cleanup of the realm. This f
 - [x] [P1] Migrate **Groq → Claude** for all AI-assisted work currently in admin-center (Log Guru error analysis, fix generation, briefing composition)
 - [x] [P2] Write `docs/ROYAL_COURT.md` — canonical roster of agents, beats, schedules, escalation paths
 - [x] [P2] Create the GitHub repo `kingdom`, `git init` this directory, push first commit
-- [ ] [P2] Build a kingdom-themed landing page for `capital/dashboard/app/page.tsx` (replacing the placeholder)
+- [x] [P2] Build a kingdom-themed landing page for `capital/dashboard/app/page.tsx` (replacing the placeholder)
 
 ## The Royal Court — agents to build (one at a time, only when needed)
 
@@ -25,38 +25,38 @@ Each gets a `council/<role>/` subfolder when its build begins, not before. Names
 - [x] **The Maester** — knowledge keeper; reads everything, knows everything; the library and archives *(second build)*
 - [x] **The Master of Works** — infrastructure; keeps the castle standing; disk, certs, containers, package updates
 - [x] **The Quartermaster** — provisions; watches RAM, CPU, disk, GPU memory; warns before the larder runs dry
-- [ ] **The Master of Whisperers** — intelligence from beyond the borders; new AI models, new tools, what the wider world is doing
+- [x] **The Master of Whisperers** — intelligence from beyond the borders; new AI models, new tools, what the wider world is doing
 - [x] **The Steward** — day-to-day operations of villages; how each is performing, who's been quiet, who's busy
 - [x] **The Captain of the Guard** — first responder to incidents; sounds the alarm, gathers facts, drafts the reply
-- [ ] **The Master of Laws** — enforces the Gekko Standard; audits villages for compliance
+- [x] **The Master of Laws** — enforces the Gekko Standard; audits villages for compliance
 - [ ] **The Lord Chamberlain** — relations with subjects (users); wellbeing, friction, complaints, abandoned flows
-- [ ] **The Castellan** — keeps the castle clean; identifies abandoned wings, recommends archive or demolish
+- [x] **The Castellan** — keeps the castle clean; identifies abandoned wings, recommends archive or demolish
 - [ ] **The Master Builder** — improves the platform itself; what gets ignored, what's missing
 - [ ] **The Master of Coin** — finance; tracks costs, infrastructure spend, cost-per-app, Azure/Anthropic bills
-- [ ] **The Herald** — publishes Telegraph; composes the morning paper from the Council's reports
+- [x] **The Herald** — publishes Telegraph; composes the morning paper from the Council's reports
 
 ## Telegraph — the daily paper
 
 - [x] [P2] Telegraph digest engine (built and run by **The Herald**) — pulls findings from agents, ranks them, generates the paper
-- [ ] [P2] Three editions: **Daily** (king), **Brief** (Barry — technical light), **Weekly** (subjects — friendly, inclusive)
+- [x] [P2] Three editions: **Daily** (king), **Brief** (Barry — technical light), **Weekly** (subjects — friendly, inclusive)
 - [ ] [P2] Section structure: Front Page (urgent/new), Today's Work (todos), The Long Read (system self-reflection), Arts & Tech (AI/IT news), Classifieds (feedback/requests)
-- [ ] [P2] Delivery: Telegram (primary), web edition, email
-- [ ] [P2] Morning ritual: deliver around 06:00 CAT before the king wakes
+- [x] [P2] Delivery: Telegram (primary) *(web edition and email still pending)*
+- [x] [P2] Morning ritual: deliver around 06:00 CAT before the king wakes
 
 ## The Gekko Standard — what every village must meet
 
 To be written into `docs/GEKKO_STANDARD.md`. Captured here from design discussions:
 
-- [ ] **Health** — `/health` endpoint returns `healthy` / `degraded` / `unhealthy`; village defines critical vs non-critical dependencies; Capital polls every 10 minutes; uptime tracked over 30 days
-- [ ] **Usage** — POST per user action to `/api/track` with `{ app, action, user_oid, timestamp, multiplier, metadata }`; per-action `minutes_saved` configured by king
-- [ ] **Auth** — Azure AD (MSAL) for all villages; user identifier = Azure AD `oid`; no village-local user identity tables
-- [ ] **Errors** — POST every error to `/api/log-guru/analyze`; include stack-fingerprint for grouping; AI triage runs on schedule (Claude), creates GitHub issues for unique fingerprints
-- [ ] **Feedback** — widget in village UI; POSTs to `/api/feedback` *(endpoint to be added)*
-- [ ] **Logs** — structured JSON to stdout; collected centrally; matrix view links to per-village log tail
-- [ ] **GitHub** — repo registered with kingdom; current deployed tag visible; backups via push to remote
-- [ ] **Changelog** — patch-notes style per release; auto-drafted from git commits, edited before publishing
-- [ ] **Wiki** — village docs registered in Copilot Studio corpus
-- [ ] **Telegram** — per-village notification level (errors only / all events / daily digest)
+- [x] **Health** — `/health` endpoint returns `healthy` / `degraded` / `unhealthy`; village defines critical vs non-critical dependencies; Capital polls every 10 minutes; uptime tracked over 30 days
+- [x] **Usage** — POST per user action to `/api/track` with `{ app, action, user_oid, timestamp, multiplier, metadata }`; per-action `minutes_saved` configured by king
+- [x] **Auth** — Azure AD (MSAL) for all villages; user identifier = Azure AD `oid`; no village-local user identity tables
+- [x] **Errors** — POST every error to `/api/log-guru/analyze`; include stack-fingerprint for grouping; AI triage runs on schedule (Claude), creates GitHub issues for unique fingerprints
+- [x] **Feedback** — widget in village UI; POSTs to `/api/feedback` *(endpoint to be added)*
+- [x] **Logs** — structured JSON to stdout; collected centrally; matrix view links to per-village log tail
+- [x] **GitHub** — repo registered with kingdom; current deployed tag visible; backups via push to remote
+- [x] **Changelog** — patch-notes style per release; auto-drafted from git commits, edited before publishing
+- [ ] **Wiki** — village docs registered in Copilot Studio corpus *(no spec written yet)*
+- [x] **Telegram** — per-village notification level (errors only / all events / daily digest)
 
 ## Bridges to islands
 
