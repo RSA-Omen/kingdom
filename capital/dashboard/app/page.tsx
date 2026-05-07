@@ -145,57 +145,57 @@ function RoyalCourt() {
     },
     {
       title: "The Master of Works",
-      beat: "Infrastructure. Keeps the castle standing.",
-      status: "expected",
+      beat: "Infrastructure. Keeps the castle standing — disk, certs, containers, packages.",
+      status: "summoned",
     },
     {
       title: "The Quartermaster",
-      beat: "Provisions. Watches RAM, CPU, disk, GPU memory.",
-      status: "expected",
-    },
-    {
-      title: "The Master of Whisperers",
-      beat: "Intelligence. New AI models, what the wider world is doing.",
-      status: "expected",
+      beat: "Provisions. Watches RAM, CPU, disk, GPU memory. Warns before the larder runs dry.",
+      status: "summoned",
     },
     {
       title: "The Steward",
-      beat: "Day-to-day operations across every village.",
-      status: "expected",
+      beat: "Day-to-day operations across every village — health, uptime, silence.",
+      status: "summoned",
     },
     {
       title: "The Captain of the Guard",
-      beat: "First responder when something breaks.",
-      status: "expected",
+      beat: "First responder when something breaks. Gathers facts, drafts the reply.",
+      status: "summoned",
     },
     {
       title: "The Master of Laws",
-      beat: "Enforces the Gekko Standard.",
+      beat: "Enforces the Gekko Standard. Audits villages for compliance.",
+      status: "summoned",
+    },
+    {
+      title: "The Herald",
+      beat: "Publishes Telegraph — composes the morning paper from the Council's reports.",
+      status: "summoned",
+    },
+    {
+      title: "The Master of Whisperers",
+      beat: "Intelligence from beyond the walls. New AI models, new tools, what the world is doing.",
       status: "expected",
     },
     {
       title: "The Lord Chamberlain",
-      beat: "Cares for the subjects — wellbeing, friction, complaints.",
+      beat: "Cares for the subjects — wellbeing, friction, complaints, abandoned flows.",
       status: "expected",
     },
     {
       title: "The Castellan",
-      beat: "Keeps the castle clean. Identifies abandoned wings.",
+      beat: "Keeps the castle clean. Identifies abandoned wings, recommends archive or demolish.",
       status: "expected",
     },
     {
       title: "The Master Builder",
-      beat: "Improves the platform itself.",
+      beat: "Improves the platform itself — what gets ignored, what's missing.",
       status: "expected",
     },
     {
       title: "The Master of Coin",
-      beat: "Finance — tracks costs, infrastructure spend.",
-      status: "expected",
-    },
-    {
-      title: "The Herald",
-      beat: "Publishes Telegraph — composes the morning paper.",
+      beat: "Finance — tracks costs, infrastructure spend, Azure and Anthropic bills.",
       status: "expected",
     },
   ];
@@ -204,8 +204,8 @@ function RoyalCourt() {
     <section>
       <SectionHeading
         eyebrow="The Royal Court"
-        title="The Council that will brief the king"
-        subtitle="Each member has a beat. They are summoned one at a time, when needed."
+        title="Eight agents serve the king"
+        subtitle="Each member has a beat. Summoned one at a time — five more expected."
       />
       <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         {roles.map((r) => (
@@ -243,10 +243,15 @@ function FromTheMasterBuilder() {
         <span className="text-xs text-[var(--color-text-tertiary)]">Note</span>
       </div>
       <p className="mt-3 text-sm text-[var(--color-text-secondary)] leading-relaxed">
-        The Kingdom is founded. The Hand reads matters and prioritises. The Maester
-        reads the realm&apos;s books and keeps memory. Both now serve at the Throne Room.
-        Next: the Steward will health-check every village and surface alerts. Then
-        the Master Builder will draft the Gekko Standard.
+        Eight agents serve the Royal Court. The Hand sets the day&apos;s agenda. The
+        Maester keeps the books. The Steward watches every village. The Captain
+        answers incidents. The Master of Works tracks infrastructure. The Quartermaster
+        guards provisions. The Master of Laws audits Gekko Standard compliance.
+        The Herald publishes Telegraph at 06:00 CAT.
+      </p>
+      <p className="mt-2 text-sm text-[var(--color-text-secondary)] leading-relaxed">
+        Five more expected: the Master of Whisperers, Lord Chamberlain, Castellan,
+        Master Builder, and Master of Coin — summoned one at a time, only when needed.
       </p>
     </section>
   );

@@ -15,7 +15,7 @@ The interim backlog for the Kingdom and the broader cleanup of the realm. This f
 - [x] [P1] Migrate **Groq → Claude** for all AI-assisted work currently in admin-center (Log Guru error analysis, fix generation, briefing composition)
 - [x] [P2] Write `docs/ROYAL_COURT.md` — canonical roster of agents, beats, schedules, escalation paths
 - [x] [P2] Create the GitHub repo `kingdom`, `git init` this directory, push first commit
-- [ ] [P2] Build a kingdom-themed landing page for `capital/dashboard/app/page.tsx` (replacing the placeholder)
+- [x] [P2] Build a kingdom-themed landing page for `capital/dashboard/app/page.tsx` (replacing the placeholder)
 
 ## The Royal Court — agents to build (one at a time, only when needed)
 
@@ -28,12 +28,12 @@ Each gets a `council/<role>/` subfolder when its build begins, not before. Names
 - [ ] **The Master of Whisperers** — intelligence from beyond the borders; new AI models, new tools, what the wider world is doing
 - [x] **The Steward** — day-to-day operations of villages; how each is performing, who's been quiet, who's busy
 - [x] **The Captain of the Guard** — first responder to incidents; sounds the alarm, gathers facts, drafts the reply
-- [ ] **The Master of Laws** — enforces the Gekko Standard; audits villages for compliance
+- [x] **The Master of Laws** — enforces the Gekko Standard; audits villages for compliance
 - [ ] **The Lord Chamberlain** — relations with subjects (users); wellbeing, friction, complaints, abandoned flows
 - [ ] **The Castellan** — keeps the castle clean; identifies abandoned wings, recommends archive or demolish
 - [ ] **The Master Builder** — improves the platform itself; what gets ignored, what's missing
 - [ ] **The Master of Coin** — finance; tracks costs, infrastructure spend, cost-per-app, Azure/Anthropic bills
-- [ ] **The Herald** — publishes Telegraph; composes the morning paper from the Council's reports
+- [x] **The Herald** — publishes Telegraph; composes the morning paper from the Council's reports
 
 ## Telegraph — the daily paper
 
@@ -41,7 +41,7 @@ Each gets a `council/<role>/` subfolder when its build begins, not before. Names
 - [ ] [P2] Three editions: **Daily** (king), **Brief** (Barry — technical light), **Weekly** (subjects — friendly, inclusive)
 - [ ] [P2] Section structure: Front Page (urgent/new), Today's Work (todos), The Long Read (system self-reflection), Arts & Tech (AI/IT news), Classifieds (feedback/requests)
 - [ ] [P2] Delivery: Telegram (primary), web edition, email
-- [ ] [P2] Morning ritual: deliver around 06:00 CAT before the king wakes
+- [x] [P2] Morning ritual: deliver around 06:00 CAT before the king wakes
 
 ## The Gekko Standard — what every village must meet
 
