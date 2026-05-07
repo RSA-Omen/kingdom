@@ -96,6 +96,18 @@ def humanise_commit(msg: str) -> str:
     return "· " + msg.capitalize()
 
 
+# Updated by /kingdom-checkpoint at the end of each work session.
+# One plain-English entry per completed feature. Replace with current week's work.
+RECENT_ADDITIONS = [
+    "The Lord Chamberlain — surfaces user friction and app abandonment, reports daily",
+    "The Master of Coin — tracks Docker disk usage and time saved per app, reports daily",
+    "The Master Builder — monitors stale errors, GitHub issues, and open TODOs, reports weekly",
+    "The Castellan — now archives abandoned directories automatically every Monday",
+    "Telegraph web page — all three editions (Daily, Brief, Weekly) readable at /telegraph",
+    "The Master of Whisperers — delivers daily AI/LLM intelligence briefing",
+]
+
+
 def main():
     if not SUBJECTS_CHAT_ID:
         print("SUBJECTS_CHAT_ID not set — Weekly edition skipped.")
@@ -169,11 +181,16 @@ def main():
         if still_open:
             lines.append(f"  📋 {len(still_open)} still open")
 
-    # What shipped
+    # What shipped — prefer plain-English RECENT_ADDITIONS, fall back to git commits
     lines.append("")
-    if commits:
+    if RECENT_ADDITIONS:
+        lines.append(f"🔧 <b>What's new in the Kingdom</b>")
+        for entry in RECENT_ADDITIONS[:6]:
+            lines.append(f"  · {entry}")
+        if len(RECENT_ADDITIONS) > 6:
+            lines.append(f"  · ...and {len(RECENT_ADDITIONS) - 6} more")
+    elif commits:
         lines.append(f"🔧 <b>What we shipped</b> ({len(commits)} change{'s' if len(commits) != 1 else ''})")
-        # Show features first, then fixes, cap at 6 total
         highlights = feats[:3] + fixes[:3]
         if not highlights:
             highlights = commits[:4]
