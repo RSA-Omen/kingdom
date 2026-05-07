@@ -47,16 +47,16 @@ Each gets a `council/<role>/` subfolder when its build begins, not before. Names
 
 To be written into `docs/GEKKO_STANDARD.md`. Captured here from design discussions:
 
-- [ ] **Health** — `/health` endpoint returns `healthy` / `degraded` / `unhealthy`; village defines critical vs non-critical dependencies; Capital polls every 10 minutes; uptime tracked over 30 days
-- [ ] **Usage** — POST per user action to `/api/track` with `{ app, action, user_oid, timestamp, multiplier, metadata }`; per-action `minutes_saved` configured by king
-- [ ] **Auth** — Azure AD (MSAL) for all villages; user identifier = Azure AD `oid`; no village-local user identity tables
-- [ ] **Errors** — POST every error to `/api/log-guru/analyze`; include stack-fingerprint for grouping; AI triage runs on schedule (Claude), creates GitHub issues for unique fingerprints
-- [ ] **Feedback** — widget in village UI; POSTs to `/api/feedback` *(endpoint to be added)*
-- [ ] **Logs** — structured JSON to stdout; collected centrally; matrix view links to per-village log tail
-- [ ] **GitHub** — repo registered with kingdom; current deployed tag visible; backups via push to remote
-- [ ] **Changelog** — patch-notes style per release; auto-drafted from git commits, edited before publishing
-- [ ] **Wiki** — village docs registered in Copilot Studio corpus
-- [ ] **Telegram** — per-village notification level (errors only / all events / daily digest)
+- [x] **Health** — `/health` endpoint returns `healthy` / `degraded` / `unhealthy`; village defines critical vs non-critical dependencies; Capital polls every 10 minutes; uptime tracked over 30 days
+- [x] **Usage** — POST per user action to `/api/track` with `{ app, action, user_oid, timestamp, multiplier, metadata }`; per-action `minutes_saved` configured by king
+- [x] **Auth** — Azure AD (MSAL) for all villages; user identifier = Azure AD `oid`; no village-local user identity tables
+- [x] **Errors** — POST every error to `/api/log-guru/analyze`; include stack-fingerprint for grouping; AI triage runs on schedule (Claude), creates GitHub issues for unique fingerprints
+- [x] **Feedback** — widget in village UI; POSTs to `/api/feedback` *(endpoint to be added)*
+- [x] **Logs** — structured JSON to stdout; collected centrally; matrix view links to per-village log tail
+- [x] **GitHub** — repo registered with kingdom; current deployed tag visible; backups via push to remote
+- [x] **Changelog** — patch-notes style per release; auto-drafted from git commits, edited before publishing
+- [ ] **Wiki** — village docs registered in Copilot Studio corpus *(no spec written yet)*
+- [x] **Telegram** — per-village notification level (errors only / all events / daily digest)
 
 ## Bridges to islands
 
