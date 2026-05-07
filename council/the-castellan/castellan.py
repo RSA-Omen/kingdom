@@ -6,6 +6,7 @@ Identifies abandoned wings, recommends archive or demolish.
 
 import os
 import sys
+import shutil
 import sqlite3
 import subprocess
 from datetime import datetime, timedelta
@@ -16,6 +17,8 @@ import requests
 HOME = Path.home()
 DB_PATH = HOME / ".castellan.db"
 KINGDOM_DIR = HOME / "Kingdom"
+ARCHIVE_DIR = HOME / "Archive"
+REPORTS_DIR = KINGDOM_DIR / "docs" / "castellan-reports"
 TELEGRAM_ENV_FALLBACK = HOME / "telegram_notify_service" / ".env"
 KINGDOM_ENV = HOME / ".kingdom.env"
 
@@ -114,6 +117,16 @@ class CastellanIndex:
                 "SELECT category, count(*) FROM findings WHERE status='open' GROUP BY category"
             ).fetchall()
         return {r[0]: r[1] for r in rows}
+
+    def resolve(self, path: str, action: str):
+        """Mark a finding as resolved with the action taken."""
+        now = datetime.utcnow().isoformat()
+        with sqlite3.connect(self.db_path) as conn:
+            conn.execute(
+                "UPDATE findings SET status=?, last_seen=? WHERE path=?",
+                (f"resolved:{action}", now, path),
+            )
+            conn.commit()
 
 
 # ---------------------------------------------------------------------------
@@ -386,6 +399,140 @@ def generate_brief(findings: List[Dict]) -> str:
 
 
 # ---------------------------------------------------------------------------
+# Execute — archive, demolish, and clean stubs
+# ---------------------------------------------------------------------------
+
+def _write_revert_report(actions: List[Dict]) -> Path:
+    """Write a markdown report documenting every action and how to revert it."""
+    REPORTS_DIR.mkdir(parents=True, exist_ok=True)
+    stamp = datetime.now().strftime("%Y-%m-%d_%H%M%S")
+    report_path = REPORTS_DIR / f"{stamp}_execute.md"
+
+    lines = [
+        f"# Castellan Execute Report",
+        f"",
+        f"**Run at:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
+        f"",
+        f"This file documents every action taken and how to revert.",
+        f"",
+        f"## Actions",
+        f"",
+    ]
+
+    for a in actions:
+        lines.append(f"### `{_shorten(a['path'])}`")
+        lines.append(f"- **Action:** {a['action']}")
+        lines.append(f"- **Reason:** {a['reason']}")
+        if a.get("destination"):
+            lines.append(f"- **Moved to:** `{_shorten(a['destination'])}`")
+            lines.append(f"- **Revert:** `mv {_shorten(a['destination'])} {_shorten(a['path'])}`")
+        elif a["action"] == "deleted empty directory":
+            lines.append(f"- **Revert:** `mkdir -p {_shorten(a['path'])}`")
+        lines.append("")
+
+    report_path.write_text("\n".join(lines))
+    return report_path
+
+
+def execute_findings(index: CastellanIndex, findings: List[Dict], dry_run: bool = False) -> Tuple[List[Dict], str]:
+    """
+    Execute open findings:
+      DEMOLISH  → rmdir (only if still empty)
+      ARCHIVE   → move to ~/Archive/
+      REVIEW    → delete if still an empty stub (no files except README.md)
+    Returns (actions_taken, report_path).
+    """
+    ARCHIVE_DIR.mkdir(exist_ok=True)
+
+    actions = []
+    skipped = []
+
+    for f in findings:
+        path = Path(f["path"])
+        cat = f["category"]
+
+        if not path.exists():
+            skipped.append(f"{_shorten(str(path))} — already gone")
+            index.resolve(str(path), "already_gone")
+            continue
+
+        if cat == DEMOLISH:
+            # Only act if still empty
+            try:
+                contents = list(path.iterdir())
+            except PermissionError:
+                skipped.append(f"{_shorten(str(path))} — permission denied")
+                continue
+            if contents:
+                skipped.append(f"{_shorten(str(path))} — no longer empty, skipping")
+                continue
+            actions.append({"path": str(path), "action": "deleted empty directory",
+                            "reason": f["reason"], "destination": None})
+            if not dry_run:
+                path.rmdir()
+                index.resolve(str(path), "demolished")
+
+        elif cat == ARCHIVE:
+            dest = ARCHIVE_DIR / path.name
+            # Avoid collisions
+            if dest.exists():
+                dest = ARCHIVE_DIR / f"{path.name}_{datetime.now().strftime('%Y%m%d')}"
+            actions.append({"path": str(path), "action": "moved to Archive",
+                            "reason": f["reason"], "destination": str(dest)})
+            if not dry_run:
+                shutil.move(str(path), str(dest))
+                index.resolve(str(path), "archived")
+
+        elif cat == REVIEW:
+            # Only demolish council stubs if they contain only README.md (empty stubs)
+            try:
+                contents = [e.name for e in path.iterdir()]
+            except PermissionError:
+                skipped.append(f"{_shorten(str(path))} — permission denied")
+                continue
+            meaningful = [c for c in contents if c not in {"README.md", "__init__.py", ".git"}]
+            if meaningful:
+                skipped.append(f"{_shorten(str(path))} — has files ({', '.join(meaningful[:3])}), skipping")
+                continue
+            actions.append({"path": str(path), "action": "deleted empty council stub",
+                            "reason": f["reason"], "destination": None})
+            if not dry_run:
+                shutil.rmtree(str(path))
+                index.resolve(str(path), "demolished")
+
+    return actions, skipped
+
+
+def generate_execute_summary(actions: List[Dict], skipped: List[str], report_path: Optional[Path], dry_run: bool) -> str:
+    prefix = "🏰 *The Castellan — Execute Report*" if not dry_run else "🏰 *The Castellan — Dry Run Preview*"
+    lines = [prefix, ""]
+
+    if not actions and not skipped:
+        lines.append("Nothing to do — no open findings.")
+        return "\n".join(lines)
+
+    if actions:
+        lines.append(f"*{len(actions)} action{'s' if len(actions) != 1 else ''} taken:*")
+        for a in actions:
+            icon = "🗑" if "deleted" in a["action"] else "📦"
+            lines.append(f"  {icon} `{_shorten(a['path'])}` → {a['action']}")
+        lines.append("")
+
+    if skipped:
+        lines.append(f"*{len(skipped)} skipped:*")
+        for s in skipped[:5]:
+            lines.append(f"  ⏭ {s}")
+        if len(skipped) > 5:
+            lines.append(f"  …and {len(skipped) - 5} more")
+        lines.append("")
+
+    if report_path and not dry_run:
+        lines.append(f"📄 Revert guide: `{_shorten(str(report_path))}`")
+
+    return "\n".join(lines)
+
+
+# ---------------------------------------------------------------------------
 # Telegram
 # ---------------------------------------------------------------------------
 
@@ -468,9 +615,31 @@ def main():
         index.dismiss(path)
         print(f"Dismissed: {path}")
 
+    elif command in ("execute", "dry-run"):
+        dry_run = command == "dry-run"
+        findings = index.get_open_findings()
+        if not findings:
+            print("No open findings. Run `scan` first.")
+            sys.exit(0)
+
+        actions, skipped = execute_findings(index, findings, dry_run=dry_run)
+
+        report_path = None
+        if actions and not dry_run:
+            report_path = _write_revert_report(actions)
+
+        summary = generate_execute_summary(actions, skipped, report_path, dry_run)
+        print(summary)
+
+        if not dry_run and actions:
+            send_telegram(summary)
+            print(f"\nTelegram notification sent.")
+            if report_path:
+                print(f"Revert guide written to: {report_path}")
+
     else:
         print(f"Unknown command: {command}", file=sys.stderr)
-        print("Commands: scan | report | brief | db | dismiss <path>", file=sys.stderr)
+        print("Commands: scan | report | brief | db | execute | dry-run | dismiss <path>", file=sys.stderr)
         sys.exit(1)
 
 
