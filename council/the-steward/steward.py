@@ -10,6 +10,8 @@ Usage:
     python -m council.the-steward report                 # generate daily report
     python -m council.the-steward telegram               # post report to Telegram
     python -m council.the-steward deps                   # dependency audit only
+    python -m council.the-steward fix                    # auto-fix vulns + redeploy
+    python -m council.the-steward fix --component NAME   # fix one component only
 """
 
 from __future__ import annotations
@@ -26,6 +28,9 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 from typing import Optional
+
+sys.path.insert(0, str(Path(__file__).parents[1]))
+from shared.issue import open_issue  # noqa: E402
 
 HOME = Path.home()
 KINGDOM_DIR = Path(os.environ.get("KINGDOM_DIR", HOME / "Kingdom"))
@@ -49,6 +54,68 @@ COMPONENTS = {
     "Admin Center MCP Server": HOME / "admin-center/mcp-server",
     "Kingdom Dashboard": KINGDOM_DIR / "capital/dashboard",
 }
+
+# Maps component name → village slug (must match github-repos.json)
+COMPONENT_VILLAGE = {
+    "Admin Center Backend": "admin-center",
+    "Admin Center Frontend": "admin-center",
+    "Admin Center MCP Server": "admin-center",
+    "Kingdom Dashboard": "kingdom",
+}
+
+# Fix config: how to fix, verify, and redeploy each component
+COMPONENT_FIX_CONFIG = {
+    "Admin Center Backend": {
+        "git_root": HOME / "admin-center",
+        "subdir": "backend",
+        "build_cmd": ["npm", "run", "build"],
+        "github_repo": "RSA-Omen/Admin-Center",
+        "docker_compose_dir": HOME / "admin-center",
+        "docker_service": "admin-center-backend",
+    },
+    "Admin Center Frontend": {
+        "git_root": HOME / "admin-center",
+        "subdir": "frontend",
+        "build_cmd": ["npm", "run", "build"],
+        "github_repo": "RSA-Omen/Admin-Center",
+        "docker_compose_dir": HOME / "admin-center",
+        "docker_service": "admin-center-frontend",
+    },
+    "Admin Center MCP Server": {
+        "git_root": HOME / "admin-center",
+        "subdir": "mcp-server",
+        "build_cmd": None,
+        "github_repo": "RSA-Omen/Admin-Center",
+        "docker_compose_dir": None,
+        "docker_service": None,
+    },
+    "Kingdom Dashboard": {
+        "git_root": KINGDOM_DIR,
+        "subdir": "capital/dashboard",
+        "build_cmd": ["npm", "run", "build"],
+        "github_repo": "RSA-Omen/kingdom",
+        "docker_compose_dir": None,
+        "docker_service": None,
+    },
+}
+
+# Known upstream blockers — vulns we're waiting on a package release to fix.
+# When blocking_package reaches min_version on npm, the Steward auto-runs fix
+# on the affected components and closes the tracking issue.
+UPSTREAM_BLOCKERS = [
+    {
+        "id": "postcss-next-xss",
+        "description": "PostCSS XSS inside Next.js (GHSA-qx2v-qp2m-jg93)",
+        "blocking_package": "next",
+        "min_version": "16.3.0",
+        "affected_components": ["Admin Center Frontend", "Kingdom Dashboard"],
+        "advisory": "https://github.com/advisories/GHSA-qx2v-qp2m-jg93",
+        "github_issues": {
+            "admin-center": 3,
+            "kingdom": 27,
+        },
+    },
+]
 
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -462,6 +529,229 @@ def generate_report(index: StewardIndex) -> str:
 # ─────────────────────────────────────────────────────────────────────────────
 
 
+def _npm_latest_version(package: str) -> str | None:
+    """Return the current latest stable version of an npm package."""
+    try:
+        r = subprocess.run(
+            ["npm", "view", package, "version"],
+            capture_output=True, text=True, timeout=15,
+        )
+        return r.stdout.strip() if r.returncode == 0 else None
+    except Exception:
+        return None
+
+
+def _version_gte(v: str, minimum: str) -> bool:
+    """Return True if version v >= minimum (semver, numeric parts only)."""
+    def parts(s: str) -> tuple:
+        return tuple(int(x) for x in s.split("-")[0].split(".") if x.isdigit())
+    try:
+        return parts(v) >= parts(minimum)
+    except Exception:
+        return False
+
+
+def check_upstream_blockers() -> list[dict]:
+    """
+    Check each upstream blocker. If the blocking package has reached the
+    required version, trigger auto_fix_component for affected components
+    and close the tracking GitHub Issues.
+    Returns list of dicts: {blocker_id, status, version, fixed_components}
+    """
+    results = []
+    for blocker in UPSTREAM_BLOCKERS:
+        pkg = blocker["blocking_package"]
+        min_ver = blocker["min_version"]
+        latest = _npm_latest_version(pkg)
+
+        if not latest:
+            results.append({"id": blocker["id"], "status": "check_failed"})
+            continue
+
+        if not _version_gte(latest, min_ver):
+            print(f"[upstream] {blocker['id']}: {pkg}@{latest} < {min_ver} — still waiting",
+                  flush=True)
+            results.append({"id": blocker["id"], "status": "waiting",
+                            "version": latest, "needs": min_ver})
+            continue
+
+        print(f"[upstream] {blocker['id']}: {pkg}@{latest} >= {min_ver} — RELEASED, fixing now",
+              flush=True)
+
+        fixed = []
+        for component in blocker["affected_components"]:
+            result = auto_fix_component(component)
+            if result["status"] == "fixed":
+                fixed.append(component)
+
+        # Close tracking issues for components that were fixed
+        if fixed:
+            for village, issue_number in blocker.get("github_issues", {}).items():
+                cfg = COMPONENT_FIX_CONFIG.get(
+                    next((c for c in blocker["affected_components"]
+                          if COMPONENT_VILLAGE.get(c) == village), ""),
+                    {}
+                )
+                repo = cfg.get("github_repo")
+                if repo:
+                    subprocess.run(
+                        ["gh", "issue", "close", str(issue_number),
+                         "--repo", repo,
+                         "--comment",
+                         f"Resolved automatically by The Steward.\n"
+                         f"{pkg}@{latest} released — `npm audit fix` applied and deployed.\n"
+                         f"Fixed components: {', '.join(fixed)}"],
+                        capture_output=True, timeout=15,
+                    )
+
+        results.append({"id": blocker["id"], "status": "released",
+                        "version": latest, "fixed_components": fixed})
+
+    return results
+
+
+def _run(cmd: list, cwd: Path, timeout: int = 120) -> tuple[int, str, str]:
+    r = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, timeout=timeout)
+    return r.returncode, r.stdout, r.stderr
+
+
+def auto_fix_component(name: str) -> dict:
+    """
+    Auto-fix npm vulnerabilities for one component.
+    Returns a result dict with keys: name, status, pr_url, error.
+    Status: 'fixed' | 'no_fixable' | 'build_failed' | 'error'
+    """
+    cfg = COMPONENT_FIX_CONFIG.get(name)
+    if not cfg:
+        return {"name": name, "status": "error", "error": "No fix config defined"}
+
+    git_root: Path = cfg["git_root"]
+    subdir: str = cfg["subdir"]
+    component_path = git_root / subdir
+    github_repo: str = cfg["github_repo"]
+    build_cmd: list | None = cfg["build_cmd"]
+    docker_compose_dir: Path | None = cfg["docker_compose_dir"]
+    docker_service: str | None = cfg["docker_service"]
+
+    print(f"\n[fix] Starting: {name}", flush=True)
+
+    # 1 — Check fixable vulns exist before touching anything
+    rc, out, _ = _run(["npm", "audit", "--json"], component_path, timeout=60)
+    try:
+        audit = json.loads(out[out.find("{"):out.rfind("}") + 1] or "{}")
+        vulns = audit.get("vulnerabilities", {})
+        fixable = [v for v in vulns.values()
+                   if v.get("severity") in ("critical", "high") and v.get("fixAvailable")]
+        if not fixable:
+            print(f"[fix] No fixable critical/high vulns in {name} — skipping", flush=True)
+            return {"name": name, "status": "no_fixable"}
+    except Exception as e:
+        return {"name": name, "status": "error", "error": f"Audit parse failed: {e}"}
+
+    # 2 — Create fix branch in the village repo
+    today = dt.date.today().isoformat()
+    slug = name.lower().replace(" ", "-")
+    branch = f"fix/steward-{slug}-{today}"
+
+    # Ensure we're on main and up to date
+    _run(["git", "checkout", "main"], git_root)
+    _run(["git", "pull", "--ff-only"], git_root)
+
+    rc, _, err = _run(["git", "checkout", "-b", branch], git_root)
+    if rc != 0:
+        # Branch may already exist from a previous run today — reuse it
+        rc2, _, _ = _run(["git", "checkout", branch], git_root)
+        if rc2 != 0:
+            return {"name": name, "status": "error", "error": f"Could not create branch: {err}"}
+
+    # 3 — Run npm audit fix
+    print(f"[fix] Running npm audit fix in {component_path}", flush=True)
+    rc, _, err = _run(["npm", "audit", "fix"], component_path, timeout=120)
+    if rc != 0:
+        _run(["git", "checkout", "main"], git_root)
+        _run(["git", "branch", "-D", branch], git_root)
+        return {"name": name, "status": "error", "error": f"npm audit fix failed: {err[:300]}"}
+
+    # 4 — Verify build compiles
+    if build_cmd:
+        print(f"[fix] Verifying build: {' '.join(build_cmd)}", flush=True)
+        rc, _, err = _run(build_cmd, component_path, timeout=180)
+        if rc != 0:
+            print(f"[fix] Build failed — rolling back", flush=True)
+            _run(["git", "checkout", "."], git_root)
+            _run(["git", "checkout", "main"], git_root)
+            _run(["git", "branch", "-D", branch], git_root)
+            return {"name": name, "status": "build_failed",
+                    "error": f"Build failed after fix:\n{err[:500]}"}
+
+    # 5 — Commit changed package files
+    _run(["git", "add", f"{subdir}/package.json", f"{subdir}/package-lock.json"], git_root)
+    rc, out, _ = _run(["git", "diff", "--cached", "--name-only"], git_root)
+    if not out.strip():
+        # Nothing changed — audit fix made no difference
+        _run(["git", "checkout", "main"], git_root)
+        _run(["git", "branch", "-D", branch], git_root)
+        return {"name": name, "status": "no_fixable"}
+
+    commit_msg = f"fix(deps): npm audit fix — {name} [steward {today}]"
+    _run(["git", "commit", "-m", commit_msg], git_root)
+
+    # 6 — Push branch
+    rc, _, err = _run(["git", "push", "-u", "origin", branch], git_root)
+    if rc != 0:
+        _run(["git", "checkout", "main"], git_root)
+        return {"name": name, "status": "error", "error": f"Push failed: {err[:300]}"}
+
+    # 7 — Open PR and merge immediately
+    pr_body = (
+        f"## Automated Dependency Fix\n\n"
+        f"**Component:** {name}\n"
+        f"**Raised by:** The Steward (daily dependency audit — {today})\n\n"
+        f"### What changed\n"
+        f"Ran `npm audit fix` to resolve critical/high vulnerabilities. "
+        f"Only semver-compatible patches applied (no `--force`).\n\n"
+        f"### Verification\n"
+        f"- [x] `npm audit fix` completed without errors\n"
+        f"{'- [x] `' + ' '.join(build_cmd) + '` passed' if build_cmd else '- [ ] No build step configured'}\n\n"
+        f"> Auto-merged by The Steward. Review `package-lock.json` diff for details."
+    )
+    r = subprocess.run(
+        ["gh", "pr", "create",
+         "--repo", github_repo,
+         "--title", f"fix(deps): npm audit fix — {name}",
+         "--body", pr_body,
+         "--label", "agent-raised,steward",
+         "--head", branch,
+         "--base", "main"],
+        capture_output=True, text=True, timeout=30,
+    )
+    pr_url = r.stdout.strip()
+    if r.returncode != 0:
+        return {"name": name, "status": "error", "error": f"PR create failed: {r.stderr[:300]}"}
+
+    # Extract PR number and merge
+    pr_number = pr_url.rstrip("/").split("/")[-1]
+    subprocess.run(
+        ["gh", "pr", "merge", pr_number, "--repo", github_repo, "--merge", "--delete-branch"],
+        capture_output=True, text=True, timeout=30,
+    )
+
+    # 8 — Pull merged changes into local main
+    _run(["git", "checkout", "main"], git_root)
+    _run(["git", "pull", "--ff-only"], git_root)
+
+    # 9 — Rebuild and restart Docker service if applicable
+    if docker_compose_dir and docker_service:
+        print(f"[fix] Rebuilding Docker service: {docker_service}", flush=True)
+        subprocess.run(
+            ["docker", "compose", "up", "-d", "--build", docker_service],
+            cwd=docker_compose_dir, timeout=300,
+        )
+
+    print(f"[fix] Done: {name} — {pr_url}", flush=True)
+    return {"name": name, "status": "fixed", "pr_url": pr_url}
+
+
 def main():
     parser = argparse.ArgumentParser(description="The Steward")
     subparsers = parser.add_subparsers(dest="command")
@@ -472,6 +762,8 @@ def main():
     subparsers.add_parser("report", help="Generate daily report")
     subparsers.add_parser("telegram", help="Post report to Telegram")
     subparsers.add_parser("deps", help="Run dependency audit only")
+    fix_parser = subparsers.add_parser("fix", help="Auto-fix vulnerabilities and redeploy")
+    fix_parser.add_argument("--component", help="Fix one component only (default: all)")
 
     args = parser.parse_args()
     if not args.command:
@@ -491,6 +783,7 @@ def main():
     elif args.command == "deps":
         dep_checker = DependencyChecker(index)
         results = dep_checker.audit_all()
+        new_criticals = dep_checker.find_new_criticals(results)
         for d in results:
             if d.error:
                 print(f"⚠️  {d.component_name}: {d.error}")
@@ -504,7 +797,81 @@ def main():
                 if d.low: parts.append(f"{d.low} low")
                 icon = "🔴" if d.critical else "🟡"
                 print(f"{icon} {d.component_name}: {', '.join(parts)} ({d.total} total)")
+
+            # Open a GitHub Issue for new critical vulnerabilities
+            # Skip components whose vulns are known upstream blockers
+            upstream_blocked = {
+                c for b in UPSTREAM_BLOCKERS for c in b["affected_components"]
+            }
+            if d.component_name in new_criticals and not d.error \
+                    and d.component_name not in upstream_blocked:
+                village = COMPONENT_VILLAGE.get(d.component_name)
+                if village:
+                    parts = []
+                    if d.critical: parts.append(f"{d.critical} critical")
+                    if d.high: parts.append(f"{d.high} high")
+                    summary = ", ".join(parts)
+                    title = f"[Steward] Dependency vulnerabilities in {d.component_name} ({summary})"
+                    body = (
+                        f"## Dependency Audit Alert\n\n"
+                        f"**Component:** {d.component_name}\n"
+                        f"**Path:** `{d.component_path}`\n\n"
+                        f"| Severity | Count |\n"
+                        f"|---|---|\n"
+                        f"| Critical | {d.critical} |\n"
+                        f"| High | {d.high} |\n"
+                        f"| Moderate | {d.moderate} |\n"
+                        f"| Low | {d.low} |\n\n"
+                        f"**Detected by:** The Steward (daily dependency audit)\n\n"
+                        f"### To investigate\n"
+                        f"```bash\ncd {d.component_path}\nnpm audit\n```\n\n"
+                        f"### To fix (auto-fixable only)\n"
+                        f"```bash\nnpm audit fix\n```\n\n"
+                        f"> Review changes before committing. Run tests after fixing."
+                    )
+                    severity = "critical" if d.critical else "high"
+                    open_issue(village=village, title=title, body=body,
+                               source="steward", severity=severity)
+
         print(json.dumps([dataclasses.asdict(d) for d in results], indent=2))
+
+    elif args.command == "fix":
+        # Check upstream blockers first — auto-fix any that have been released
+        if not args.component:
+            upstream_results = check_upstream_blockers()
+            for r in upstream_results:
+                if r["status"] == "released":
+                    print(f"[upstream] {r['id']} resolved — fixed: {r.get('fixed_components', [])}")
+                elif r["status"] == "waiting":
+                    print(f"[upstream] {r['id']} still waiting on {r.get('needs')} "
+                          f"(latest: {r.get('version')})")
+
+        targets = [args.component] if args.component else list(COMPONENT_FIX_CONFIG.keys())
+        results = []
+        for component in targets:
+            result = auto_fix_component(component)
+            results.append(result)
+        # Summary
+        fixed = [r for r in results if r["status"] == "fixed"]
+        failed = [r for r in results if r["status"] in ("build_failed", "error")]
+        skipped = [r for r in results if r["status"] == "no_fixable"]
+        print(f"\n{'─'*50}")
+        print(f"Fixed:   {len(fixed)} — {', '.join(r['name'] for r in fixed) or 'none'}")
+        print(f"Skipped: {len(skipped)} — {', '.join(r['name'] for r in skipped) or 'none'}")
+        print(f"Failed:  {len(failed)} — {', '.join(r['name'] for r in failed) or 'none'}")
+        for r in failed:
+            print(f"  ⚠️  {r['name']}: {r.get('error','')}")
+        # Telegram summary if anything was fixed or failed
+        if fixed or failed:
+            lines = ["🔧 *Steward — Auto-fix Report*", ""]
+            for r in fixed:
+                lines.append(f"✅ Fixed: {r['name']}\n   PR: {r.get('pr_url','')}")
+            for r in failed:
+                lines.append(f"❌ Failed: {r['name']}\n   {r.get('error','')[:150]}")
+            try:
+                send_telegram("\n".join(lines))
+            except Exception:
+                pass
 
     elif args.command == "status":
         print(json.dumps(index.get_all_services(), indent=2))
