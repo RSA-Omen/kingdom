@@ -200,7 +200,7 @@ export default function TodosClient({
         {TABS.map((t) => (
           <Link
             key={t.key}
-            href={t.href}
+            href={t.href as unknown as "/todos"}
             className={`px-4 py-2 text-sm transition-colors border-b-2 -mb-px ${
               tab === t.key
                 ? "border-[var(--color-accent)] text-[var(--color-text-primary)]"

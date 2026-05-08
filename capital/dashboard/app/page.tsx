@@ -5,6 +5,7 @@ import { BureauCard } from "../components/kingdom/BureauCard";
 import { MasterOfWorksCard } from "../components/kingdom/MasterOfWorksCard";
 import { SummaryCards } from "@/components/kingdom/SummaryCards";
 import { ErrorFeed } from "@/components/kingdom/ErrorFeed";
+import { HexStatRow } from "@/components/kingdom/HexStatRow";
 
 export default function ThroneRoom() {
   const today = new Date().toLocaleDateString("en-GB", {
@@ -17,6 +18,7 @@ export default function ThroneRoom() {
   return (
     <div className="space-y-10">
       <Hero today={today} />
+      <HexStatRow />
       <HandAgendaCard />
       <MaesterCard />
       <BureauCard />

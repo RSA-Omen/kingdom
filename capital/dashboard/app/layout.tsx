@@ -62,6 +62,8 @@ function Sidebar() {
       items: [
         { label: "Errors", slug: "/errors" },
         { label: "To-Dos", slug: "/todos" },
+        { label: "Security", slug: "/security" },
+        { label: "Schedules", slug: "/schedules" },
       ],
     },
     {

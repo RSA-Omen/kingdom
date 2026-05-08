@@ -1,8 +1,6 @@
 "use client";
 import { useEffect, useState } from "react";
 
-const API = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:5001";
-
 interface Summary {
   openErrors: number;
   openTodos: number;
@@ -15,8 +13,8 @@ export function SummaryCards() {
 
   useEffect(() => {
     Promise.all([
-      fetch(`${API}/api/errors/summary`).then((r) => r.json()),
-      fetch(`${API}/api/todos/summary`).then((r) => r.json()),
+      fetch(`/api/errors/summary`).then((r) => r.json()),
+      fetch(`/api/todos/summary`).then((r) => r.json()),
     ]).then(([errors, todos]) => {
       setSummary({
         openErrors: errors.open,

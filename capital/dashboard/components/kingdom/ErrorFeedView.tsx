@@ -1,6 +1,3 @@
-"use client";
-import { useEffect, useState } from "react";
-
 interface KingdomError {
   id: string;
   village: string;
@@ -25,15 +22,7 @@ function timeAgo(unix: number): string {
   return `${Math.floor(diff / 86400)}d ago`;
 }
 
-export function ErrorFeed({ limit = 8 }: { limit?: number }) {
-  const [errors, setErrors] = useState<KingdomError[]>([]);
-
-  useEffect(() => {
-    fetch(`/api/errors?status=open&limit=${limit}`)
-      .then((r) => r.json())
-      .then((data) => setErrors(data.errors || []));
-  }, [limit]);
-
+export function ErrorFeedView({ errors }: { errors: KingdomError[] }) {
   if (errors.length === 0) {
     return (
       <div className="surface p-6 text-center text-sm text-[var(--color-text-tertiary)]">
@@ -58,9 +47,7 @@ export function ErrorFeed({ limit = 8 }: { limit?: number }) {
           <span className="text-xs text-[var(--color-text-tertiary)] w-24 flex-shrink-0 capitalize">
             {err.village}
           </span>
-          <span className="flex-1 text-[var(--color-text-secondary)] truncate">
-            {err.message}
-          </span>
+          <span className="flex-1 text-[var(--color-text-secondary)] truncate">{err.message}</span>
           {err.linked_todo_id && (
             <span className="text-xs bg-[var(--color-bg-subtle)] text-[var(--color-accent)] px-2 py-0.5 rounded flex-shrink-0">
               → TODO

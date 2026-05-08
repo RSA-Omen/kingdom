@@ -99,12 +99,12 @@ def humanise_commit(msg: str) -> str:
 # Updated by /kingdom-checkpoint at the end of each work session.
 # One plain-English entry per completed feature. Replace with current week's work.
 RECENT_ADDITIONS = [
-    "The Lord Chamberlain — surfaces user friction and app abandonment, reports daily",
-    "The Master of Coin — tracks Docker disk usage and time saved per app, reports daily",
-    "The Master Builder — monitors stale errors, GitHub issues, and open TODOs, reports weekly",
-    "The Castellan — now archives abandoned directories automatically every Monday",
-    "Telegraph web page — all three editions (Daily, Brief, Weekly) readable at /telegraph",
-    "The Master of Whisperers — delivers daily AI/LLM intelligence briefing",
+    "Security page — dependency vulnerability audit across all npm projects, live on /security",
+    "The Steward extended — now audits npm dependencies daily, alerts on new critical CVEs",
+    "Hex stat row — Throne Room stats restored with a 6th Vulns card (red/amber/green by severity)",
+    "Schedules page — every agent cron job listed with run history; click any bar to see what happened",
+    "Run detail modal — plain-English explanation of each run's colour + full per-row breakdown",
+    "Dashboard reads from Steward DB — security page instant (no live npm audit on page load)",
 ]
 
 

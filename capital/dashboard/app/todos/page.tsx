@@ -2,8 +2,6 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
 
-const API = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:5001";
-
 interface Todo {
   id: string;
   village: string;
@@ -31,7 +29,7 @@ export default function TodosPage() {
     const params = new URLSearchParams({ limit: "100" });
     if (tab === "Linked") params.set("linked", "true");
     if (tab === "Unlinked") params.set("linked", "false");
-    fetch(`${API}/api/todos?${params}`)
+    fetch(`/api/todos?${params}`)
       .then((r) => r.json())
       .then((d) => setTodos((d.todos || []).filter((t: Todo) => t.status !== "done")));
   }, [tab]);
@@ -39,7 +37,7 @@ export default function TodosPage() {
   useEffect(() => { fetchTodos(); }, [fetchTodos]);
 
   async function updateStatus(id: string, status: string) {
-    await fetch(`${API}/api/todos/${id}`, {
+    await fetch(`/api/todos/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status }),

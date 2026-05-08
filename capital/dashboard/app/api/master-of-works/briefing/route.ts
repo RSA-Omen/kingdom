@@ -24,7 +24,7 @@ export async function GET() {
     );
     if (resourceMatch) {
       const resourceLines = resourceMatch[1].trim().split("\n");
-      resources = {};
+      resources = {} as Record<string, unknown>;
 
       for (const line of resourceLines) {
         const cpuMatch = line.match(/CPU: ([\d.]+)%/);

@@ -2,8 +2,6 @@
 "use client";
 import { useEffect, useState } from "react";
 
-const API = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:5001";
-
 interface KingdomError {
   id: string;
   village: string;
@@ -40,7 +38,7 @@ export default function ErrorsPage() {
   useEffect(() => {
     const params = new URLSearchParams({ status: "open", limit: "100" });
     if (tab === "Linked to To-Do") params.set("linked", "true");
-    fetch(`${API}/api/errors?${params}`)
+    fetch(`/api/errors?${params}`)
       .then((r) => r.json())
       .then((d) => setErrors(d.errors || []));
   }, [tab]);
@@ -53,7 +51,7 @@ export default function ErrorsPage() {
   async function createTodo(error: KingdomError) {
     const title = prompt(`To-Do title for: ${error.message}`);
     if (!title) return;
-    await fetch(`${API}/api/todos`, {
+    await fetch(`/api/todos`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ village: error.village, title, source: error.id }),
@@ -64,7 +62,7 @@ export default function ErrorsPage() {
   }
 
   async function resolve(id: string) {
-    await fetch(`${API}/api/errors/${id}`, {
+    await fetch(`/api/errors/${id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status: "resolved" }),
