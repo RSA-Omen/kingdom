@@ -26,7 +26,7 @@ Each gets a `council/<role>/` subfolder when its build begins, not before. Names
 - [x] **The Master of Works** — infrastructure; keeps the castle standing; disk, certs, containers, package updates
 - [x] **The Quartermaster** — provisions; watches RAM, CPU, disk, GPU memory; warns before the larder runs dry
 - [x] **The Master of Whisperers** — intelligence from beyond the borders; new AI models, new tools, what the wider world is doing
-- [x] **The Steward** — day-to-day operations of villages; how each is performing, who's been quiet, who's busy
+- [x] **The Steward** — day-to-day operations of villages; how each is performing, who's been quiet, who's busy. Now auto-fixes dependency vulns: detects → opens GitHub Issue in village repo → `npm audit fix` → build verify → PR → merge → Docker redeploy. Upstream blockers tracked separately; auto-resolves the moment the blocking package releases on npm.
 - [x] **The Captain of the Guard** — first responder to incidents; sounds the alarm, gathers facts, drafts the reply
 - [x] **The Master of Laws** — enforces the Gekko Standard; audits villages for compliance
 - [x] **The Lord Chamberlain** — relations with subjects (users); wellbeing, friction, complaints, abandoned flows
@@ -57,6 +57,7 @@ To be written into `docs/GEKKO_STANDARD.md`. Captured here from design discussio
 - [x] **Changelog** — patch-notes style per release; auto-drafted from git commits, edited before publishing
 - [ ] **Wiki** — village docs registered in Copilot Studio corpus *(no spec written yet)*
 - [x] **Telegram** — per-village notification level (errors only / all events / daily digest)
+- [x] **Issue Tracking (Standard v1.1)** — villages must register in `github-repos.json`, create standard labels (`agent-raised`, `steward`, `captain`, `master-of-laws`, `master-builder`, `critical`, `high`, `waiting-upstream`), and honour agent-raised issues within SLA (7 days critical, 30 days standard). All 5 current villages registered and labelled.
 
 ## Bridges to islands
 

@@ -99,12 +99,12 @@ def humanise_commit(msg: str) -> str:
 # Updated by /kingdom-checkpoint at the end of each work session.
 # One plain-English entry per completed feature. Replace with current week's work.
 RECENT_ADDITIONS = [
-    "Security page — dependency vulnerability audit across all npm projects, live on /security",
-    "The Steward extended — now audits npm dependencies daily, alerts on new critical CVEs",
-    "Hex stat row — Throne Room stats restored with a 6th Vulns card (red/amber/green by severity)",
-    "Schedules page — every agent cron job listed with run history; click any bar to see what happened",
-    "Run detail modal — plain-English explanation of each run's colour + full per-row breakdown",
-    "Dashboard reads from Steward DB — security page instant (no live npm audit on page load)",
+    "The Steward now self-heals — detects dependency vulnerabilities, opens a GitHub Issue in the affected village, runs the fix, verifies the build, merges a PR, and redeploys automatically",
+    "Upstream blocker tracking — when a fix requires waiting on an upstream release (e.g. Next.js 16.3.0), the Steward marks it, suppresses the noise, and auto-resolves the moment the package lands on npm",
+    "GitHub issue routing — any Kingdom agent can now open a GitHub Issue in the correct village repo via a shared helper; issues are deduplicated and carry standard labels",
+    "Gekko Standard v1.1 — Section 14 (Issue Tracking) formalises the feedback loop: villages register their repo, adopt standard labels, and are expected to action agent-raised issues within SLA",
+    "All 5 villages registered — Kingdom, Admin Center, Gekko Tracks, The Bureau, and Server Management now feed into the Kingdom dashboard's issue mirror",
+    "Real vulns resolved — Admin Center Backend (2 critical) and MCP Server (1 high) fixed, merged, and redeployed in this session with zero manual intervention",
 ]
 
 
