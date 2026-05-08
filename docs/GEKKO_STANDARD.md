@@ -1,7 +1,7 @@
 # The Gekko Standard — What Every Village Must Keep
 
-**Version:** 1.0  
-**Effective:** 2026-04-29  
+**Version:** 1.1  
+**Effective:** 2026-05-08  
 **Enforced by:** The Master of Laws
 
 This document is the contract between the Capital (Kingdom infrastructure) and every Village (app, service, system). Villages that meet the Standard are recognised as part of the Realm.
@@ -374,6 +374,9 @@ db/
 - [ ] Latest release has a CHANGELOG entry
 - [ ] Deployment artifact is tagged and traceable
 - [ ] No hard-coded secrets in code
+- [ ] Repo registered in `github-repos.json`
+- [ ] Standard labels created (`agent-raised`, `steward`, `captain`, `master-of-laws`, `master-builder`)
+- [ ] Agent-raised issues actioned within SLA (critical: 7 days, standard: 30 days)
 
 **Failure:** Villages that don't meet the Standard will be:
 1. Warned (14 days to fix)
@@ -389,10 +392,67 @@ db/
 3. **Wire the three reporting integrations** (usage, errors, logs)
 4. **Write a README.md** with setup, config, deploy steps
 5. **Register the repo** with The Master of Laws
-6. **Pass the compliance audit** (automated checks)
-7. **Announced to the kingdom** (Telegram, dashboard)
+6. **Register the repo** in `github-repos.json` so the Kingdom sync can mirror your issues
+7. **Create standard labels** in your repo (`agent-raised`, `steward`, `captain`, `master-of-laws`, `master-builder`)
+8. **Pass the compliance audit** (automated checks)
+9. **Announced to the kingdom** (Telegram, dashboard)
 
 The entire process should take <1 hour for a simple service.
+
+---
+
+## 14. Issue Tracking
+
+**Requirement:** Every village's GitHub repo must be registered with the Kingdom so agent-raised issues are visible on the Kingdom dashboard and actioned by the village.
+
+---
+
+### 14.1 Register with the Kingdom sync
+
+Add your repo to `admin-center/backend/github-repos.json`:
+
+```json
+{ "village": "your-village-slug", "owner": "RSA-Omen", "repo": "your-repo-name" }
+```
+
+Without this, the Kingdom's runner cannot visit your notice board. Your issues will not appear on the dashboard, and agents cannot route work to you.
+
+**This is a hard requirement for recognition as a village of the realm.**
+
+---
+
+### 14.2 Use standard labels
+
+All issues in village repos must use these labels so the Kingdom can filter and route correctly:
+
+| Label | Applied by | Meaning |
+|---|---|---|
+| `agent-raised` | All Kingdom agents | Machine-detected, not human-filed |
+| `steward` | The Steward | Dependency vulnerability |
+| `captain` | The Captain of the Guard | Unresolved incident or recurring error |
+| `master-of-laws` | The Master of Laws | Compliance failure |
+| `master-builder` | The Master Builder | Stale work, ignored issues |
+
+Create these labels in your repo during onboarding. The shared issue helper (`council/shared/issue.py`) applies them automatically.
+
+---
+
+### 14.3 Honour agent-raised issues
+
+When an agent opens an issue in your repo it is the Kingdom telling you something needs fixing. Villages are expected to:
+
+- **Action within 7 days** for `critical` severity issues
+- **Action within 30 days** for standard issues
+- **Close via PR** where possible — GitHub will auto-close the issue and the Kingdom sync will mark the todo done
+- **Comment with reason** if closing without a fix (e.g. false positive, won't fix)
+
+Ignored issues are monitored by The Master Builder. Issues older than their SLA with no activity are escalated to the king.
+
+---
+
+### 14.4 Never close agent issues silently
+
+Do not close an agent-raised issue without either a linked PR or a comment explaining why. Silent closes are treated as ignored by the Master Builder's stale-todo scan.
 
 ---
 
@@ -424,4 +484,5 @@ A: The king (you). Changes require explicit approval. But the Master of Laws enf
 ---
 
 **Version history:**
+- **1.1** (2026-05-08) — Added Section 14: Issue Tracking. Villages must register in `github-repos.json`, create standard labels, and honour agent-raised issues within SLA. Updated onboarding checklist and compliance audit accordingly.
 - **1.0** (2026-04-29) — Initial Standard. Covers: health, usage, errors, auth, logs, docs, repos, changelog, feedback, notifications, DB, deployment, audit.

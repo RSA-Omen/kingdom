@@ -27,6 +27,9 @@ import urllib.request
 from pathlib import Path
 from typing import Optional
 
+sys.path.insert(0, str(Path(__file__).parents[2]))
+from shared.issue import open_issue  # noqa: E402
+
 HOME = Path.home()
 KINGDOM_DIR = Path(os.environ.get("KINGDOM_DIR", HOME / "Kingdom"))
 HEALTH_DB = Path(os.environ.get("STEWARD_HEALTH_DB", HOME / ".steward-health.db"))
@@ -48,6 +51,14 @@ COMPONENTS = {
     "Admin Center Frontend": HOME / "admin-center/frontend",
     "Admin Center MCP Server": HOME / "admin-center/mcp-server",
     "Kingdom Dashboard": KINGDOM_DIR / "capital/dashboard",
+}
+
+# Maps component name → village slug (must match github-repos.json)
+COMPONENT_VILLAGE = {
+    "Admin Center Backend": "admin-center",
+    "Admin Center Frontend": "admin-center",
+    "Admin Center MCP Server": "admin-center",
+    "Kingdom Dashboard": "kingdom",
 }
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -491,6 +502,7 @@ def main():
     elif args.command == "deps":
         dep_checker = DependencyChecker(index)
         results = dep_checker.audit_all()
+        new_criticals = dep_checker.find_new_criticals(results)
         for d in results:
             if d.error:
                 print(f"⚠️  {d.component_name}: {d.error}")
@@ -504,6 +516,37 @@ def main():
                 if d.low: parts.append(f"{d.low} low")
                 icon = "🔴" if d.critical else "🟡"
                 print(f"{icon} {d.component_name}: {', '.join(parts)} ({d.total} total)")
+
+            # Open a GitHub Issue for new critical vulnerabilities
+            if d.component_name in new_criticals and not d.error:
+                village = COMPONENT_VILLAGE.get(d.component_name)
+                if village:
+                    parts = []
+                    if d.critical: parts.append(f"{d.critical} critical")
+                    if d.high: parts.append(f"{d.high} high")
+                    summary = ", ".join(parts)
+                    title = f"[Steward] Dependency vulnerabilities in {d.component_name} ({summary})"
+                    body = (
+                        f"## Dependency Audit Alert\n\n"
+                        f"**Component:** {d.component_name}\n"
+                        f"**Path:** `{d.component_path}`\n\n"
+                        f"| Severity | Count |\n"
+                        f"|---|---|\n"
+                        f"| Critical | {d.critical} |\n"
+                        f"| High | {d.high} |\n"
+                        f"| Moderate | {d.moderate} |\n"
+                        f"| Low | {d.low} |\n\n"
+                        f"**Detected by:** The Steward (daily dependency audit)\n\n"
+                        f"### To investigate\n"
+                        f"```bash\ncd {d.component_path}\nnpm audit\n```\n\n"
+                        f"### To fix (auto-fixable only)\n"
+                        f"```bash\nnpm audit fix\n```\n\n"
+                        f"> Review changes before committing. Run tests after fixing."
+                    )
+                    severity = "critical" if d.critical else "high"
+                    open_issue(village=village, title=title, body=body,
+                               source="steward", severity=severity)
+
         print(json.dumps([dataclasses.asdict(d) for d in results], indent=2))
 
     elif args.command == "status":
