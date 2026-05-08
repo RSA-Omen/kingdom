@@ -33,6 +33,7 @@ SOURCE_LABELS = {
 SEVERITY_LABELS = {
     "critical": ["critical"],
     "high": ["high"],
+    "waiting-upstream": ["waiting-upstream"],
 }
 
 

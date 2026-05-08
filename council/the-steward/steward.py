@@ -99,6 +99,24 @@ COMPONENT_FIX_CONFIG = {
     },
 }
 
+# Known upstream blockers — vulns we're waiting on a package release to fix.
+# When blocking_package reaches min_version on npm, the Steward auto-runs fix
+# on the affected components and closes the tracking issue.
+UPSTREAM_BLOCKERS = [
+    {
+        "id": "postcss-next-xss",
+        "description": "PostCSS XSS inside Next.js (GHSA-qx2v-qp2m-jg93)",
+        "blocking_package": "next",
+        "min_version": "16.3.0",
+        "affected_components": ["Admin Center Frontend", "Kingdom Dashboard"],
+        "advisory": "https://github.com/advisories/GHSA-qx2v-qp2m-jg93",
+        "github_issues": {
+            "admin-center": 3,
+            "kingdom": 27,
+        },
+    },
+]
+
 # ─────────────────────────────────────────────────────────────────────────────
 
 
@@ -511,6 +529,87 @@ def generate_report(index: StewardIndex) -> str:
 # ─────────────────────────────────────────────────────────────────────────────
 
 
+def _npm_latest_version(package: str) -> str | None:
+    """Return the current latest stable version of an npm package."""
+    try:
+        r = subprocess.run(
+            ["npm", "view", package, "version"],
+            capture_output=True, text=True, timeout=15,
+        )
+        return r.stdout.strip() if r.returncode == 0 else None
+    except Exception:
+        return None
+
+
+def _version_gte(v: str, minimum: str) -> bool:
+    """Return True if version v >= minimum (semver, numeric parts only)."""
+    def parts(s: str) -> tuple:
+        return tuple(int(x) for x in s.split("-")[0].split(".") if x.isdigit())
+    try:
+        return parts(v) >= parts(minimum)
+    except Exception:
+        return False
+
+
+def check_upstream_blockers() -> list[dict]:
+    """
+    Check each upstream blocker. If the blocking package has reached the
+    required version, trigger auto_fix_component for affected components
+    and close the tracking GitHub Issues.
+    Returns list of dicts: {blocker_id, status, version, fixed_components}
+    """
+    results = []
+    for blocker in UPSTREAM_BLOCKERS:
+        pkg = blocker["blocking_package"]
+        min_ver = blocker["min_version"]
+        latest = _npm_latest_version(pkg)
+
+        if not latest:
+            results.append({"id": blocker["id"], "status": "check_failed"})
+            continue
+
+        if not _version_gte(latest, min_ver):
+            print(f"[upstream] {blocker['id']}: {pkg}@{latest} < {min_ver} — still waiting",
+                  flush=True)
+            results.append({"id": blocker["id"], "status": "waiting",
+                            "version": latest, "needs": min_ver})
+            continue
+
+        print(f"[upstream] {blocker['id']}: {pkg}@{latest} >= {min_ver} — RELEASED, fixing now",
+              flush=True)
+
+        fixed = []
+        for component in blocker["affected_components"]:
+            result = auto_fix_component(component)
+            if result["status"] == "fixed":
+                fixed.append(component)
+
+        # Close tracking issues for components that were fixed
+        if fixed:
+            for village, issue_number in blocker.get("github_issues", {}).items():
+                cfg = COMPONENT_FIX_CONFIG.get(
+                    next((c for c in blocker["affected_components"]
+                          if COMPONENT_VILLAGE.get(c) == village), ""),
+                    {}
+                )
+                repo = cfg.get("github_repo")
+                if repo:
+                    subprocess.run(
+                        ["gh", "issue", "close", str(issue_number),
+                         "--repo", repo,
+                         "--comment",
+                         f"Resolved automatically by The Steward.\n"
+                         f"{pkg}@{latest} released — `npm audit fix` applied and deployed.\n"
+                         f"Fixed components: {', '.join(fixed)}"],
+                        capture_output=True, timeout=15,
+                    )
+
+        results.append({"id": blocker["id"], "status": "released",
+                        "version": latest, "fixed_components": fixed})
+
+    return results
+
+
 def _run(cmd: list, cwd: Path, timeout: int = 120) -> tuple[int, str, str]:
     r = subprocess.run(cmd, cwd=cwd, capture_output=True, text=True, timeout=timeout)
     return r.returncode, r.stdout, r.stderr
@@ -700,7 +799,12 @@ def main():
                 print(f"{icon} {d.component_name}: {', '.join(parts)} ({d.total} total)")
 
             # Open a GitHub Issue for new critical vulnerabilities
-            if d.component_name in new_criticals and not d.error:
+            # Skip components whose vulns are known upstream blockers
+            upstream_blocked = {
+                c for b in UPSTREAM_BLOCKERS for c in b["affected_components"]
+            }
+            if d.component_name in new_criticals and not d.error \
+                    and d.component_name not in upstream_blocked:
                 village = COMPONENT_VILLAGE.get(d.component_name)
                 if village:
                     parts = []
@@ -732,6 +836,16 @@ def main():
         print(json.dumps([dataclasses.asdict(d) for d in results], indent=2))
 
     elif args.command == "fix":
+        # Check upstream blockers first — auto-fix any that have been released
+        if not args.component:
+            upstream_results = check_upstream_blockers()
+            for r in upstream_results:
+                if r["status"] == "released":
+                    print(f"[upstream] {r['id']} resolved — fixed: {r.get('fixed_components', [])}")
+                elif r["status"] == "waiting":
+                    print(f"[upstream] {r['id']} still waiting on {r.get('needs')} "
+                          f"(latest: {r.get('version')})")
+
         targets = [args.component] if args.component else list(COMPONENT_FIX_CONFIG.keys())
         results = []
         for component in targets:
