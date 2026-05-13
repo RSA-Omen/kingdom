@@ -99,12 +99,11 @@ def humanise_commit(msg: str) -> str:
 # Updated by /kingdom-checkpoint at the end of each work session.
 # One plain-English entry per completed feature. Replace with current week's work.
 RECENT_ADDITIONS = [
-    "The Steward now self-heals — detects dependency vulnerabilities, opens a GitHub Issue in the affected village, runs the fix, verifies the build, merges a PR, and redeploys automatically",
-    "Upstream blocker tracking — when a fix requires waiting on an upstream release (e.g. Next.js 16.3.0), the Steward marks it, suppresses the noise, and auto-resolves the moment the package lands on npm",
-    "GitHub issue routing — any Kingdom agent can now open a GitHub Issue in the correct village repo via a shared helper; issues are deduplicated and carry standard labels",
-    "Gekko Standard v1.1 — Section 14 (Issue Tracking) formalises the feedback loop: villages register their repo, adopt standard labels, and are expected to action agent-raised issues within SLA",
-    "All 5 villages registered — Kingdom, Admin Center, Gekko Tracks, The Bureau, and Server Management now feed into the Kingdom dashboard's issue mirror",
-    "Real vulns resolved — Admin Center Backend (2 critical) and MCP Server (1 high) fixed, merged, and redeployed in this session with zero manual intervention",
+    "Bureau briefing now reads accurate security counts — fixed a double-count bug in the aggregator that was inflating totals (8H/6M/14T → 4H/6M/10T against the real cache)",
+    "All 10 outstanding dependency vulnerabilities cleared — overrode postcss in Admin Center frontend and overrode both postcss and @xmldom/xmldom in Gekko-Tracks mobile, keeping Next 16 and Expo 55 intact instead of taking npm's suggested downgrades",
+    "Forensic compromise check documented — every one of the 10 advisories was build-time-only with no path from user input to the vulnerable code; the realm was not compromised",
+    "Three PRs opened across the realm — Admin-Center #5 (aggregator), #6 (frontend deps), Gekko-Trails #12 (mobile deps)",
+    "Briefing now reads 0/0/0 — first time in weeks the security ledger shows clean across every village",
 ]
 
 

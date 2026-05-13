@@ -16,6 +16,7 @@ The interim backlog for the Kingdom and the broader cleanup of the realm. This f
 - [x] [P2] Write `docs/ROYAL_COURT.md` — canonical roster of agents, beats, schedules, escalation paths
 - [x] [P2] Create the GitHub repo `kingdom`, `git init` this directory, push first commit
 - [x] [P2] Build a kingdom-themed landing page for `capital/dashboard/app/page.tsx` (replacing the placeholder)
+- [x] [P1] **Security incident 2026-05-13** — Bureau briefing reported 8H/6M/14T; investigation found aggregator double-count bug in admin-center reports.ts + 10 real transitive vulns (4 xmldom highs + 6 postcss/expo moderates). Fixed aggregator (PR #5), overrode `postcss` and `@xmldom/xmldom` versions in both admin-center frontend (PR #6) and Gekko-Tracks mobile (Gekko-Trails PR #12). Forensic report at `docs/security/2026-05-13-postcss-xmldom-advisories.md` — no compromise (all vulns build-time-only, no path from user input to vulnerable code). Briefing now reads 0/0/0.
 
 ## The Royal Court — agents to build (one at a time, only when needed)
 
