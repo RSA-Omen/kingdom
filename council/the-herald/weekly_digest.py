@@ -105,6 +105,7 @@ RECENT_ADDITIONS = [
     "Gekko Standard v1.1 — Section 14 (Issue Tracking) formalises the feedback loop: villages register their repo, adopt standard labels, and are expected to action agent-raised issues within SLA",
     "All 5 villages registered — Kingdom, Admin Center, Gekko Tracks, The Bureau, and Server Management now feed into the Kingdom dashboard's issue mirror",
     "Real vulns resolved — Admin Center Backend (2 critical) and MCP Server (1 high) fixed, merged, and redeployed in this session with zero manual intervention",
+    "The Dreamboard — a new home in the Kingdom for ideas worth keeping warm; first entry is The Master of Letters, a future agent to triage the king's Outlook and Teams correspondence into ready-to-action work",
 ]
 
 
