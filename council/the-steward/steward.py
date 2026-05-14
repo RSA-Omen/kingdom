@@ -38,13 +38,15 @@ HEALTH_DB = Path(os.environ.get("STEWARD_HEALTH_DB", HOME / ".steward-health.db"
 TELEGRAM_ENV_FALLBACK = HOME / "telegram_notify_service" / ".env"
 
 # Known villages and their health endpoints
+# Kanban-AI and n8n removed 2026-05-14 — no longer in use.
+# Interceptor AU (L01) + ZA (L02) added 2026-05-14.
 VILLAGES = {
     "Gekko Tracks": "http://localhost:8002/health",
-    "Kanban-AI": "http://localhost:5002/health",
     "Admin Center API": "http://localhost:5001/health",
     "Open WebUI": "http://localhost:3005/health",
     "Local API": "http://localhost:8080/health",
-    "n8n": "http://localhost:5678/api/health",
+    "Interceptor AU": "http://localhost:8001/health",
+    "Interceptor ZA": "http://localhost:8004/health",
 }
 
 # npm projects to audit for dependency vulnerabilities
@@ -116,6 +118,10 @@ UPSTREAM_BLOCKERS = [
         },
     },
 ]
+
+# Action-only Telegram alerts (added 2026-05-14, see OPERATOR_DUTIES.md #1)
+FAILURE_THRESHOLD = 3  # consecutive failed /health checks before alerting
+FAILING_STATUSES = {"unhealthy", "unreachable"}
 
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -290,6 +296,61 @@ class StewardIndex:
                 last_check=last_checked, uptime_percent_24h=uptime,
                 last_incident=incident[0] if incident else None,
             )
+
+    # ── Incidents (action-only Telegram path) ──
+
+    def get_recent_snapshot_statuses(self, service_name: str, limit: int = 3) -> list[str]:
+        """Latest N snapshot statuses for a service, newest first."""
+        with sqlite3.connect(self.db_path) as conn:
+            rows = conn.execute('''
+                SELECT status FROM health_snapshots
+                WHERE service_name = ?
+                ORDER BY timestamp DESC
+                LIMIT ?
+            ''', (service_name, limit)).fetchall()
+        return [r[0] for r in rows]
+
+    def has_open_incident(self, service_name: str) -> bool:
+        with sqlite3.connect(self.db_path) as conn:
+            row = conn.execute('''
+                SELECT id FROM incidents
+                WHERE service_name = ? AND end_time IS NULL
+                LIMIT 1
+            ''', (service_name,)).fetchone()
+        return row is not None
+
+    def open_incident(self, service_name: str, start_time: str) -> int:
+        with sqlite3.connect(self.db_path) as conn:
+            cur = conn.execute('''
+                INSERT INTO incidents (service_name, start_time)
+                VALUES (?, ?)
+            ''', (service_name, start_time))
+            conn.commit()
+            return cur.lastrowid
+
+    def close_open_incident(self, service_name: str, end_time: str) -> Optional[int]:
+        """Close the open incident for a service. Returns mttr_seconds or None."""
+        with sqlite3.connect(self.db_path) as conn:
+            row = conn.execute('''
+                SELECT id, start_time FROM incidents
+                WHERE service_name = ? AND end_time IS NULL
+                ORDER BY start_time DESC LIMIT 1
+            ''', (service_name,)).fetchone()
+            if not row:
+                return None
+            incident_id, start_time = row
+            try:
+                start_dt = dt.datetime.fromisoformat(start_time)
+                end_dt = dt.datetime.fromisoformat(end_time)
+                mttr = int((end_dt - start_dt).total_seconds())
+            except Exception:
+                mttr = None
+            conn.execute('''
+                UPDATE incidents SET end_time = ?, mttr_seconds = ?
+                WHERE id = ?
+            ''', (end_time, mttr, incident_id))
+            conn.commit()
+            return mttr
 
     # ── Dependencies ──
 
@@ -752,6 +813,332 @@ def auto_fix_component(name: str) -> dict:
     return {"name": name, "status": "fixed", "pr_url": pr_url}
 
 
+# ─────────────────────────────────────────────────────────────────────────────
+# Action-only incident detection — added 2026-05-14, OPERATOR_DUTIES.md #1
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+def detect_incidents(snapshots: list[HealthSnapshot],
+                     index: StewardIndex) -> list[str]:
+    """
+    After each /health poll, decide whether to open or close an incident per
+    service. Returns Telegram-ready Markdown messages to send.
+
+    Open  → service has had FAILURE_THRESHOLD consecutive failing snapshots
+             and no incident is currently open
+    Close → service's latest snapshot is healthy and an incident is open
+    """
+    messages: list[str] = []
+
+    for snap in snapshots:
+        if snap.status == "healthy" and index.has_open_incident(snap.service_name):
+            mttr = index.close_open_incident(snap.service_name, snap.timestamp)
+            messages.append(_format_recovery(snap, mttr))
+            continue
+
+        if snap.status in FAILING_STATUSES:
+            recent = index.get_recent_snapshot_statuses(
+                snap.service_name, limit=FAILURE_THRESHOLD,
+            )
+            if (len(recent) >= FAILURE_THRESHOLD
+                    and all(s in FAILING_STATUSES for s in recent)
+                    and not index.has_open_incident(snap.service_name)):
+                index.open_incident(snap.service_name, snap.timestamp)
+                messages.append(_format_failure(snap))
+
+    return messages
+
+
+def _format_failure(snap: HealthSnapshot) -> str:
+    detail = (snap.details or "no response")[:120]
+    return (
+        f"🚨 *Village down — action required*\n\n"
+        f"*{snap.service_name}* has failed {FAILURE_THRESHOLD} consecutive /health checks.\n\n"
+        f"• URL: `{snap.service_url}`\n"
+        f"• Status: `{snap.status}`\n"
+        f"• Detected: {snap.timestamp[:16]} UTC\n"
+        f"• Last error: `{detail}`\n\n"
+        f"_Investigate the service._"
+    )
+
+
+def _format_recovery(snap: HealthSnapshot, mttr_seconds: Optional[int]) -> str:
+    if mttr_seconds is None:
+        duration = "unknown"
+    elif mttr_seconds < 60:
+        duration = f"{mttr_seconds}s"
+    elif mttr_seconds < 3600:
+        duration = f"{mttr_seconds // 60} min"
+    else:
+        h, m = mttr_seconds // 3600, (mttr_seconds % 3600) // 60
+        duration = f"{h}h {m}m"
+    return (
+        f"✅ *Village recovered*\n\n"
+        f"*{snap.service_name}* is healthy again.\n\n"
+        f"• Down for: {duration}\n"
+        f"• Restored: {snap.timestamp[:16]} UTC"
+    )
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Uptime board — generated on every check, served by ~/reports/ nginx on 8095
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+UPTIME_BOARD_CSS = """
+  :root {
+    --void: #050510; --void-2: #0a0a18;
+    --teal: #81e6d9; --teal-dim: #4fb8aa;
+    --amber: #f0c674; --red: #ff6b6b;
+    --text: #e6e6f0; --text-dim: #9090a8;
+    --border: rgba(129, 230, 217, 0.15);
+    --border-strong: rgba(129, 230, 217, 0.35);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: var(--void); color: var(--text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    line-height: 1.6; min-height: 100vh; }
+  body {
+    background-image:
+      radial-gradient(ellipse at top, rgba(129,230,217,0.04) 0%, transparent 60%),
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='60' height='52' viewBox='0 0 60 52'><polygon points='30,1 58,15 58,37 30,51 2,37 2,15' fill='none' stroke='%23192040' stroke-width='0.7'/></svg>");
+    background-repeat: no-repeat, repeat;
+    background-attachment: fixed;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 56px 28px 80px; }
+  header { border-bottom: 1px solid var(--border); padding-bottom: 24px; margin-bottom: 36px; }
+  .kicker { color: var(--teal); font-size: 0.78rem; letter-spacing: 0.18em;
+    text-transform: uppercase; margin-bottom: 12px; font-weight: 500; }
+  h1 { font-size: 2.2rem; font-weight: 600; margin: 0 0 10px;
+    letter-spacing: -0.02em; color: #fff; }
+  .lede { color: var(--text-dim); font-size: 1rem; margin: 0; }
+  .updated { color: var(--text-dim); font-size: 0.82rem; margin-top: 14px;
+    font-family: ui-monospace, monospace; }
+
+  h2 { font-size: 0.95rem; font-weight: 500;
+    margin: 40px 0 16px; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--teal);
+    border-bottom: 1px solid var(--border); padding-bottom: 10px; }
+
+  .villages { display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 14px; }
+  .village-card {
+    background: linear-gradient(180deg, var(--void-2) 0%, rgba(10,10,24,0.5) 100%);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+  .village-card.healthy { border-color: rgba(129,230,217,0.35); }
+  .village-card.failing { border-color: rgba(255,107,107,0.45);
+    background: linear-gradient(180deg, rgba(255,107,107,0.05) 0%, rgba(10,10,24,0.5) 100%); }
+  .village-name { font-size: 0.98rem; font-weight: 500; color: #fff;
+    margin-bottom: 14px; }
+  .village-uptime { font-size: 1.85rem; font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.1; margin-bottom: 4px; letter-spacing: -0.02em; }
+  .village-meta { color: var(--text-dim); font-size: 0.78rem; }
+  .village-status { color: var(--text-dim); font-size: 0.72rem;
+    margin-top: 10px; padding-top: 10px;
+    border-top: 1px solid rgba(129,230,217,0.08);
+    text-transform: uppercase; letter-spacing: 0.12em; }
+
+  .incidents { display: flex; flex-direction: column; gap: 10px; }
+  .incident { background: var(--void-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 0.93rem; }
+  .incident.open { border-color: rgba(255,107,107,0.5); }
+  .incident.closed { border-color: rgba(129,230,217,0.25); }
+  .incident strong { color: #fff; }
+  .incident-meta { color: var(--text-dim); font-size: 0.78rem;
+    font-family: ui-monospace, monospace; }
+
+  .no-incidents { color: var(--text-dim); font-style: italic;
+    background: var(--void-2); border: 1px solid var(--border);
+    border-radius: 8px; padding: 18px; }
+
+  footer { margin-top: 56px; padding-top: 24px;
+    border-top: 1px solid var(--border);
+    color: var(--text-dim); font-size: 0.82rem; }
+  a { color: var(--teal); text-decoration: none; }
+  a:hover { color: #fff; }
+"""
+
+
+def generate_uptime_json(index: StewardIndex) -> dict:
+    """Machine-readable village state for the dashboard at gvdi-30:3000/villages."""
+    services = index.get_all_services()
+    since_7d = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=7)).isoformat()
+    villages = []
+    with sqlite3.connect(index.db_path) as conn:
+        for svc in services:
+            row = conn.execute('''
+                SELECT
+                  SUM(CASE WHEN status='healthy' THEN 1 ELSE 0 END),
+                  COUNT(*)
+                FROM health_snapshots
+                WHERE service_name=? AND timestamp > ?
+            ''', (svc['name'], since_7d)).fetchone()
+            healthy_count = row[0] or 0
+            total_count = row[1] or 0
+            uptime_pct = (healthy_count / total_count * 100) if total_count else 100.0
+            villages.append({
+                "name": svc['name'],
+                "url": svc.get('url'),
+                "status": svc.get('status') or "unknown",
+                "last_checked": svc.get('last_checked'),
+                "uptime_7d_pct": round(uptime_pct, 2),
+                "sample_count": total_count,
+            })
+
+        open_incidents = [
+            {"service_name": r[0], "start_time": r[1]}
+            for r in conn.execute(
+                "SELECT service_name, start_time FROM incidents WHERE end_time IS NULL"
+            ).fetchall()
+        ]
+
+    healthy = sum(1 for v in villages if v["status"] == "healthy")
+    return {
+        "generated_at": dt.datetime.now(dt.timezone.utc).isoformat(),
+        "total": len(villages),
+        "healthy": healthy,
+        "unhealthy": len(villages) - healthy,
+        "villages": villages,
+        "open_incidents": open_incidents,
+    }
+
+
+def generate_uptime_html(index: StewardIndex) -> str:
+    """Generate the village uptime board HTML. Refreshes on every check."""
+    services = index.get_all_services()
+    since_7d = (dt.datetime.now(dt.timezone.utc) - dt.timedelta(days=7)).isoformat()
+
+    uptime_data = []
+    with sqlite3.connect(index.db_path) as conn:
+        for svc in services:
+            row = conn.execute('''
+                SELECT
+                  SUM(CASE WHEN status='healthy' THEN 1 ELSE 0 END),
+                  COUNT(*)
+                FROM health_snapshots
+                WHERE service_name=? AND timestamp > ?
+            ''', (svc['name'], since_7d)).fetchone()
+            healthy_count = row[0] or 0
+            total_count = row[1] or 0
+            uptime_pct = (healthy_count / total_count * 100) if total_count else 100.0
+            uptime_data.append({**svc, 'uptime_pct': uptime_pct, 'sample_count': total_count})
+
+        incidents = conn.execute('''
+            SELECT service_name, start_time, end_time, mttr_seconds
+            FROM incidents
+            WHERE start_time > ?
+            ORDER BY start_time DESC
+        ''', (since_7d,)).fetchall()
+
+    open_incidents = [i for i in incidents if i[2] is None]
+    closed_incidents = [i for i in incidents if i[2] is not None]
+
+    now_str = dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+
+    village_cards = []
+    for svc in uptime_data:
+        status = svc.get('status') or 'unknown'
+        is_healthy = status == 'healthy'
+        emoji = "✅" if is_healthy else "❌"
+        card_class = "healthy" if is_healthy else "failing"
+        pct = svc['uptime_pct']
+        pct_color = "var(--teal)" if pct >= 99 else "var(--amber)" if pct >= 95 else "var(--red)"
+        village_cards.append(
+            f'<div class="village-card {card_class}">'
+            f'<div class="village-name">{emoji} {svc["name"]}</div>'
+            f'<div class="village-uptime" style="color: {pct_color};">{pct:.1f}%</div>'
+            f'<div class="village-meta">7-day uptime · {svc["sample_count"]} samples</div>'
+            f'<div class="village-status">{status}</div>'
+            f'</div>'
+        )
+
+    incidents_blocks = []
+    if open_incidents:
+        items = []
+        for svc_name, start, _, _ in open_incidents:
+            try:
+                started = dt.datetime.fromisoformat(start)
+                mins = int((dt.datetime.now(dt.timezone.utc) - started).total_seconds() / 60)
+                dur = f"down {mins} min" if mins < 60 else f"down {mins // 60}h {mins % 60}m"
+            except Exception:
+                dur = "open"
+            items.append(
+                f'<div class="incident open"><strong>{svc_name}</strong> — {dur}<br>'
+                f'<span class="incident-meta">Started {start[:16]} UTC</span></div>'
+            )
+        incidents_blocks.append(
+            f'<h2>Open Incidents</h2><div class="incidents">{"".join(items)}</div>'
+        )
+
+    if closed_incidents:
+        items = []
+        for svc_name, start, end, mttr in closed_incidents:
+            if mttr and mttr < 60:
+                dur_str = f"{mttr}s"
+            elif mttr and mttr < 3600:
+                dur_str = f"{mttr // 60} min"
+            elif mttr:
+                dur_str = f"{mttr // 3600}h {(mttr % 3600) // 60}m"
+            else:
+                dur_str = "?"
+            items.append(
+                f'<div class="incident closed"><strong>{svc_name}</strong> — recovered after {dur_str}<br>'
+                f'<span class="incident-meta">{start[:16]} → {end[:16]} UTC</span></div>'
+            )
+        incidents_blocks.append(
+            f'<h2>Recovered This Week</h2><div class="incidents">{"".join(items)}</div>'
+        )
+
+    if not incidents_blocks:
+        incidents_section = (
+            '<h2>Incidents This Week</h2>'
+            '<div class="no-incidents">None — the realm was quiet.</div>'
+        )
+    else:
+        incidents_section = "".join(incidents_blocks)
+
+    return f'''<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="refresh" content="300">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Village Uptime — Kingdom</title>
+<style>{UPTIME_BOARD_CSS}</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="kicker">The Kingdom · Steward</div>
+    <h1>Village Uptime</h1>
+    <p class="lede">Every village's health, last 7 days. Page refreshes every 5 minutes; data regenerates inside the Steward's check loop.</p>
+    <p class="updated">Last regenerated: {now_str}</p>
+  </header>
+
+  <h2>Villages</h2>
+  <div class="villages">{"".join(village_cards)}</div>
+
+  {incidents_section}
+
+  <footer>
+    Steward · Kingdom ·
+    <a href="/Kingdom/operator-duties.html">Operator Duties</a> ·
+    <a href="/Kingdom/">Kingdom reports</a>
+  </footer>
+</div>
+</body>
+</html>
+'''
+
+
 def main():
     parser = argparse.ArgumentParser(description="The Steward")
     subparsers = parser.add_subparsers(dest="command")
@@ -779,6 +1166,33 @@ def main():
             icon = "✅" if snap.status == "healthy" else "❌"
             rt = f" ({snap.response_time_ms}ms)" if snap.response_time_ms else ""
             print(f"{icon} {snap.service_name}: {snap.status}{rt}")
+
+        # Action-only Telegram — open/close incidents on real transitions
+        alerts = detect_incidents(snapshots, index)
+        for msg in alerts:
+            try:
+                send_telegram(msg)
+                print(f"[alert] sent: {msg.splitlines()[0]}")
+            except Exception as e:
+                print(f"[alert] telegram failed: {e}", file=sys.stderr)
+
+        # Regenerate the uptime board (served at http://localhost:8095/Kingdom/uptime.html)
+        try:
+            html = generate_uptime_html(index)
+            board_path = HOME / "reports" / "Kingdom" / "uptime.html"
+            board_path.parent.mkdir(parents=True, exist_ok=True)
+            board_path.write_text(html)
+        except Exception as e:
+            print(f"[board] failed: {e}", file=sys.stderr)
+
+        # Write JSON sidecar — canonical machine-readable village state,
+        # consumed by the Kingdom dashboard at gvdi-30:3000/villages
+        try:
+            sidecar = generate_uptime_json(index)
+            json_path = HOME / ".steward-health.json"
+            json_path.write_text(json.dumps(sidecar, indent=2))
+        except Exception as e:
+            print(f"[sidecar] failed: {e}", file=sys.stderr)
 
     elif args.command == "deps":
         dep_checker = DependencyChecker(index)

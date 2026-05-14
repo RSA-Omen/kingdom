@@ -278,8 +278,10 @@ class MasterOfWorksChecker:
         services = {
             "Open WebUI": "http://localhost:3005/health",
             "Local API": "http://localhost:8080/health",
-            "Kanban AI": "http://localhost:5002/health",
             "Admin Center API": "http://localhost:5001/health",
+            "Gekko Tracks": "http://localhost:8002/health",
+            "Interceptor AU": "http://localhost:8001/health",
+            "Interceptor ZA": "http://localhost:8004/health",
         }
 
         for service_name, url in services.items():
@@ -356,7 +358,7 @@ def main():
         elif command == "brief":
             snapshot = index.get_latest_snapshot()
             statuses = [
-                status for service_name in ["Docker", "Open WebUI", "Local API", "Kanban AI", "Admin Center API"]
+                status for service_name in ["Docker", "Open WebUI", "Local API", "Admin Center API", "Gekko Tracks", "Interceptor AU", "Interceptor ZA"]
                 for status in index.get_service_history(service_name, hours=1)
             ][:1]  # Get most recent
             report = generate_report(snapshot, statuses)
