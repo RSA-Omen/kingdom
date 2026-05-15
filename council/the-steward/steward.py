@@ -37,9 +37,12 @@ KINGDOM_DIR = Path(os.environ.get("KINGDOM_DIR", HOME / "Kingdom"))
 HEALTH_DB = Path(os.environ.get("STEWARD_HEALTH_DB", HOME / ".steward-health.db"))
 TELEGRAM_ENV_FALLBACK = HOME / "telegram_notify_service" / ".env"
 
-# Known villages and their health endpoints
-# Kanban-AI and n8n removed 2026-05-14 — no longer in use.
-# Interceptor AU (L01) + ZA (L02) added 2026-05-14.
+# Known villages and their health endpoints — single source of truth.
+# Drives Telegram alerts, /villages page, "Systems" hexagon, Master of Works card.
+# Changelog:
+#   2026-05-14: removed Kanban-AI, n8n (retired).
+#   2026-05-14: added Interceptor AU (L01) + ZA (L02), split from single interceptor-app.
+#   2026-05-14: added PDF Removal API + Web. Local API kept pending review.
 VILLAGES = {
     "Gekko Tracks": "http://localhost:8002/health",
     "Admin Center API": "http://localhost:5001/health",
@@ -47,6 +50,8 @@ VILLAGES = {
     "Local API": "http://localhost:8080/health",
     "Interceptor AU": "http://localhost:8001/health",
     "Interceptor ZA": "http://localhost:8004/health",
+    "PDF Removal API": "http://localhost:5007/api/health",
+    "PDF Removal Web": "http://localhost:3007/",
 }
 
 # npm projects to audit for dependency vulnerabilities
