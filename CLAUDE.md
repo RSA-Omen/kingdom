@@ -168,6 +168,46 @@ This is the operator-facing flow, codified in `docs/GEKKO_STANDARD.md`. The shor
 
 ---
 
+## Registering a village for monitoring
+
+When a new app needs to appear in the Throne Room "Systems" hexagon, the `/villages` page, the Master of Works card, and the action-only Telegram alerts on failure — **there is exactly one place to edit:**
+
+`council/the-steward/steward.py` → the `VILLAGES` dict.
+
+```python
+VILLAGES = {
+    ...
+    "Your App Name": "http://localhost:PORT/health",
+}
+```
+
+Save the file. On the next 5-minute Steward `check` cycle (or by running `python3 -m council.the-steward check` from `~/Kingdom`), every downstream surface updates automatically:
+
+- Steward polls `/health` and records snapshots
+- `~/.steward-health.json` regenerates — this is the **canonical village state**
+- `/villages` page on the Kingdom dashboard picks it up (60s revalidate)
+- "Systems" hexagon picks it up (next page load; the Bureau briefing route overlays health from the sidecar)
+- Master of Works card picks it up (next briefing call; it reads the sidecar)
+- Telegram fires on the action-only threshold (3 consecutive failures)
+
+**Do not also edit:** the admin-center `apps` table, `bureau-systems.json`, or Master of Works's old `services` dict. Those are legacy or hold different data; they no longer drive the hexagon.
+
+### Health-endpoint conventions
+
+The Steward records a village as **healthy** when:
+- The endpoint returns 200 with JSON containing `{"status": "healthy"}` (or `"ok"`, `"up"`)
+- Or returns 200 with non-JSON body (e.g. an nginx index page) — JSON-parse failure falls back to healthy
+
+**unhealthy** on any 4xx/5xx, **unreachable** on connection failure or timeout.
+
+Prefer a real `/health` route returning JSON. Falling back to `/` on a static site is acceptable but worth a TODO to add a proper endpoint.
+
+### Adding new fields (future)
+
+Per-village metadata (priority, criticality, response runbook) belongs alongside the URL in `VILLAGES`. When that feature lands, the dict structure will widen from `name → url` to `name → {url, priority, runbook}`. Same single-edit guarantee.
+
+---
+
 ## Working with this codebase as Claude Code
 
 - **Don't refactor speculatively.** Build the next stone, not the next ten.
