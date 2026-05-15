@@ -64,6 +64,7 @@ To be written into `docs/GEKKO_STANDARD.md`. Captured here from design discussio
 - [ ] [P2] **Microsoft 365 / Power Automate bridge** — read-only view of Power Automate flows; surface their state in the Kingdom; do not bring flows in-house (company policy)
 - [ ] [P2] **Copilot Studio / ProntoBot bridge** — monitor the ProntoBot we built but cannot currently see; status, usage, errors
 - [ ] [P2] **Pronto Xi bridge** — already partly exists via pronto-api-deployment; promote to a formal bridge with monitoring
+- [x] [P2] **Bender** — Pronto Xi keystroke-driven bridge on gvdi-30 (workaround until API access lands). Service account logs into Pronto IAM (Keycloak SAML) autonomously, runs YAML recipes via headless Chromium, exposes a single-page operator UI at `gvdi-30:8092`. First recipe `export-suppliers` pulls the full AP supplier master (3,184 rows) via Pronto's native View Manager → Export data in ~30s.
 
 ## Migrations into the Kingdom
 
