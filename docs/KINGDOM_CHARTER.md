@@ -47,7 +47,7 @@ The Kingdom exists to solve both problems: multiply throughput across concurrent
 - Building automations for villages *(Knights design and validate; village teams build)*
 
 **Future scope (not current):**
-- Communication routes to external systems (Power Automate, Pronto Xi, Copilot Studio) for monitoring and intelligence — bridges will be built, not control panels
+- Communication routes to external systems (Power Automate, Copilot Studio) for monitoring and intelligence — bridges will be built, not control panels. *Pronto Xi is already reached through Bender (a village); see `docs/PRONTO_ACCESS.md`.*
 
 **Kingdom functions (background services, not Royal Court):**
 - Communications Agent — monitors Telegram and Outlook, learns the King's response patterns, delivers a daily digest of communications requiring action
@@ -160,7 +160,7 @@ Each recognised village maintains a **Yarl** — a standardised AI interface tha
 - The Master of Whisperers delivering weekly AI intelligence briefs
 - Communications Agent live — daily Outlook + Telegram digest
 - The Master of Coin reporting monthly spend
-- Communication routes to external systems (Power Automate, Pronto Xi, Copilot Studio) opened for monitoring
+- Communication routes to external systems (Power Automate, Copilot Studio) opened for monitoring. *Pronto Xi already addressed via Bender — see `docs/PRONTO_ACCESS.md`.*
 - **Measurable outcome:** Village compliance rate visible. No surprise infrastructure bills. No missed messages requiring action.
 
 ### Phase 4 — Standardisation *(Future)*
@@ -199,7 +199,7 @@ Knights design and validate. Village teams build. The Kingdom builds automations
 Once an automation is validated, handover to the village is complete. How teams learn to use it is the village's responsibility.
 
 **The Kingdom does not control external systems.**
-Communication routes to Power Automate, Pronto Xi, and Copilot Studio will be built for monitoring and intelligence — not for operating or controlling those systems.
+Communication routes to Power Automate and Copilot Studio will be built for monitoring and intelligence — not for operating or controlling those systems. Pronto Xi is a special case: it is reached through Bender (a village inside the realm) because Pronto has no production-grade API. Bender drives Pronto's UI on our behalf, but Pronto itself is not ours. See `docs/PRONTO_ACCESS.md`.
 
 **The Kingdom does not replace the King's judgement.**
 Every recommendation is a recommendation. Every escalation is a question, not a directive. The King decides. Always.
