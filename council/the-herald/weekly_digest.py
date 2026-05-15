@@ -99,11 +99,12 @@ def humanise_commit(msg: str) -> str:
 # Updated by /kingdom-checkpoint at the end of each work session.
 # One plain-English entry per completed feature. Replace with current week's work.
 RECENT_ADDITIONS = [
-    "Bender — a new Pronto Xi bridge that runs on gvdi-30: a service account logs into Pronto headlessly via SAML/Keycloak, walks the menus by keyboard and click, and runs pre-written recipes. First recipe pulls the entire AP supplier master (3,184 rows) in under a minute through Pronto's native export, with no human in the loop",
+    "Bender promoted to a recognised village of the Kingdom — Steward now polls its health every 5 minutes alongside Gekko Tracks, Admin Center, PDF Removal, Interceptor and Open WebUI; if Bender falls over three checks in a row the king gets a Telegram action ping",
+    "Bender's web UI restyled to the Kingdom's Void Teal palette — same near-black surfaces, teal accent, and isometric grid background as the dashboard, so the realm finally looks like one product",
+    "Bender's repo lives at RSA-Omen/bender with all eight standard Kingdom issue labels, registered in github-repos.json — the Kingdom can now mirror its issues onto the dashboard like every other village",
+    "Bender now auto-starts and auto-restarts via two new systemd units (kingdom-bender + kingdom-bender-chrome) — if the process crashes or the server reboots, Bender comes back without anyone touching a terminal",
+    "Bender — a Pronto Xi keystroke-driven village on gvdi-30: a service account logs into Pronto headlessly via SAML/Keycloak, walks the menus by keyboard and click, and runs pre-written recipes. First recipe pulls the entire AP supplier master (3,184 rows) in under a minute through Pronto's native export, with no human in the loop",
     "Recipe runtime — operators author Pronto flows once via Claude, save them as YAML, and replay forever with no AI in the production hot path. Dry-run mode validates each recipe against live state before it touches data",
-    "Bender UI at gvdi-30:8092 — a single-page operator console with one-click run, live step-by-step progress polling, and direct CSV download; the supplier dump is one button",
-    "Cross-platform from the start — Bender's launchers work identically on Linux, Windows, and macOS via auto-detected Chromium or Playwright's bundled build, so it can move from gvdi-30 to its own VM without code changes",
-    "Pronto IAM service account onboarded — gekko_flow is now exempt from MFA, mapped to the Gekko Testing company with read access, and drives the entire authenticated Pronto session unattended",
 ]
 
 

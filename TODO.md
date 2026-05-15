@@ -57,7 +57,8 @@ To be written into `docs/GEKKO_STANDARD.md`. Captured here from design discussio
 - [x] **Changelog** — patch-notes style per release; auto-drafted from git commits, edited before publishing
 - [ ] **Wiki** — village docs registered in Copilot Studio corpus *(no spec written yet)*
 - [x] **Telegram** — per-village notification level (errors only / all events / daily digest)
-- [x] **Issue Tracking (Standard v1.1)** — villages must register in `github-repos.json`, create standard labels (`agent-raised`, `steward`, `captain`, `master-of-laws`, `master-builder`, `critical`, `high`, `waiting-upstream`), and honour agent-raised issues within SLA (7 days critical, 30 days standard). All 5 current villages registered and labelled.
+- [x] **Issue Tracking (Standard v1.1)** — villages must register in `github-repos.json`, create standard labels (`agent-raised`, `steward`, `captain`, `master-of-laws`, `master-builder`, `critical`, `high`, `waiting-upstream`), and honour agent-raised issues within SLA (7 days critical, 30 days standard). All 6 current villages registered and labelled (kingdom, admin-center, gekko-tracks, the-bureau, server-management, bender).
+- [x] **Bender onboarded as a village** *(2026-05-15)* — Steward monitors `:8092/health`, repo `RSA-Omen/bender` created with standard labels, `kingdom-bender.service` + `kingdom-bender-chrome.service` user units installed and enabled (lazy cutover — systemd takes over on next reboot), and Bender's web UI restyled to Void Teal. Bender is a village, not a bridge — it enables a future Pronto Xi bridge.
 
 ## Bridges to islands
 
