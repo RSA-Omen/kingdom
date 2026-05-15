@@ -58,14 +58,13 @@ To be written into `docs/GEKKO_STANDARD.md`. Captured here from design discussio
 - [ ] **Wiki** — village docs registered in Copilot Studio corpus *(no spec written yet)*
 - [x] **Telegram** — per-village notification level (errors only / all events / daily digest)
 - [x] **Issue Tracking (Standard v1.1)** — villages must register in `github-repos.json`, create standard labels (`agent-raised`, `steward`, `captain`, `master-of-laws`, `master-builder`, `critical`, `high`, `waiting-upstream`), and honour agent-raised issues within SLA (7 days critical, 30 days standard). All 6 current villages registered and labelled (kingdom, admin-center, gekko-tracks, the-bureau, server-management, bender).
-- [x] **Bender onboarded as a village** *(2026-05-15)* — Steward monitors `:8092/health`, repo `RSA-Omen/bender` created with standard labels, `kingdom-bender.service` + `kingdom-bender-chrome.service` user units installed and enabled (lazy cutover — systemd takes over on next reboot), and Bender's web UI restyled to Void Teal. Bender is a village, not a bridge — it enables a future Pronto Xi bridge.
+- [x] **Bender onboarded as a village** *(2026-05-15)* — Steward monitors `:8092/health`, repo `RSA-Omen/bender` created with standard labels, `kingdom-bender.service` + `kingdom-bender-chrome.service` user units installed and enabled (lazy cutover — systemd takes over on next reboot), and Bender's web UI restyled to Void Teal. Bender is a village; it carries the realm's Pronto Xi traffic. See `docs/PRONTO_ACCESS.md`.
 
 ## Bridges to islands
 
 - [ ] [P2] **Microsoft 365 / Power Automate bridge** — read-only view of Power Automate flows; surface their state in the Kingdom; do not bring flows in-house (company policy)
 - [ ] [P2] **Copilot Studio / ProntoBot bridge** — monitor the ProntoBot we built but cannot currently see; status, usage, errors
-- [ ] [P2] **Pronto Xi bridge** — already partly exists via pronto-api-deployment; promote to a formal bridge with monitoring
-- [x] [P2] **Bender** — Pronto Xi keystroke-driven bridge on gvdi-30 (workaround until API access lands). Service account logs into Pronto IAM (Keycloak SAML) autonomously, runs YAML recipes via headless Chromium, exposes a single-page operator UI at `gvdi-30:8092`. First recipe `export-suppliers` pulls the full AP supplier master (3,184 rows) via Pronto's native View Manager → Export data in ~30s.
+- [x] [P2] **Pronto Xi access — handled by villages, not a bridge.** All new Pronto reads/writes go through **Bender** (keystroke automation village at `gvdi-30:8092`). The implied-link → NextCloud path stays with the **Interceptor** (separate, predates Bender, do not extend). No `bridges/pronto/` folder. Canonical policy: `docs/PRONTO_ACCESS.md`. The old archived `pronto-api-deployment` is superseded by Bender.
 
 ## Migrations into the Kingdom
 

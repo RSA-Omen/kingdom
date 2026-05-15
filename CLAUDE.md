@@ -32,11 +32,11 @@ The Kingdom does three things:
         │                     │                     │
    ┌────┴─────┐            Gekko Tracks      Power Automate
    The Castle             PDF Removal        Copilot Studio
-   ├ api/                 Interceptor        Microsoft 365
-   ├ dashboard/           Timesheet Bot      Pronto Xi
+   ├ api/                 Interceptor       (Microsoft 365)
+   ├ dashboard/           Timesheet Bot
    ├ mcp/                 n8n
    └ herald/              Open WebUI
-        │
+        │                  Bender ──── Pronto Xi
    The Royal Court
    (council/)
 ```
@@ -47,6 +47,8 @@ The Kingdom does three things:
 - **Villages** = each app (lives elsewhere on the server; the Kingdom only watches)
 - **Bridges** = integrations to systems we don't control
 - **Royal Court** = the agents — created one by one as they're needed
+
+**Note on Pronto Xi:** Pronto is reached *through Bender* — a village that drives Pronto's UI by keystroke. There is no `bridges/pronto/` folder. The Interceptor is a separate, narrow Pronto path (NextCloud routing for implied-link URLs) that predates Bender and is not replaced by it. See `docs/PRONTO_ACCESS.md` for the canonical policy.
 
 ---
 
@@ -61,6 +63,7 @@ Kingdom/
 │   ├── GEKKO_STANDARD.md     ← *(forthcoming)* the contract every village must meet
 │   ├── DESIGN_SYSTEM.md      ← visual and interaction language
 │   ├── ROYAL_COURT.md        ← *(forthcoming)* canonical agent roster
+│   ├── PRONTO_ACCESS.md      ← how the Kingdom talks to Pronto Xi (Bender vs. Interceptor)
 │   └── admin-center-audit.md ← inventory of what already exists in admin-center
 ├── capital/
 │   ├── api/                  ← *(forthcoming)* migrated from ~/admin-center/backend/
