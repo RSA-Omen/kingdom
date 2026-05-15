@@ -43,6 +43,7 @@ TELEGRAM_ENV_FALLBACK = HOME / "telegram_notify_service" / ".env"
 #   2026-05-14: removed Kanban-AI, n8n (retired).
 #   2026-05-14: added Interceptor AU (L01) + ZA (L02), split from single interceptor-app.
 #   2026-05-14: added PDF Removal API + Web. Local API kept pending review.
+#   2026-05-15: added Bender (Pronto Xi keystroke automation service).
 VILLAGES = {
     "Gekko Tracks": "http://localhost:8002/health",
     "Admin Center API": "http://localhost:5001/health",
@@ -52,6 +53,7 @@ VILLAGES = {
     "Interceptor ZA": "http://localhost:8004/health",
     "PDF Removal API": "http://localhost:5007/api/health",
     "PDF Removal Web": "http://localhost:3007/",
+    "Bender": "http://localhost:8092/health",
 }
 
 # npm projects to audit for dependency vulnerabilities
