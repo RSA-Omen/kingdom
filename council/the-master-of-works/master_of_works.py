@@ -275,21 +275,36 @@ class MasterOfWorksChecker:
         statuses.append(docker_status)
         self.index.record_service_status(docker_status)
 
-        services = {
-            "Open WebUI": "http://localhost:3005/health",
-            "Local API": "http://localhost:8080/health",
-            "Admin Center API": "http://localhost:5001/health",
-            "Gekko Tracks": "http://localhost:8002/health",
-            "Interceptor AU": "http://localhost:8001/health",
-            "Interceptor ZA": "http://localhost:8004/health",
-        }
+        # Villages: read from the Steward's canonical sidecar.
+        # The Steward is the single source of truth for village identity + state.
+        # This keeps the Master of Works card, the /villages page, and the
+        # "Systems" hexagon in sync. Master of Works still owns Docker + system
+        # resources, which the Steward does not track.
+        services = self._load_villages_from_steward()
 
-        for service_name, url in services.items():
-            status = self.check_service_health(url, service_name)
+        for service_name, village_status in services:
+            status = ServiceStatus(
+                timestamp=datetime.utcnow().isoformat(),
+                service_name=service_name,
+                is_healthy=village_status == "healthy",
+                status=village_status,
+                details="via the Steward",
+            )
             statuses.append(status)
             self.index.record_service_status(status)
 
         return snapshot, statuses
+
+    def _load_villages_from_steward(self) -> List[Tuple[str, str]]:
+        """Read the Steward's village state sidecar. Falls back to empty list."""
+        import json
+        from pathlib import Path
+        sidecar = Path.home() / ".steward-health.json"
+        try:
+            data = json.loads(sidecar.read_text())
+            return [(v["name"], v.get("status") or "unknown") for v in data.get("villages", [])]
+        except Exception:
+            return []
 
 
 def generate_report(snapshot: Optional[ResourceSnapshot], statuses: List[ServiceStatus]) -> str:
@@ -357,8 +372,10 @@ def main():
 
         elif command == "brief":
             snapshot = index.get_latest_snapshot()
+            # Brief reads the same village list as perform_checks — from the Steward.
+            village_names = ["Docker"] + [n for (n, _) in checker._load_villages_from_steward()]
             statuses = [
-                status for service_name in ["Docker", "Open WebUI", "Local API", "Admin Center API", "Gekko Tracks", "Interceptor AU", "Interceptor ZA"]
+                status for service_name in village_names
                 for status in index.get_service_history(service_name, hours=1)
             ][:1]  # Get most recent
             report = generate_report(snapshot, statuses)
