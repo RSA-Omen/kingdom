@@ -16,6 +16,8 @@ The interim backlog for the Kingdom and the broader cleanup of the realm. This f
 - [x] [P2] Write `docs/ROYAL_COURT.md` — canonical roster of agents, beats, schedules, escalation paths
 - [x] [P2] Create the GitHub repo `kingdom`, `git init` this directory, push first commit
 - [x] [P2] Build a kingdom-themed landing page for `capital/dashboard/app/page.tsx` (replacing the placeholder)
+- [x] [P2] Formalise the **Dispatches** channel — adopt `gvdi-30:8095/Kingdom/` as Claude's HTML publishing surface; Void Teal house style; two-audiences contract. Standard at `docs/COMMUNICATION.md`, infrastructure at `capital/dispatches/`.
+- [ ] [P3] Post-merge: stop the orphan `reports-server` container (from a removed AP-processing worktree) and bring it back up from `capital/dispatches/infrastructure/`. One-liner in `capital/dispatches/README.md`.
 
 ## The Royal Court — agents to build (one at a time, only when needed)
 

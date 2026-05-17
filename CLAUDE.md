@@ -4,6 +4,7 @@ This file gives Claude Code guidance for working on the Kingdom — Gekko's inte
 
 For the standards every village must meet, see `docs/GEKKO_STANDARD.md` (to be written).
 For the canonical agent roster, see `docs/ROYAL_COURT.md` (to be written).
+For how the Kingdom talks to the king (chat / dispatch / Telegram / Telegraph), see `docs/COMMUNICATION.md`.
 For deferred work, see `TODO.md`.
 
 ---
@@ -219,6 +220,19 @@ Per-village metadata (priority, criticality, response runbook) belongs alongside
 - **Update `TODO.md` whenever you defer something.** Don't leave deferred work in chat history.
 - **Update `docs/GEKKO_STANDARD.md` whenever a new village contract is decided.**
 - **The kingdom analogy is load-bearing.** Use it in code names, file structure, and conversation. It makes the system understandable to humans and gives every component a clear role.
+
+### Communicating with the king
+
+The Kingdom has four communication channels. Pick the right one:
+
+- **Chat** — quick answers, live work.
+- **Dispatch** — substantial proposals, audits, comparisons, anything worth re-reading. Authored as a self-contained HTML file in `capital/dispatches/published/`, published to `http://gvdi-30:8095/Kingdom/`. Always two audiences: *"In plain English"* first, then *"Technical detail"*.
+- **Telegram** — action-only. Used by Royal Court agents when the king must act. Sessions don't send Telegram directly.
+- **Telegraph** — daily paper, composed by The Herald. Sessions don't write Telegraph directly.
+
+Full standard: `docs/COMMUNICATION.md`. Dispatch authoring guide: `capital/dispatches/README.md`.
+
+**Heuristic:** if you're about to write more than ~30 lines of chat reply, or the king will want to re-read it tomorrow, write a dispatch instead.
 
 ---
 

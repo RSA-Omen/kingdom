@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kingdom Dispatches</title>
+<style>
+  :root {
+    --bg-page: #050510;
+    --bg-surface: rgba(8, 8, 32, 0.85);
+    --bg-surface-elevated: rgba(10, 10, 42, 0.92);
+    --bg-subtle: rgba(129, 230, 217, 0.05);
+    --text-primary: #ccfbf1;
+    --text-secondary: #5eada3;
+    --text-tertiary: #2d6b64;
+    --border: rgba(129, 230, 217, 0.15);
+    --border-strong: rgba(129, 230, 217, 0.28);
+    --accent: #81e6d9;
+    --accent-hover: #2dd4bf;
+    --accent-fg: #050510;
+    --radius-sm: 0.25rem;
+    --radius-lg: 0.5rem;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; font-family: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
+  body {
+    background-color: var(--bg-page);
+    color: var(--text-primary);
+    background-image: url("data:image/svg+xml,%3Csvg width='48' height='84' xmlns='http://www.w3.org/2000/svg'%3E%3Cline x1='-2' y1='0' x2='50' y2='0' stroke='rgba(129,230,217,0.12)' stroke-width='0.7'/%3E%3Cline x1='-2' y1='42' x2='50' y2='42' stroke='rgba(129,230,217,0.12)' stroke-width='0.7'/%3E%3Cline x1='0' y1='0' x2='24' y2='42' stroke='rgba(129,230,217,0.12)' stroke-width='0.7'/%3E%3Cline x1='48' y1='0' x2='24' y2='42' stroke='rgba(129,230,217,0.12)' stroke-width='0.7'/%3E%3Cline x1='24' y1='42' x2='48' y2='84' stroke='rgba(129,230,217,0.12)' stroke-width='0.7'/%3E%3Cline x1='24' y1='42' x2='0' y2='84' stroke='rgba(129,230,217,0.12)' stroke-width='0.7'/%3E%3C/svg%3E");
+    background-repeat: repeat; background-size: 48px 84px;
+    line-height: 1.6; min-height: 100vh;
+  }
+  ::selection { background: var(--accent); color: var(--accent-fg); }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: var(--radius-lg); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-tertiary); }
+
+  header {
+    max-width: 880px; margin: 0 auto;
+    padding: 80px 24px 32px;
+  }
+  .eyebrow {
+    color: var(--text-tertiary);
+    font-size: 12px; font-family: "JetBrains Mono", ui-monospace, monospace;
+    text-transform: uppercase; letter-spacing: 0.14em;
+    margin-bottom: 16px;
+  }
+  h1 {
+    font-size: 44px; font-weight: 600; line-height: 1.1;
+    margin: 0 0 16px;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
+  }
+  .crown { color: var(--accent); }
+  .lede {
+    font-size: 18px; color: var(--text-secondary);
+    margin: 0; max-width: 64ch;
+  }
+
+  main { max-width: 880px; margin: 0 auto; padding: 24px 24px 96px; }
+
+  .dispatch-list {
+    background: var(--bg-surface);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 1px 16px 0 rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+  }
+  .dispatch-row {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 24px;
+    padding: 20px 28px;
+    border-bottom: 1px solid var(--border);
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: background 0.15s;
+  }
+  .dispatch-row:last-child { border-bottom: none; }
+  .dispatch-row:hover { background: var(--bg-subtle); }
+
+  .dispatch-date {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 12px;
+    color: var(--text-tertiary);
+    padding-top: 4px;
+    white-space: nowrap;
+  }
+  .dispatch-meta { display: flex; flex-direction: column; gap: 4px; }
+  .dispatch-kind {
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.12em;
+    color: var(--accent);
+  }
+  .dispatch-title {
+    font-size: 17px; font-weight: 500;
+    color: var(--text-primary);
+    line-height: 1.35;
+  }
+  .dispatch-hook {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-top: 4px;
+  }
+
+  .empty {
+    padding: 80px 24px;
+    text-align: center;
+    color: var(--text-tertiary);
+  }
+
+  footer {
+    max-width: 880px; margin: 64px auto 0;
+    padding: 24px 24px 48px;
+    color: var(--text-tertiary);
+    font-size: 12px;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    border-top: 1px solid var(--border);
+  }
+  footer a { color: var(--text-secondary); text-decoration: none; border-bottom: 1px solid var(--border); }
+  footer a:hover { color: var(--accent); border-bottom-color: var(--accent); }
+  .channels {
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-top: 12px;
+  }
+  .channel-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 10px;
+    text-transform: uppercase; letter-spacing: 0.05em;
+  }
+  .channel-tag.active { color: var(--accent); border-color: var(--border-strong); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="eyebrow">The Kingdom · Capital · Dispatches</div>
+  <h1><span class="crown">⌂</span> Kingdom Dispatches</h1>
+  <p class="lede">Substantial communications from Claude to the king. Proposals, audits, comparisons — anything worth re-reading. Newest first.</p>
+</header>
+
+<main>
+  <div class="dispatch-list">
+
+    <a href="2026-05-17-kingdom-dispatches.html" class="dispatch-row">
+      <div class="dispatch-date">2026-05-17</div>
+      <div class="dispatch-meta">
+        <span class="dispatch-kind">Proposal</span>
+        <span class="dispatch-title">Kingdom Dispatches — a publishing channel for the king</span>
+        <span class="dispatch-hook">Formalising the HTML reports page as the Kingdom's third communication channel.</span>
+      </div>
+    </a>
+
+  </div>
+</main>
+
+<footer>
+  <div>Kingdom Dispatches is the non-action publishing channel. Other channels:</div>
+  <div class="channels">
+    <span class="channel-tag">Chat — live working session</span>
+    <span class="channel-tag active">Dispatch — substantial, re-readable</span>
+    <span class="channel-tag">Telegram — action-only</span>
+    <span class="channel-tag">Telegraph — daily paper</span>
+  </div>
+  <div style="margin-top: 16px;">
+    Authoring guide: <a href="https://github.com/RSA-Omen/Kingdom/tree/main/capital/dispatches">capital/dispatches/README.md</a> · Standard: <a href="https://github.com/RSA-Omen/Kingdom/blob/main/docs/COMMUNICATION.md">docs/COMMUNICATION.md</a>
+  </div>
+</footer>
+
+</body>
+</html>
