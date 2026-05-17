@@ -3,8 +3,9 @@
 **Version:** 1.0
 **Effective:** 2026-05-17
 **Owners:** the king (chooses), Claude sessions (uphold), the Royal Court (compose)
+**Applies to:** every Claude session in every village of the realm — not just the Kingdom repo. See Gekko Standard §15.
 
-This document defines how the Kingdom talks to the king. Where the **Gekko Standard** is the contract between villages and the Capital, this is the contract between the Kingdom and its operator.
+This document defines how the Kingdom talks to the king. Where the **Gekko Standard** is the contract between villages and the Capital, this is the contract between the Kingdom and its operator — and, via §15, a clause every village must mirror so its Claude sessions can discover it.
 
 Four channels, four jobs. Picking the wrong one is the most common communication failure — verbose chat, alert-fatigue Telegram, dispatches that should have been a one-line reply. This document is the disambiguator.
 

@@ -223,16 +223,37 @@ Per-village metadata (priority, criticality, response runbook) belongs alongside
 
 ### Communicating with the king
 
-The Kingdom has four communication channels. Pick the right one:
+**This applies realm-wide — to Claude sessions working inside any village's repo, not just the Kingdom repo.** Dispatches are part of the Gekko Standard (Section 15). Every village's `CLAUDE.md` should either mirror this section or reference it.
 
-- **Chat** — quick answers, live work.
-- **Dispatch** — substantial proposals, audits, comparisons, anything worth re-reading. Authored as a self-contained HTML file in `capital/dispatches/published/`, published to `http://gvdi-30:8095/Kingdom/`. Always two audiences: *"In plain English"* first, then *"Technical detail"*.
-- **Telegram** — action-only. Used by Royal Court agents when the king must act. Sessions don't send Telegram directly.
-- **Telegraph** — daily paper, composed by The Herald. Sessions don't write Telegraph directly.
+The realm has four communication channels. Pick the right one:
 
-Full standard: `docs/COMMUNICATION.md`. Dispatch authoring guide: `capital/dispatches/README.md`.
+| Channel | Job | Cadence | Who writes it |
+|---|---|---|---|
+| **Chat** | Quick answers, live work | Live | Any session |
+| **Dispatch** | Substantial proposal, audit, comparison — anything worth re-reading | On-demand | Any session, in any village |
+| **Telegram** | "King, you need to act" | Event-driven | Royal Court agents only |
+| **Telegraph** | Morning paper | Daily ~06:00 CAT | The Herald only |
 
-**Heuristic:** if you're about to write more than ~30 lines of chat reply, or the king will want to re-read it tomorrow, write a dispatch instead.
+**Heuristic:** if you're about to write more than ~30 lines of chat reply, or the king will want to re-read it tomorrow, write a **dispatch** instead.
+
+#### How to write a dispatch (works from any village)
+
+1. **Copy the template** — `cp ~/Kingdom/capital/dispatches/templates/dispatch.html.tpl ~/Kingdom/capital/dispatches/published/YYYY-MM-DD-<slug>.html`
+2. **Fill the placeholders** — `{{TITLE}}`, `{{DATE_HUMAN}}`, `{{DATE_ISO}}`, `{{DISPATCH_KIND}}` (e.g. *Proposal*, *Audit*, *Comparison*), `{{LEDE}}`, `{{PLAIN_BODY}}`, `{{TECHNICAL_BODY}}`, footer metadata
+3. **Two audiences, in order** — `audience-plain` block first ("In plain English"), `audience-technical` block second ("Technical detail"). This is the contract — never invert it, never drop the plain block
+4. **Update the index** — prepend a row to `~/Kingdom/capital/dispatches/published/index.html` (newest first)
+5. **Publish** — `bash ~/Kingdom/capital/dispatches/infrastructure/publish.sh` (rsyncs to `~/reports/Kingdom/`, viewable at `http://gvdi-30:8095/Kingdom/`)
+6. **Commit** — to the Kingdom repo, with a conventional-commits message; in village PRs, link the dispatch URL in the PR body
+
+If the village session can't reach the Kingdom path (sandbox, container without bind), hand the draft (with both audience blocks already written) back to a Kingdom session and ask it to publish. Don't lose the work to a chat reply.
+
+#### Things the dispatch must be
+
+- **Self-contained.** Single HTML file, inline CSS, no external scripts. Forwardable, saveable, archive-stable.
+- **Void Teal.** Use the template's tokens unchanged — same palette as the dashboard.
+- **Two audiences, plain first.** Mirrors the rule for PRs (see `feedback_pr_two_audiences` memory note).
+
+Full standard: `docs/COMMUNICATION.md` · Authoring guide: `capital/dispatches/README.md` · Village-CLAUDE.md snippet to copy-paste into your village: `docs/templates/village-claude-snippet.md`.
 
 ---
 
