@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kingdom Dispatches — Kingdom Dispatch</title>
+<style>
+  :root {
+    --bg-page: #050510;
+    --bg-surface: rgba(8, 8, 32, 0.85);
+    --bg-surface-elevated: rgba(10, 10, 42, 0.92);
+    --bg-subtle: rgba(129, 230, 217, 0.05);
+    --text-primary: #ccfbf1;
+    --text-secondary: #5eada3;
+    --text-tertiary: #2d6b64;
+    --border: rgba(129, 230, 217, 0.15);
+    --border-strong: rgba(129, 230, 217, 0.28);
+    --accent: #81e6d9;
+    --accent-hover: #2dd4bf;
+    --accent-fg: #050510;
+    --success: #34d399;
+    --warning: #fbbf24;
+    --danger: #f87171;
+    --info: #60a5fa;
+    --radius-sm: 0.25rem;
+    --radius-lg: 0.5rem;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; font-family: "Inter", ui-sans-serif, system-ui, -apple-system, sans-serif; -webkit-font-smoothing: antialiased; }
+  body {
+    background-color: var(--bg-page);
+    color: var(--text-primary);
+    background-image: url("data:image/svg+xml,%3Csvg width='48' height='84' xmlns='http://www.w3.org/2000/svg'%3E%3Cline x1='-2' y1='0' x2='50' y2='0' stroke='rgba(129,230,217,0.12)' stroke-width='0.7'/%3E%3Cline x1='-2' y1='42' x2='50' y2='42' stroke='rgba(129,230,217,0.12)' stroke-width='0.7'/%3E%3Cline x1='0' y1='0' x2='24' y2='42' stroke='rgba(129,230,217,0.12)' stroke-width='0.7'/%3E%3Cline x1='48' y1='0' x2='24' y2='42' stroke='rgba(129,230,217,0.12)' stroke-width='0.7'/%3E%3Cline x1='24' y1='42' x2='48' y2='84' stroke='rgba(129,230,217,0.12)' stroke-width='0.7'/%3E%3Cline x1='24' y1='42' x2='0' y2='84' stroke='rgba(129,230,217,0.12)' stroke-width='0.7'/%3E%3C/svg%3E");
+    background-repeat: repeat; background-size: 48px 84px;
+    line-height: 1.6; min-height: 100vh;
+  }
+  ::selection { background: var(--accent); color: var(--accent-fg); }
+  ::-webkit-scrollbar { width: 10px; height: 10px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: var(--radius-lg); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--text-tertiary); }
+  .topbar { position: sticky; top: 0; z-index: 10; background: rgba(5,5,16,0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--border); }
+  .topbar-inner { max-width: 760px; margin: 0 auto; padding: 14px 24px; display: flex; align-items: center; justify-content: space-between; font-size: 13px; }
+  .topbar a { color: var(--text-secondary); text-decoration: none; }
+  .topbar a:hover { color: var(--accent); }
+  .topbar .crown { color: var(--accent); font-weight: 600; letter-spacing: 0.02em; }
+  main { max-width: 760px; margin: 0 auto; padding: 48px 24px 96px; }
+  .meta-top { color: var(--text-tertiary); font-size: 12px; font-family: "JetBrains Mono", ui-monospace, monospace; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 12px; }
+  h1 { font-size: 36px; font-weight: 600; line-height: 1.2; margin: 0 0 16px; color: var(--text-primary); }
+  .lede { font-size: 18px; color: var(--text-secondary); margin: 0 0 32px; }
+  .audience { margin: 32px 0; padding: 28px; background: var(--bg-surface); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid var(--border); border-radius: var(--radius-lg); box-shadow: 0 1px 16px 0 rgba(0,0,0,0.3); }
+  .audience h2 { margin: 0 0 16px; font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent); font-family: "JetBrains Mono", ui-monospace, monospace; }
+  .audience-plain { border-left: 2px solid var(--accent); }
+  .audience-technical { border-left: 2px solid var(--text-tertiary); }
+  .audience-technical h2 { color: var(--text-secondary); }
+  h3 { font-size: 18px; font-weight: 600; margin: 28px 0 12px; color: var(--text-primary); }
+  p, ul, ol { margin: 0 0 16px; }
+  p { color: var(--text-primary); }
+  ul, ol { padding-left: 24px; }
+  li { margin: 6px 0; }
+  strong { color: var(--text-primary); font-weight: 600; }
+  em { color: var(--text-secondary); font-style: italic; }
+  a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--border); transition: border-color 0.15s, color 0.15s; }
+  a:hover { color: var(--accent-hover); border-bottom-color: var(--accent); }
+  code { font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 13px; background: var(--bg-subtle); border: 1px solid var(--border); color: var(--accent); padding: 1px 6px; border-radius: var(--radius-sm); }
+  pre { background: var(--bg-surface-elevated); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px 20px; overflow-x: auto; margin: 16px 0; }
+  pre code { background: transparent; border: none; padding: 0; color: var(--text-primary); font-size: 13px; }
+  table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 14px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--border); }
+  th { font-weight: 600; color: var(--text-secondary); font-size: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+  blockquote { margin: 20px 0; padding: 12px 20px; border-left: 2px solid var(--accent); background: var(--bg-subtle); color: var(--text-secondary); border-radius: 0 var(--radius-sm) var(--radius-sm) 0; }
+  .badge { display: inline-block; font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 11px; font-weight: 500; padding: 2px 8px; border-radius: var(--radius-sm); border: 1px solid var(--border); color: var(--text-secondary); margin-right: 6px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .badge-accent { color: var(--accent); border-color: var(--border-strong); }
+  hr { border: none; height: 1px; background: var(--border); margin: 48px 0; }
+  footer { margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--border); color: var(--text-tertiary); font-size: 12px; font-family: "JetBrains Mono", ui-monospace, monospace; }
+  footer dl { margin: 0; display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; }
+  footer dt { color: var(--text-tertiary); }
+  footer dd { margin: 0; color: var(--text-secondary); }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <a href="./" class="crown">⌂ Kingdom Dispatches</a>
+    <span>17 May 2026</span>
+  </div>
+</div>
+
+<main>
+  <div class="meta-top">Proposal · 2026-05-17</div>
+  <h1>Kingdom Dispatches — a publishing channel for the king</h1>
+  <p class="lede">A formal home for the HTML reports Claude has been mailing to the king. Adopted as the Kingdom's third communication standard, alongside Telegram and Telegraph.</p>
+
+  <section class="audience audience-plain">
+    <h2>In plain English</h2>
+
+    <p>You've been keeping a page at <a href="http://gvdi-30:8095/">gvdi-30:8095</a> where Claude drops HTML files when something needs more than a chat reply. We're making that official: it's now a recognised part of the Kingdom and one of four ways the Kingdom talks to you.</p>
+
+    <h3>What you get</h3>
+    <ul>
+      <li>A landing page at <strong>gvdi-30:8095/Kingdom/</strong> that lists every dispatch, newest first.</li>
+      <li>A house style — <strong>Void Teal</strong>, the same palette as the dashboard — so every dispatch <em>looks</em> like part of the Kingdom, not a random web page.</li>
+      <li>A rule: every dispatch leads with <strong>"In plain English"</strong> before <strong>"Technical detail"</strong>. You should never have to read jargon to find out what's happening.</li>
+      <li>Each dispatch is a single, self-contained HTML file. You can save one, forward it, or print it — it'll still look right.</li>
+    </ul>
+
+    <h3>Where it fits</h3>
+    <p>Four channels, four jobs:</p>
+    <table>
+      <thead><tr><th>Channel</th><th>Job</th><th>When</th></tr></thead>
+      <tbody>
+        <tr><td><span class="badge">Chat</span></td><td>Quick answers, working together</td><td>Live</td></tr>
+        <tr><td><span class="badge badge-accent">Dispatch</span></td><td>Substantial proposal, audit, comparison</td><td>On-demand</td></tr>
+        <tr><td><span class="badge">Telegram</span></td><td>"King, you need to act"</td><td>Event-driven</td></tr>
+        <tr><td><span class="badge">Telegraph</span></td><td>Morning paper</td><td>Daily</td></tr>
+      </tbody>
+    </table>
+
+    <p>Dispatches are the <strong>non-action</strong> publishing channel. They exist so a Claude session never has to choose between dumping 800 lines into the chat and losing the thinking entirely.</p>
+
+    <h3>What changes for you</h3>
+    <p>Almost nothing. When something deserves to be read more than once, I'll publish a dispatch and link you to it instead of typing a wall of text. Same URL you've been using. The first thing you'll notice is that the page now has an index and a house style.</p>
+  </section>
+
+  <section class="audience audience-technical">
+    <h2>Technical detail</h2>
+
+    <h3>Files added</h3>
+    <pre><code>capital/dispatches/
+├── README.md                                      ← system overview, authoring guide
+├── infrastructure/
+│   ├── docker-compose.yml                         ← reports-server (nginx:alpine, port 8095)
+│   ├── nginx.conf                                 ← server block: autoindex + /health
+│   └── publish.sh                                 ← sync published/ → ~/reports/Kingdom/
+├── templates/
+│   └── dispatch.html.tpl                          ← Void Teal dispatch skeleton
+└── published/
+    ├── index.html                                 ← landing page (reverse-chrono)
+    └── 2026-05-17-kingdom-dispatches.html         ← this dispatch
+
+docs/COMMUNICATION.md                              ← canonical communication standard
+CLAUDE.md                                          ← updated to reference dispatches
+TODO.md                                            ← marked dispatches channel complete</code></pre>
+
+    <h3>The orphan container situation</h3>
+    <p>A <code>reports-server</code> container is currently running on the host, but its compose project lives at <code>~/projects/AP-processing/.claude/worktrees/wizardly-lehmann-fefb2a/infrastructure/reports-server/</code> — a worktree that no longer exists. The container is functionally orphaned: still serving, but unmanaged.</p>
+    <p>This PR moves the canonical compose+config into <code>capital/dispatches/infrastructure/</code>. After merge, run:</p>
+    <pre><code>docker stop reports-server &amp;&amp; docker rm reports-server
+cd ~/Kingdom/capital/dispatches/infrastructure
+docker compose up -d
+curl http://localhost:8095/health  # → {"status":"healthy",...}</code></pre>
+    <p>Mount source (<code>~/reports/</code>) is unchanged, so no published content is lost.</p>
+
+    <h3>Design tokens</h3>
+    <p>The dispatch template inlines the same Void Teal token set as <code>capital/dashboard/app/globals.css</code>: <code>#050510</code> page, <code>#81e6d9</code> accent, <code>rgba(8,8,32,0.85)</code> surfaces with backdrop-blur, isometric triangle hex grid (48×84 SVG, 0.7px strokes at 12% alpha). Inter for body, JetBrains Mono for meta and code.</p>
+    <p>CSS is inlined per dispatch — no shared stylesheet. Tradeoff: ~6 KB duplicated per file, in exchange for self-contained artifacts that survive forwarding, archiving, and design-system drift.</p>
+
+    <h3>The two-audiences contract</h3>
+    <p>Every dispatch has exactly two <code>&lt;section class="audience"&gt;</code> blocks in this order: <code>audience-plain</code> first (teal left border, "In plain English" header), <code>audience-technical</code> second (tertiary left border, "Technical detail" header). This is enforced socially, not in code — but the template only has these two slots, so deviating takes deliberate work.</p>
+
+    <h3>Authoring flow</h3>
+    <ol>
+      <li>Copy <code>templates/dispatch.html.tpl</code> → <code>published/YYYY-MM-DD-&lt;slug&gt;.html</code>.</li>
+      <li>Replace <code>{{TITLE}}</code>, <code>{{DATE_HUMAN}}</code>, <code>{{DATE_ISO}}</code>, <code>{{DISPATCH_KIND}}</code>, <code>{{LEDE}}</code>, <code>{{PLAIN_BODY}}</code>, <code>{{TECHNICAL_BODY}}</code>, footer metadata.</li>
+      <li>Prepend a row to <code>published/index.html</code> &lt;table&gt; (newest first).</li>
+      <li>Run <code>infrastructure/publish.sh</code> — rsyncs <code>published/</code> → <code>~/reports/Kingdom/</code>.</li>
+      <li>Commit. Visible at <code>http://gvdi-30:8095/Kingdom/</code>.</li>
+    </ol>
+
+    <h3>Out of scope (deliberately)</h3>
+    <ul>
+      <li><strong>No build pipeline.</strong> Dispatches are hand-authored HTML. If volume grows, revisit — for now, a one-page template plus a sync script is enough.</li>
+      <li><strong>No auth.</strong> Reports server is intranet-only (gvdi-30). Same trust boundary as before.</li>
+      <li><strong>No RSS / email push.</strong> Dispatches are pull-based by design. Telegram and Telegraph handle push.</li>
+      <li><strong>No MCP tool for "publish a dispatch."</strong> Possible follow-up if Claude sessions want to publish without filesystem access, but day-one this lives entirely in source control.</li>
+    </ul>
+  </section>
+
+  <footer>
+    <dl>
+      <dt>Source</dt><dd>capital/dispatches/published/2026-05-17-kingdom-dispatches.html</dd>
+      <dt>Generated</dt><dd>2026-05-17</dd>
+      <dt>Author</dt><dd>Claude (Opus 4.7) — claude/suspicious-heyrovsky-2dba81</dd>
+    </dl>
+  </footer>
+</main>
+
+</body>
+</html>

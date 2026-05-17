@@ -16,6 +16,10 @@ The interim backlog for the Kingdom and the broader cleanup of the realm. This f
 - [x] [P2] Write `docs/ROYAL_COURT.md` — canonical roster of agents, beats, schedules, escalation paths
 - [x] [P2] Create the GitHub repo `kingdom`, `git init` this directory, push first commit
 - [x] [P2] Build a kingdom-themed landing page for `capital/dashboard/app/page.tsx` (replacing the placeholder)
+- [x] [P2] Formalise the **Dispatches** channel — adopt `gvdi-30:8095/Kingdom/` as Claude's HTML publishing surface; Void Teal house style; two-audiences contract. Standard at `docs/COMMUNICATION.md`, infrastructure at `capital/dispatches/`.
+- [x] [P2] Make dispatches a village contract — Gekko Standard §15 (v1.2), copy-pasteable snippet at `docs/templates/village-claude-snippet.md`, Kingdom CLAUDE.md "Communicating with the king" section now realm-wide.
+- [ ] [P2] **Fan out the snippet to each village's `CLAUDE.md`** — separate PR per repo. Status: `kingdom` ✓ (this PR); `gekko-tracks` (`~/Operations/Gekko-Tracks/CLAUDE.md`) needs section; `the-bureau` (`~/bureau/CLAUDE.md`) needs section; `server-management` (`~/Management/server-management/CLAUDE.md`) needs section; `admin-center` (no CLAUDE.md — create stub); `bender` (no CLAUDE.md — create stub).
+- [ ] [P3] Post-merge: stop the orphan `reports-server` container (from a removed AP-processing worktree) and bring it back up from `capital/dispatches/infrastructure/`. One-liner in `capital/dispatches/README.md`.
 
 ## The Royal Court — agents to build (one at a time, only when needed)
 

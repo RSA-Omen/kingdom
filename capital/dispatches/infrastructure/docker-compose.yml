@@ -1,0 +1,23 @@
+# Kingdom Dispatches — static HTML publishing surface
+#
+# Serves /home/lauchlandupreez/reports/ at http://localhost:8095/
+# The Kingdom's dispatches live at http://localhost:8095/Kingdom/
+# Other projects may publish to sibling subdirectories under ~/reports/.
+#
+# Bring up:    docker compose up -d
+# Health:      curl http://localhost:8095/health
+# Logs:        docker logs -f reports-server
+
+services:
+  reports-server:
+    image: nginx:alpine
+    container_name: reports-server
+    restart: unless-stopped
+    ports:
+      - "8095:80"
+    volumes:
+      - /home/lauchlandupreez/reports:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    labels:
+      org.kingdom.role: "dispatches-server"
+      org.kingdom.owner: "capital/dispatches"

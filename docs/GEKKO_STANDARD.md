@@ -1,7 +1,7 @@
 # The Gekko Standard — What Every Village Must Keep
 
-**Version:** 1.1  
-**Effective:** 2026-05-08  
+**Version:** 1.2  
+**Effective:** 2026-05-17  
 **Enforced by:** The Master of Laws
 
 This document is the contract between the Capital (Kingdom infrastructure) and every Village (app, service, system). Villages that meet the Standard are recognised as part of the Realm.
@@ -377,6 +377,7 @@ db/
 - [ ] Repo registered in `github-repos.json`
 - [ ] Standard labels created (`agent-raised`, `steward`, `captain`, `master-of-laws`, `master-builder`)
 - [ ] Agent-raised issues actioned within SLA (critical: 7 days, standard: 30 days)
+- [ ] `CLAUDE.md` (or `AGENTS.md` / `README.md`) references Kingdom Dispatches — either contains the literal phrase "Kingdom Dispatches" or links to `docs/COMMUNICATION.md`
 
 **Failure:** Villages that don't meet the Standard will be:
 1. Warned (14 days to fix)
@@ -394,8 +395,9 @@ db/
 5. **Register the repo** with The Master of Laws
 6. **Register the repo** in `github-repos.json` so the Kingdom sync can mirror your issues
 7. **Create standard labels** in your repo (`agent-raised`, `steward`, `captain`, `master-of-laws`, `master-builder`)
-8. **Pass the compliance audit** (automated checks)
-9. **Announced to the kingdom** (Telegram, dashboard)
+8. **Add the dispatches snippet** to `CLAUDE.md` (or create one if absent) — copy-paste from `~/Kingdom/docs/templates/village-claude-snippet.md`
+9. **Pass the compliance audit** (automated checks)
+10. **Announced to the kingdom** (Telegram, dashboard)
 
 The entire process should take <1 hour for a simple service.
 
@@ -456,6 +458,45 @@ Do not close an agent-raised issue without either a linked PR or a comment expla
 
 ---
 
+## 15. Communication
+
+**Requirement:** Every village's Claude sessions must know how to communicate substantial work back to the king through the realm's standard channels. There are four; pick the right one.
+
+| Channel | Job | Cadence | Who writes it |
+|---|---|---|---|
+| **Chat** | Quick answers, live work | Live | Any session |
+| **Dispatch** | Substantial proposal, audit, comparison — anything worth re-reading | On-demand | Any session, in any village |
+| **Telegram** | "King, you need to act" | Event-driven | Royal Court agents only |
+| **Telegraph** | Morning paper | Daily ~06:00 CAT | The Herald only |
+
+### 15.1 The dispatch channel (what villages most need to know)
+
+Substantial output — a cross-cutting proposal, an audit, a side-by-side comparison, a post-mortem — must not be dumped into a chat reply that the king has to re-read by scrolling. It goes as a **dispatch**: a self-contained HTML file published to `http://gvdi-30:8095/Kingdom/`.
+
+**Authoring is the same from any village.** Steps live in `~/Kingdom/CLAUDE.md` under "Communicating with the king" and in `~/Kingdom/capital/dispatches/README.md`. The short version:
+
+1. Copy `~/Kingdom/capital/dispatches/templates/dispatch.html.tpl` to `~/Kingdom/capital/dispatches/published/YYYY-MM-DD-<slug>.html`
+2. Fill placeholders; write **"In plain English"** before **"Technical detail"** (mandatory order)
+3. Prepend a row to `~/Kingdom/capital/dispatches/published/index.html`
+4. Run `~/Kingdom/capital/dispatches/infrastructure/publish.sh`
+5. Commit to the Kingdom repo. Link the dispatch URL in your village PR body.
+
+If your village session can't reach the Kingdom path (sandboxed, containerised, no bind), produce the draft with both audience blocks already written and hand it to a Kingdom session to publish. Do not silently lose the work.
+
+### 15.2 Village CLAUDE.md must reference this
+
+Each village's `CLAUDE.md` (or equivalent agent instructions file) must include a pointer to this standard so Claude sessions in that village discover the dispatch channel during normal operation. A copy-pasteable snippet is maintained at `~/Kingdom/docs/templates/village-claude-snippet.md`.
+
+**Compliance check:** the Master of Laws searches each village repo for either the literal phrase "Kingdom Dispatches" or a link to `docs/COMMUNICATION.md` in `CLAUDE.md`, `AGENTS.md`, or `README.md`. Villages without an instructions file must add one (a minimal three-paragraph stub is enough) — Claude sessions need a place to land.
+
+### 15.3 Telegram and Telegraph are not village responsibilities
+
+Villages do not write directly to Telegram or Telegraph. Telegram is reserved for Royal Court agents that observe the village (e.g. The Steward escalating a 3-consecutive-failure health check); Telegraph is composed by The Herald from Royal Court findings. A village wanting to surface something in the morning paper writes a dispatch — the Herald will pick it up if it deserves the front page.
+
+Full standard: `docs/COMMUNICATION.md`.
+
+---
+
 ## Enforcement
 
 The Master of Laws runs automated checks quarterly. Violations are reported to the king and the village owner. Persistent non-compliance results in archival (move to `~/Archive/`) until fixed.
@@ -484,5 +525,6 @@ A: The king (you). Changes require explicit approval. But the Master of Laws enf
 ---
 
 **Version history:**
+- **1.2** (2026-05-17) — Added Section 15: Communication. Codifies the four-channel model (Chat / Dispatch / Telegram / Telegraph) as a village contract. Villages' `CLAUDE.md` (or equivalent) must reference the dispatch channel so Claude sessions discover it. Dispatches must be self-contained HTML in Void Teal, with "In plain English" before "Technical detail".
 - **1.1** (2026-05-08) — Added Section 14: Issue Tracking. Villages must register in `github-repos.json`, create standard labels, and honour agent-raised issues within SLA. Updated onboarding checklist and compliance audit accordingly.
 - **1.0** (2026-04-29) — Initial Standard. Covers: health, usage, errors, auth, logs, docs, repos, changelog, feedback, notifications, DB, deployment, audit.
