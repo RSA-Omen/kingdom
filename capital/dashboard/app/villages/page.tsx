@@ -1,8 +1,12 @@
 import { readFile } from "fs/promises";
 import { homedir } from "os";
 import path from "path";
+import { headers } from "next/headers";
+import { ArrowUpRight } from "lucide-react";
 
-export const revalidate = 60;
+// Dynamic: each request reads the host header so village links resolve to
+// the same hostname the user is browsing from (localhost in dev, gvdi-30 in prod).
+export const dynamic = "force-dynamic";
 
 type Village = {
   name: string;
@@ -59,6 +63,27 @@ function statusEmoji(status: string): string {
   return "❌";
 }
 
+function webappUrl(healthUrl: string): string {
+  return healthUrl
+    .replace(/\/api\/health\/?$/, "")
+    .replace(/\/health\/?$/, "");
+}
+
+function rewriteHost(url: string, publicHost: string | null): string {
+  if (!publicHost) return url;
+  return url.replace(
+    /(\bhttps?:\/\/)(localhost|127\.0\.0\.1)(:\d+)?/g,
+    `$1${publicHost}$3`,
+  );
+}
+
+async function getPublicHost(): Promise<string | null> {
+  const h = await headers();
+  const host = h.get("host");
+  if (!host) return null;
+  return host.split(":")[0] ?? null;
+}
+
 function pctColor(pct: number, status: string): string {
   if (status !== "healthy") return "var(--color-danger, #ff6b6b)";
   if (pct >= 99) return "var(--color-success, #81e6d9)";
@@ -68,6 +93,7 @@ function pctColor(pct: number, status: string): string {
 
 export default async function VillagesPage() {
   const data = await loadSidecar();
+  const publicHost = await getPublicHost();
 
   if (!data) {
     return (
@@ -127,9 +153,7 @@ export default async function VillagesPage() {
             villages healthy
           </span>
           <span>Last refresh: {updatedStr}</span>
-          <span>
-            Auto-revalidates every 60s · refresh the page for the latest
-          </span>
+          <span>Refresh the page for the latest</span>
         </div>
       </header>
 
@@ -140,15 +164,13 @@ export default async function VillagesPage() {
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {data.villages.map((v) => {
             const healthy = v.status === "healthy";
-            return (
-              <div
-                key={v.name}
-                className={`rounded-lg border p-5 ${
-                  healthy
-                    ? "border-[var(--color-border)] bg-[var(--color-surface,#0a0a18)]"
-                    : "border-[var(--color-danger,#ff6b6b)]/40 bg-[var(--color-danger,#ff6b6b)]/5"
-                }`}
-              >
+            const cardClass = `relative block rounded-lg border p-5 transition-colors ${
+              healthy
+                ? "border-[var(--color-border)] bg-[var(--color-surface,#0a0a18)]"
+                : "border-[var(--color-danger,#ff6b6b)]/40 bg-[var(--color-danger,#ff6b6b)]/5"
+            }`;
+            const body = (
+              <>
                 <div className="text-base font-medium text-[var(--color-text-primary)] mb-3">
                   {statusEmoji(v.status)} {v.name}
                 </div>
@@ -166,9 +188,31 @@ export default async function VillagesPage() {
                 </div>
                 {v.url && (
                   <div className="mt-2 text-[11px] text-[var(--color-text-tertiary)] font-mono break-all">
-                    {v.url}
+                    {rewriteHost(v.url, publicHost)}
                   </div>
                 )}
+              </>
+            );
+            if (v.url) {
+              return (
+                <a
+                  key={v.name}
+                  href={rewriteHost(webappUrl(v.url), publicHost)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`group ${cardClass} hover:bg-[var(--color-surface-elev,rgba(255,255,255,0.04))] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500`}
+                >
+                  <ArrowUpRight
+                    className="absolute top-4 right-4 size-4 text-[var(--color-text-tertiary)] opacity-0 transition-opacity group-hover:opacity-100"
+                    aria-hidden
+                  />
+                  {body}
+                </a>
+              );
+            }
+            return (
+              <div key={v.name} className={cardClass}>
+                {body}
               </div>
             );
           })}
