@@ -1,6 +1,6 @@
 # The Gekko Standard — What Every Village Must Keep
 
-**Version:** 1.2  
+**Version:** 1.3  
 **Effective:** 2026-05-20  
 **Enforced by:** The Master of Laws
 
@@ -577,7 +577,30 @@ Every village's own CLAUDE.md should include a one-line pointer to this section 
 
 ---
 
-### 15.8 Audit
+### 15.8 Auto-managed wiki pages
+
+Some wiki pages are maintained automatically by Kingdom processes, not by humans editing markdown.
+
+| Page | Maintained by | Contents |
+|---|---|---|
+| `wiki/changelog.md` | `village-checkpoint` skill | One line per checkpoint — date, commit summary, short SHA |
+
+When a checkpoint runs in a village, it appends an entry to that village's `wiki/changelog.md` in the Scriptorium and commits the addition to the Kingdom repo. The file is created on first checkpoint if it does not already exist.
+
+Auto-managed pages may not be edited by hand. To correct a wrong entry, delete the line directly in the Kingdom repo with a commit explaining why.
+
+If a village's checkpoint runs but the Scriptorium folder for that village does not exist, the skill emits a warning (Standard §15 gap) and the checkpoint still proceeds — the village's own commit is the source of truth, the wiki update is a Kingdom-side mirror.
+
+### 15.9 Resolving a village's Scriptorium slug
+
+The `village-checkpoint` skill needs to know which Scriptorium folder belongs to the current village. It resolves the slug in this order:
+
+1. A `Scriptorium slug:` line in the village's CLAUDE.md Village Contract block (recommended — explicit and stable)
+2. Otherwise, an auto-slug derived from the village name (lowercase, hyphens, alphanumeric only)
+
+Add the `Scriptorium slug:` line to your village's CLAUDE.md Village Contract block to avoid auto-slug surprises.
+
+### 15.10 Audit
 
 A village fails this section if:
 
@@ -587,7 +610,7 @@ A village fails this section if:
 - Any mandatory wiki post for its type is missing
 - A required post exists but is empty (zero bytes or whitespace-only)
 
-Stubs are fine. Empty is not.
+Stubs are fine. Empty is not. `wiki/changelog.md` is exempt from the empty-file check on first creation — the header alone is sufficient until the first checkpoint lands.
 
 ---
 
@@ -619,6 +642,7 @@ A: The king (you). Changes require explicit approval. But the Master of Laws enf
 ---
 
 **Version history:**
+- **1.3** (2026-05-20) — Extended Section 15 with auto-managed wiki pages (§15.8): every village-checkpoint appends an entry to that village's `wiki/changelog.md` in the Scriptorium. Added §15.9 on slug resolution from CLAUDE.md. Renumbered audit subsection.
 - **1.2** (2026-05-20) — Added Section 15: Scriptorium Presence. Every village must have a folder under `Kingdom/scriptorium/content/villages/<slug>/` with `meta.yml` and the mandatory wiki posts for its type (app / process / service / bridge). Updated onboarding checklist and compliance audit accordingly.
 - **1.1** (2026-05-08) — Added Section 14: Issue Tracking. Villages must register in `github-repos.json`, create standard labels, and honour agent-raised issues within SLA. Updated onboarding checklist and compliance audit accordingly.
 - **1.0** (2026-04-29) — Initial Standard. Covers: health, usage, errors, auth, logs, docs, repos, changelog, feedback, notifications, DB, deployment, audit.
