@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Receipts — capture, OCR, match</title>
+<style>
+  body { margin: 0; background: #050510; color: #e2e8f0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 48px 24px 80px; }
+  h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; color: #f1f5f9; margin: 0 0 8px; }
+  .lead { color: #94a3b8; font-size: 15px; max-width: 65ch; margin: 0; }
+  .diagram { background: #0a0a18; border: 1px solid rgba(148,163,184,0.10); border-radius: 14px; padding: 32px 24px; margin: 32px 0; }
+  .diagram svg { display: block; width: 100%; height: auto; }
+  h2 { font-size: 14px; font-weight: 600; color: #f1f5f9; margin: 32px 0 10px; letter-spacing: -0.01em; }
+  ul { color: #cbd5e1; font-size: 14px; line-height: 1.7; padding-left: 22px; margin: 0; }
+  .footnote { color: #475569; font-size: 11px; margin-top: 32px; font-family: 'JetBrains Mono', ui-monospace, monospace; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Receipts — capture, OCR, match</h1>
+  <p class="lead">A receipt enters the system from a phone camera or a file upload, gets OCR'd, and is scored against unmatched transactions on the cardholder's card. High-score matches attach automatically; low-score matches surface for the cardholder to pick.</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 1000 520" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="rc-ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#81e6d9"/>
+        </marker>
+        <marker id="rc-ar-soft" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="rgba(148,163,184,0.6)"/>
+        </marker>
+      </defs>
+
+      <!-- Inputs (left column) -->
+      <text x="95" y="40" text-anchor="middle" fill="#475569" font-size="11" font-weight="600" letter-spacing="0.1em">CAPTURE</text>
+
+      <rect x="15" y="58" width="160" height="80" rx="10" fill="rgba(129,230,217,0.08)" stroke="#81e6d9" stroke-width="1.4"/>
+      <text x="95" y="82" text-anchor="middle" fill="#81e6d9" font-size="13" font-weight="700">📱 Phone camera</text>
+      <text x="95" y="100" text-anchor="middle" fill="#94a3b8" font-size="10">capture="environment"</text>
+      <text x="95" y="116" text-anchor="middle" fill="#94a3b8" font-size="10">back-facing, one tap</text>
+
+      <rect x="15" y="158" width="160" height="70" rx="10" fill="rgba(148,163,184,0.06)" stroke="rgba(148,163,184,0.35)" stroke-width="1.2"/>
+      <text x="95" y="184" text-anchor="middle" fill="#cbd5e1" font-size="13" font-weight="600">💻 File upload</text>
+      <text x="95" y="202" text-anchor="middle" fill="#94a3b8" font-size="10">JPEG · PNG · PDF · ≤10MB</text>
+
+      <!-- Pipeline arrow into processing -->
+      <path d="M175 100 L 235 100 L 235 250 L 290 250" stroke="#81e6d9" stroke-width="1.5" fill="none" marker-end="url(#rc-ar)"/>
+      <path d="M175 190 L 235 190" stroke="rgba(148,163,184,0.6)" stroke-width="1.3" fill="none" marker-end="url(#rc-ar-soft)"/>
+
+      <!-- Processing box -->
+      <text x="385" y="40" text-anchor="middle" fill="#475569" font-size="11" font-weight="600" letter-spacing="0.1em">PIPELINE</text>
+
+      <rect x="295" y="60" width="180" height="220" rx="10" fill="rgba(255,255,255,0.02)" stroke="rgba(148,163,184,0.18)" stroke-width="1"/>
+
+      <rect x="310" y="78" width="150" height="30" rx="5" fill="rgba(148,163,184,0.06)" stroke="rgba(148,163,184,0.25)" stroke-width="0.8"/>
+      <text x="385" y="98" text-anchor="middle" fill="#cbd5e1" font-size="11" font-weight="600">1 · Hash + dedup</text>
+
+      <rect x="310" y="116" width="150" height="30" rx="5" fill="rgba(148,163,184,0.06)" stroke="rgba(148,163,184,0.25)" stroke-width="0.8"/>
+      <text x="385" y="136" text-anchor="middle" fill="#cbd5e1" font-size="11" font-weight="600">2 · Save file_path</text>
+
+      <rect x="310" y="154" width="150" height="30" rx="5" fill="rgba(129,230,217,0.06)" stroke="rgba(129,230,217,0.3)" stroke-width="0.8"/>
+      <text x="385" y="174" text-anchor="middle" fill="#81e6d9" font-size="11" font-weight="600">3 · OCR (pytesseract)</text>
+
+      <rect x="310" y="192" width="150" height="30" rx="5" fill="rgba(129,230,217,0.06)" stroke="rgba(129,230,217,0.3)" stroke-width="0.8"/>
+      <text x="385" y="206" text-anchor="middle" fill="#81e6d9" font-size="11" font-weight="600">4 · Parse hints</text>
+      <text x="385" y="218" text-anchor="middle" fill="#94a3b8" font-size="9">amounts · dates · merchant</text>
+
+      <rect x="310" y="232" width="150" height="30" rx="5" fill="rgba(129,230,217,0.06)" stroke="rgba(129,230,217,0.3)" stroke-width="0.8"/>
+      <text x="385" y="252" text-anchor="middle" fill="#81e6d9" font-size="11" font-weight="600">5 · Score vs transactions</text>
+
+      <!-- Pipeline → status fork -->
+      <path d="M475 170 L 535 170" stroke="#81e6d9" stroke-width="1.5" fill="none" marker-end="url(#rc-ar)"/>
+
+      <!-- Status outcomes -->
+      <text x="650" y="40" text-anchor="middle" fill="#475569" font-size="11" font-weight="600" letter-spacing="0.1em">STATUS</text>
+
+      <rect x="545" y="64" width="210" height="56" rx="8" fill="rgba(129,230,217,0.10)" stroke="#81e6d9" stroke-width="1.4"/>
+      <text x="650" y="86" text-anchor="middle" fill="#81e6d9" font-size="12" font-weight="700">matched · auto-attached</text>
+      <text x="650" y="104" text-anchor="middle" fill="#94a3b8" font-size="10">high score · cardholder confirms</text>
+
+      <rect x="545" y="132" width="210" height="56" rx="8" fill="rgba(251,191,36,0.08)" stroke="rgba(251,191,36,0.55)" stroke-width="1.3"/>
+      <text x="650" y="154" text-anchor="middle" fill="#fbbf24" font-size="12" font-weight="700">manual_review</text>
+      <text x="650" y="172" text-anchor="middle" fill="#94a3b8" font-size="10">low score · cardholder picks</text>
+
+      <rect x="545" y="200" width="210" height="46" rx="8" fill="rgba(148,163,184,0.06)" stroke="rgba(148,163,184,0.3)" stroke-width="1" stroke-dasharray="3 2"/>
+      <text x="650" y="220" text-anchor="middle" fill="#cbd5e1" font-size="12" font-weight="600">unassigned · processing</text>
+      <text x="650" y="234" text-anchor="middle" fill="#94a3b8" font-size="10">in-flight states</text>
+
+      <rect x="545" y="258" width="210" height="36" rx="8" fill="rgba(248,113,113,0.06)" stroke="rgba(248,113,113,0.35)" stroke-width="1"/>
+      <text x="650" y="280" text-anchor="middle" fill="#f87171" font-size="11" font-weight="600">error</text>
+
+      <!-- Attach to transaction -->
+      <text x="875" y="40" text-anchor="middle" fill="#475569" font-size="11" font-weight="600" letter-spacing="0.1em">RESULT</text>
+
+      <rect x="785" y="80" width="180" height="180" rx="10" fill="rgba(255,255,255,0.02)" stroke="rgba(129,230,217,0.4)" stroke-width="1.3"/>
+      <text x="875" y="104" text-anchor="middle" fill="#81e6d9" font-size="13" font-weight="700">Transaction</text>
+      <text x="875" y="122" text-anchor="middle" fill="#94a3b8" font-size="10">Format 1 row</text>
+
+      <rect x="800" y="138" width="150" height="44" rx="5" fill="rgba(129,230,217,0.06)" stroke="rgba(129,230,217,0.3)" stroke-width="0.8"/>
+      <text x="875" y="156" text-anchor="middle" fill="#cbd5e1" font-size="10">UBER * EATS</text>
+      <text x="875" y="170" text-anchor="middle" fill="#81e6d9" font-size="10" font-weight="600">R 285.00 · 05-08</text>
+
+      <rect x="800" y="194" width="150" height="48" rx="5" fill="rgba(196,181,253,0.06)" stroke="rgba(196,181,253,0.4)" stroke-width="1"/>
+      <text x="875" y="212" text-anchor="middle" fill="#c4b5fd" font-size="10" font-weight="700">📎 receipt</text>
+      <text x="875" y="226" text-anchor="middle" fill="#94a3b8" font-size="9">attached</text>
+      <text x="875" y="236" text-anchor="middle" fill="#94a3b8" font-size="9">match score 0.94</text>
+
+      <!-- Status → attach arrow -->
+      <path d="M755 92 L 785 130" stroke="#81e6d9" stroke-width="1.5" fill="none" marker-end="url(#rc-ar)"/>
+      <path d="M755 160 L 785 200" stroke="rgba(251,191,36,0.7)" stroke-width="1.3" fill="none" stroke-dasharray="3 3" marker-end="url(#rc-ar-soft)"/>
+
+      <!-- Reassignment band (bottom) -->
+      <text x="500" y="340" text-anchor="middle" fill="#475569" font-size="10" font-weight="600" letter-spacing="0.16em">REASSIGNMENT &amp; LINE-MATCHING</text>
+
+      <rect x="15" y="360" width="465" height="120" rx="10" fill="rgba(255,255,255,0.02)" stroke="rgba(148,163,184,0.15)" stroke-width="1"/>
+      <text x="35" y="384" fill="#cbd5e1" font-size="12" font-weight="600">Receipt reassignment</text>
+      <text x="35" y="404" fill="#94a3b8" font-size="11">A receipt can be moved between cardholders if a card was used for someone</text>
+      <text x="35" y="418" fill="#94a3b8" font-size="11">else's purchase. The original cardholder is recorded; the new one inherits</text>
+      <text x="35" y="432" fill="#94a3b8" font-size="11">the receipt and its match. Used by Admin to deal with shared-card cases.</text>
+      <text x="35" y="458" fill="#64748b" font-size="11" font-style="italic" font-family="'JetBrains Mono', ui-monospace, monospace">reassigned_cardholder_id · Receipt model</text>
+
+      <rect x="500" y="360" width="465" height="120" rx="10" fill="rgba(255,255,255,0.02)" stroke="rgba(148,163,184,0.15)" stroke-width="1"/>
+      <text x="520" y="384" fill="#cbd5e1" font-size="12" font-weight="600">Line-level matching</text>
+      <text x="520" y="404" fill="#94a3b8" font-size="11">For itemised receipts, each line is parsed and scored against any classified</text>
+      <text x="520" y="418" fill="#94a3b8" font-size="11">transactions on the cardholder's card — extra evidence beyond the header</text>
+      <text x="520" y="432" fill="#94a3b8" font-size="11">amount-date-merchant match. Strengthens borderline cases.</text>
+      <text x="520" y="458" fill="#64748b" font-size="11" font-style="italic" font-family="'JetBrains Mono', ui-monospace, monospace">match_all_receipt_lines · receipt_matching.py</text>
+    </svg>
+  </div>
+
+  <h2>Notes</h2>
+  <ul>
+    <li><strong>Camera capture is the primary path.</strong> The phone form-factor is the right place to deal with paper receipts because that's where they physically are.</li>
+    <li><strong>Hash + dedup is the first step.</strong> Re-uploading the same receipt does not create a duplicate or re-run OCR.</li>
+    <li><strong>The matcher refuses to guess.</strong> Low-confidence matches go to <code>manual_review</code> rather than auto-attaching to the wrong transaction.</li>
+    <li><strong>Reassignment is supported as a first-class workflow.</strong> Shared-card cases happen and the system makes them tractable.</li>
+    <li><strong>Line-level matching is opt-in evidence.</strong> Not required for a match, but used to strengthen borderline header-level scores.</li>
+  </ul>
+
+  <p class="footnote">demo · 2026-05-20 · /villages/gekko-tracks</p>
+</div>
+</body>
+</html>
