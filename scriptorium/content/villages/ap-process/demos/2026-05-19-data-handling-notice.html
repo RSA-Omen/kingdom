@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AP Processing — Data Handling Notice (Claude / Anthropic)</title>
+<style>
+  :root {
+    --ink: #1c1f24;
+    --muted: #5a6470;
+    --rule: #d8dde4;
+    --bg: #f7f8fa;
+    --card: #ffffff;
+    --accent: #2b6cb0;
+    --soft: #eef2f7;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--ink);
+    line-height: 1.55;
+  }
+  .wrap { max-width: 820px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+  .crumbs { font-size: 0.85rem; color: var(--muted); margin-bottom: 1.5rem; }
+  .crumbs a { color: var(--accent); text-decoration: none; }
+  .crumbs a:hover { text-decoration: underline; }
+  .doc {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 10px;
+    padding: 2.5rem 2.75rem;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+  }
+  .doc-header {
+    border-bottom: 1px solid var(--rule);
+    padding-bottom: 1.25rem;
+    margin-bottom: 2rem;
+  }
+  .doc-header h1 {
+    margin: 0 0 0.25rem;
+    font-size: 1.05rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .doc-header .subject {
+    margin: 0.75rem 0 0;
+    font-size: 1.45rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: var(--ink);
+  }
+  .meta {
+    margin: 1.25rem 0 0;
+    font-size: 0.9rem;
+    color: var(--muted);
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    column-gap: 1rem;
+    row-gap: 0.25rem;
+  }
+  .meta dt { font-weight: 600; color: var(--ink); }
+  .meta dd { margin: 0; }
+  h2 {
+    font-size: 1.1rem;
+    margin: 2rem 0 0.75rem;
+    color: var(--ink);
+    letter-spacing: -0.005em;
+  }
+  h2::before {
+    content: attr(data-num) ".";
+    color: var(--muted);
+    margin-right: 0.5rem;
+    font-weight: 600;
+  }
+  p { margin: 0 0 1rem; }
+  ul, ol { padding-left: 1.25rem; margin: 0 0 1rem; }
+  li { margin-bottom: 0.4rem; }
+  strong { color: var(--ink); }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0.75rem 0 1rem;
+    font-size: 0.93rem;
+  }
+  th, td {
+    text-align: left;
+    padding: 0.6rem 0.75rem;
+    border-bottom: 1px solid var(--rule);
+    vertical-align: top;
+  }
+  th {
+    background: var(--soft);
+    font-weight: 600;
+    color: var(--ink);
+  }
+  tr:last-child td { border-bottom: none; }
+  .callout {
+    background: var(--soft);
+    border-left: 3px solid var(--accent);
+    padding: 0.85rem 1rem;
+    border-radius: 0 6px 6px 0;
+    margin: 1rem 0 1.5rem;
+    font-size: 0.95rem;
+  }
+  .sig {
+    margin-top: 2.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--rule);
+    font-size: 0.95rem;
+  }
+  .sig .name { font-weight: 600; }
+  .sig .role { color: var(--muted); }
+  @media print {
+    body { background: white; }
+    .wrap { padding: 0; }
+    .crumbs { display: none; }
+    .doc { border: none; box-shadow: none; padding: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="crumbs">
+    <a href="/">Reports</a> &nbsp;/&nbsp; AP Processing &nbsp;/&nbsp; Data Handling Notice
+  </div>
+
+  <article class="doc">
+
+    <header class="doc-header">
+      <h1>Memorandum</h1>
+      <p class="subject">Data Handling Assessment — Use of Claude (Anthropic) for AP Invoice Processing</p>
+      <dl class="meta">
+        <dt>To</dt><dd>Barry &amp; Management</dd>
+        <dt>From</dt><dd>Lauchlan du Preez</dd>
+        <dt>Date</dt><dd>19 May 2026</dd>
+        <dt>Subject</dt><dd>Data Handling Assessment — Claude / Anthropic for AP Processing</dd>
+      </dl>
+    </header>
+
+    <h2 data-num="1">Purpose</h2>
+    <p>
+      This notice sets out the data-handling implications of using Anthropic's Claude AI to extract
+      information from supplier invoices and supporting documents within the AP Processing workflow.
+      It is intended to give management a clear, documented basis for approving (or constraining)
+      the use of this service before it is rolled into production.
+    </p>
+
+    <h2 data-num="2">Summary Position</h2>
+    <div class="callout">
+      Use of the Anthropic API for invoice data extraction is <strong>assessed as acceptable</strong>
+      for our intended scope, provided the controls listed in Section 6 are implemented. The risk
+      profile is comparable to other cloud-based document-processing tools we already use, and is
+      materially lower than uploading documents to consumer AI products (e.g. ChatGPT free tier,
+      public chatbots).
+    </div>
+
+    <h2 data-num="3">What Data Is Sent to Anthropic</h2>
+    <p>When an invoice is processed, the following information is transmitted to Anthropic's API:</p>
+    <ul>
+      <li>Supplier name, ABN / VAT number, contact details</li>
+      <li>Banking details shown on the invoice (BSB, account number, SWIFT)</li>
+      <li>Invoice number, date, line items, descriptions, prices, GST</li>
+      <li>Our company's billing address and any PO references</li>
+      <li>Free-text remarks present on the document</li>
+    </ul>
+    <p>
+      No internal Pronto data, customer data, employee records, or system credentials are sent.
+    </p>
+
+    <h2 data-num="4">Anthropic's Data-Handling Commitments</h2>
+    <p>
+      The following commitments are contractually binding under Anthropic's Commercial Terms of Service:
+    </p>
+    <table>
+      <thead>
+        <tr><th>Item</th><th>Position</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Training on our data</td>
+          <td><strong>No.</strong> API inputs and outputs are not used to train Anthropic's models.</td>
+        </tr>
+        <tr>
+          <td>Retention</td>
+          <td>Up to 30 days for abuse monitoring, then deleted. Zero Data Retention (ZDR) available on request for enterprise customers.</td>
+        </tr>
+        <tr>
+          <td>Human review</td>
+          <td>None, unless content is flagged by automated abuse detection systems.</td>
+        </tr>
+        <tr>
+          <td>Infrastructure</td>
+          <td>Hosted on AWS (Anthropic's sole sub-processor). Default region is the United States.</td>
+        </tr>
+        <tr>
+          <td>Compliance</td>
+          <td>SOC 2 Type II certified. GDPR Data Processing Addendum available.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2 data-num="5">Identified Risks</h2>
+    <ol>
+      <li>
+        <strong>Prompt injection via malicious documents.</strong>
+        A supplier (or attacker impersonating one) could embed hidden instructions in a PDF
+        designed to manipulate Claude's output — e.g. inflating an amount or substituting bank
+        details. This is the most material risk.
+      </li>
+      <li>
+        <strong>Data residency.</strong>
+        Default processing occurs in the United States. For suppliers based in jurisdictions
+        with data-export restrictions, this may require disclosure.
+      </li>
+      <li>
+        <strong>Accidental over-sharing.</strong>
+        Sending entire documents when only specific fields are required increases unnecessary exposure.
+      </li>
+      <li>
+        <strong>Provider availability and continuity.</strong>
+        Anthropic is a third-party service; outages or terms changes are outside our control.
+      </li>
+    </ol>
+
+    <h2 data-num="6">Required Controls</h2>
+    <p>The following controls are recommended as conditions of use:</p>
+    <ul>
+      <li>
+        <strong>Human-in-the-loop confirmation.</strong>
+        No extracted invoice data is to be entered into Pronto Xi without operator review and approval.
+        This control directly mitigates the prompt-injection risk.
+      </li>
+      <li>
+        <strong>Direct API use only.</strong>
+        The Anthropic API is to be accessed directly by our application — not through third-party
+        wrappers or aggregators that introduce additional data handlers.
+      </li>
+      <li>
+        <strong>Zero Data Retention (ZDR) request.</strong>
+        ZDR will be requested from Anthropic, removing the 30-day retention window entirely once granted.
+      </li>
+      <li>
+        <strong>Local storage of source documents.</strong>
+        Original PDFs and emails remain in our own storage
+        (<code>~/Operations/ap-processing/storage/</code>). Anthropic receives only the document
+        content needed for extraction and retains no persistent copy.
+      </li>
+      <li>
+        <strong>Audit trail.</strong>
+        Every call to the Anthropic API is logged (timestamp, document reference, fields requested)
+        for compliance and troubleshooting purposes.
+      </li>
+      <li>
+        <strong>Scoped data.</strong>
+        Where feasible, documents will be pre-processed to send only the pages or regions needed for extraction.
+      </li>
+    </ul>
+
+    <h2 data-num="7">What This Is Not</h2>
+    <p>For clarity:</p>
+    <ul>
+      <li>Claude is <strong>not</strong> authorised to enter data into Pronto autonomously.</li>
+      <li>Claude is <strong>not</strong> authorised to approve or release payments.</li>
+      <li>Claude does <strong>not</strong> retain knowledge of prior invoices between requests; each call is independent.</li>
+      <li>This assessment covers <strong>invoice extraction only</strong>. Any expansion of Claude's role in AP (e.g. supplier communication, payment release) requires a fresh review.</li>
+    </ul>
+
+    <h2 data-num="8">Recommendation</h2>
+    <p>
+      Management approval is sought to proceed with Anthropic's Claude as the extraction engine
+      for AP invoice processing, subject to the controls in Section 6 being implemented before
+      production rollout.
+    </p>
+    <p>
+      Questions or requests for additional information should be directed to me.
+    </p>
+
+    <div class="sig">
+      <div class="name">Lauchlan du Preez</div>
+      <div class="role">AP Processing — Kingdom Platform</div>
+    </div>
+
+  </article>
+
+</div>
+</body>
+</html>
