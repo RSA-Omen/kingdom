@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Three formats — data &amp; role flow</title>
+<style>
+  body { margin: 0; background: #050510; color: #e2e8f0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 48px 24px 80px; }
+  h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; color: #f1f5f9; margin: 0 0 8px; }
+  .lead { color: #94a3b8; font-size: 15px; max-width: 65ch; margin: 0; }
+  .diagram { background: #0a0a18; border: 1px solid rgba(148,163,184,0.10); border-radius: 14px; padding: 32px 24px; margin: 32px 0; }
+  .diagram svg { display: block; width: 100%; height: auto; }
+  h2 { font-size: 14px; font-weight: 600; color: #f1f5f9; margin: 32px 0 10px; letter-spacing: -0.01em; }
+  ul { color: #cbd5e1; font-size: 14px; line-height: 1.7; padding-left: 22px; margin: 0; }
+  .footnote { color: #475569; font-size: 11px; margin-top: 32px; font-family: 'JetBrains Mono', ui-monospace, monospace; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Three formats — data &amp; role flow</h1>
+  <p class="lead">A transaction enters Gekko Tracks as a single bank-CSV row and leaves as a Pronto-ready export. Three database views progressively enrich it; four roles touch it on the way through.</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 1000 520" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="gt-ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#81e6d9"/>
+        </marker>
+        <marker id="gt-ar-soft" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="rgba(148,163,184,0.6)"/>
+        </marker>
+      </defs>
+
+      <!-- Input: bank CSV -->
+      <text x="80" y="40" text-anchor="middle" fill="#475569" font-size="11" font-weight="600" letter-spacing="0.1em">INPUT</text>
+      <rect x="15" y="58" width="130" height="60" rx="8" fill="rgba(148,163,184,0.06)" stroke="rgba(148,163,184,0.4)" stroke-width="1.2"/>
+      <text x="80" y="84" text-anchor="middle" fill="#cbd5e1" font-size="12" font-weight="600">📑 Bank CSV</text>
+      <text x="80" y="102" text-anchor="middle" fill="#94a3b8" font-size="10">one row per transaction</text>
+
+      <!-- Format 1: Raw Bank Ledger -->
+      <text x="270" y="40" text-anchor="middle" fill="#475569" font-size="11" font-weight="600" letter-spacing="0.1em">FORMAT 1</text>
+      <rect x="180" y="58" width="190" height="80" rx="8" fill="rgba(148,163,184,0.06)" stroke="rgba(148,163,184,0.4)" stroke-width="1.2"/>
+      <text x="275" y="84" text-anchor="middle" fill="#e2e8f0" font-size="13" font-weight="600">Raw Bank Ledger</text>
+      <text x="275" y="102" text-anchor="middle" fill="#94a3b8" font-size="10">date · narrative · debit · credit</text>
+      <text x="275" y="118" text-anchor="middle" fill="#94a3b8" font-size="10">view_format1_raw</text>
+
+      <!-- Format 2: Classified -->
+      <text x="500" y="40" text-anchor="middle" fill="#81e6d9" font-size="11" font-weight="600" letter-spacing="0.1em">FORMAT 2</text>
+      <rect x="410" y="58" width="190" height="80" rx="8" fill="rgba(129,230,217,0.08)" stroke="#81e6d9" stroke-width="1.5"/>
+      <text x="505" y="84" text-anchor="middle" fill="#81e6d9" font-size="13" font-weight="600">Classified View</text>
+      <text x="505" y="102" text-anchor="middle" fill="#94a3b8" font-size="10">+ project · cost cat · GL · status</text>
+      <text x="505" y="118" text-anchor="middle" fill="#94a3b8" font-size="10">view_format2_classified</text>
+
+      <!-- Format 3: Finance/Pronto -->
+      <text x="730" y="40" text-anchor="middle" fill="#475569" font-size="11" font-weight="600" letter-spacing="0.1em">FORMAT 3</text>
+      <rect x="640" y="58" width="190" height="80" rx="8" fill="rgba(129,230,217,0.08)" stroke="#81e6d9" stroke-width="1.5"/>
+      <text x="735" y="84" text-anchor="middle" fill="#81e6d9" font-size="13" font-weight="600">Finance / Pronto</text>
+      <text x="735" y="102" text-anchor="middle" fill="#94a3b8" font-size="10">+ account · tax · CBS · reference</text>
+      <text x="735" y="118" text-anchor="middle" fill="#94a3b8" font-size="10">view_format3_finance</text>
+
+      <!-- Output -->
+      <text x="935" y="40" text-anchor="middle" fill="#475569" font-size="11" font-weight="600" letter-spacing="0.1em">OUTPUT</text>
+      <rect x="870" y="58" width="130" height="80" rx="8" fill="rgba(196,181,253,0.06)" stroke="rgba(196,181,253,0.4)" stroke-width="1.2"/>
+      <text x="935" y="84" text-anchor="middle" fill="#c4b5fd" font-size="12" font-weight="600">Pronto export</text>
+      <text x="935" y="102" text-anchor="middle" fill="#94a3b8" font-size="10">via [[bender]] (next)</text>
+      <text x="935" y="118" text-anchor="middle" fill="#94a3b8" font-size="10">today: manual</text>
+
+      <!-- Arrows along the top -->
+      <path d="M145 88 L 180 88" stroke="#81e6d9" stroke-width="1.5" fill="none" marker-end="url(#gt-ar)"/>
+      <path d="M370 88 L 410 88" stroke="#81e6d9" stroke-width="1.5" fill="none" marker-end="url(#gt-ar)"/>
+      <path d="M600 88 L 640 88" stroke="#81e6d9" stroke-width="1.5" fill="none" marker-end="url(#gt-ar)"/>
+      <path d="M830 88 L 870 88" stroke="#81e6d9" stroke-width="1.5" fill="none" marker-end="url(#gt-ar)"/>
+
+      <!-- Status flow band -->
+      <text x="500" y="180" text-anchor="middle" fill="#475569" font-size="10" font-weight="600" letter-spacing="0.16em">CLASSIFICATION STATUS</text>
+      <g font-family="-apple-system, BlinkMacSystemFont, sans-serif">
+        <rect x="160" y="200" width="120" height="30" rx="14" fill="rgba(148,163,184,0.06)" stroke="rgba(148,163,184,0.3)" stroke-width="1"/>
+        <text x="220" y="220" text-anchor="middle" fill="#cbd5e1" font-size="11">unclassified</text>
+
+        <path d="M280 215 L 310 215" stroke="rgba(148,163,184,0.5)" stroke-width="1" fill="none" marker-end="url(#gt-ar-soft)"/>
+
+        <rect x="320" y="200" width="120" height="30" rx="14" fill="rgba(148,163,184,0.06)" stroke="rgba(148,163,184,0.3)" stroke-width="1" stroke-dasharray="3 2"/>
+        <text x="380" y="220" text-anchor="middle" fill="#94a3b8" font-size="11">predicted (ML)</text>
+
+        <path d="M440 215 L 470 215" stroke="rgba(148,163,184,0.5)" stroke-width="1" fill="none" marker-end="url(#gt-ar-soft)"/>
+
+        <rect x="480" y="200" width="140" height="30" rx="14" fill="rgba(129,230,217,0.08)" stroke="#81e6d9" stroke-width="1.2"/>
+        <text x="550" y="220" text-anchor="middle" fill="#81e6d9" font-size="11" font-weight="600">user_confirmed</text>
+
+        <path d="M620 215 L 650 215" stroke="#81e6d9" stroke-width="1" fill="none" marker-end="url(#gt-ar)"/>
+
+        <rect x="660" y="200" width="150" height="30" rx="14" fill="rgba(129,230,217,0.12)" stroke="#81e6d9" stroke-width="1.4"/>
+        <text x="735" y="220" text-anchor="middle" fill="#81e6d9" font-size="11" font-weight="700">manager_approved</text>
+      </g>
+
+      <!-- Role swim lanes (bottom band) -->
+      <text x="500" y="280" text-anchor="middle" fill="#475569" font-size="10" font-weight="600" letter-spacing="0.16em">WHO TOUCHES IT</text>
+
+      <!-- Admin / Finance -->
+      <rect x="15" y="300" width="160" height="180" rx="10" fill="rgba(255,255,255,0.02)" stroke="rgba(148,163,184,0.18)" stroke-width="1"/>
+      <text x="95" y="320" text-anchor="middle" fill="#f1f5f9" font-size="12" font-weight="700">Admin / Finance</text>
+      <text x="95" y="338" text-anchor="middle" fill="#94a3b8" font-size="10">imports CSV</text>
+      <text x="95" y="352" text-anchor="middle" fill="#94a3b8" font-size="10">runs Pronto export</text>
+      <text x="95" y="366" text-anchor="middle" fill="#94a3b8" font-size="10">oversees all formats</text>
+      <rect x="32" y="385" width="126" height="20" rx="3" fill="rgba(129,230,217,0.06)"/>
+      <text x="95" y="398" text-anchor="middle" fill="#81e6d9" font-size="10">Format 1 · 2 · 3</text>
+      <text x="95" y="430" text-anchor="middle" fill="#475569" font-size="10" font-style="italic">role start &amp; end</text>
+
+      <!-- Cardholder -->
+      <rect x="190" y="300" width="160" height="180" rx="10" fill="rgba(129,230,217,0.04)" stroke="rgba(129,230,217,0.3)" stroke-width="1.2"/>
+      <text x="270" y="320" text-anchor="middle" fill="#81e6d9" font-size="12" font-weight="700">Cardholder</text>
+      <text x="270" y="338" text-anchor="middle" fill="#94a3b8" font-size="10">classifies own rows</text>
+      <text x="270" y="352" text-anchor="middle" fill="#94a3b8" font-size="10">accepts / overrides</text>
+      <text x="270" y="366" text-anchor="middle" fill="#94a3b8" font-size="10">ML predictions</text>
+      <rect x="207" y="385" width="126" height="20" rx="3" fill="rgba(129,230,217,0.08)"/>
+      <text x="270" y="398" text-anchor="middle" fill="#81e6d9" font-size="10">Format 2 — own card</text>
+      <text x="270" y="430" text-anchor="middle" fill="#cbd5e1" font-size="11" font-weight="600">→ user_confirmed</text>
+
+      <!-- Manager -->
+      <rect x="365" y="300" width="160" height="180" rx="10" fill="rgba(129,230,217,0.04)" stroke="rgba(129,230,217,0.3)" stroke-width="1.2"/>
+      <text x="445" y="320" text-anchor="middle" fill="#81e6d9" font-size="12" font-weight="700">Manager</text>
+      <text x="445" y="338" text-anchor="middle" fill="#94a3b8" font-size="10">reviews assigned</text>
+      <text x="445" y="352" text-anchor="middle" fill="#94a3b8" font-size="10">cardholders' work</text>
+      <text x="445" y="366" text-anchor="middle" fill="#94a3b8" font-size="10">approve / reject</text>
+      <rect x="382" y="385" width="126" height="20" rx="3" fill="rgba(129,230,217,0.08)"/>
+      <text x="445" y="398" text-anchor="middle" fill="#81e6d9" font-size="10">Format 2 — team</text>
+      <text x="445" y="430" text-anchor="middle" fill="#cbd5e1" font-size="11" font-weight="600">→ manager_approved</text>
+
+      <!-- ML predictor -->
+      <rect x="540" y="300" width="160" height="180" rx="10" fill="rgba(196,181,253,0.04)" stroke="rgba(196,181,253,0.3)" stroke-width="1" stroke-dasharray="4 3"/>
+      <text x="620" y="320" text-anchor="middle" fill="#c4b5fd" font-size="12" font-weight="700">ML predictor</text>
+      <text x="620" y="338" text-anchor="middle" fill="#94a3b8" font-size="10">internal service</text>
+      <text x="620" y="352" text-anchor="middle" fill="#94a3b8" font-size="10">trained on historic</text>
+      <text x="620" y="366" text-anchor="middle" fill="#94a3b8" font-size="10">Excel workbooks</text>
+      <rect x="557" y="385" width="126" height="20" rx="3" fill="rgba(196,181,253,0.08)"/>
+      <text x="620" y="398" text-anchor="middle" fill="#c4b5fd" font-size="10">pre-fills Format 2</text>
+      <text x="620" y="430" text-anchor="middle" fill="#cbd5e1" font-size="11" font-weight="600">→ predicted</text>
+
+      <!-- Finance again -->
+      <rect x="715" y="300" width="160" height="180" rx="10" fill="rgba(255,255,255,0.02)" stroke="rgba(148,163,184,0.18)" stroke-width="1"/>
+      <text x="795" y="320" text-anchor="middle" fill="#f1f5f9" font-size="12" font-weight="700">Finance</text>
+      <text x="795" y="338" text-anchor="middle" fill="#94a3b8" font-size="10">adds tax / account /</text>
+      <text x="795" y="352" text-anchor="middle" fill="#94a3b8" font-size="10">CBS / reference</text>
+      <text x="795" y="366" text-anchor="middle" fill="#94a3b8" font-size="10">generates export</text>
+      <rect x="732" y="385" width="126" height="20" rx="3" fill="rgba(129,230,217,0.06)"/>
+      <text x="795" y="398" text-anchor="middle" fill="#81e6d9" font-size="10">Format 3</text>
+      <text x="795" y="430" text-anchor="middle" fill="#cbd5e1" font-size="11" font-weight="600">→ export ready</text>
+
+      <!-- Pronto -->
+      <rect x="890" y="300" width="100" height="180" rx="10" fill="rgba(196,181,253,0.04)" stroke="rgba(196,181,253,0.3)" stroke-width="1.2"/>
+      <text x="940" y="320" text-anchor="middle" fill="#c4b5fd" font-size="12" font-weight="700">Pronto Xi</text>
+      <text x="940" y="346" text-anchor="middle" fill="#94a3b8" font-size="10">AP Entry</text>
+      <text x="940" y="362" text-anchor="middle" fill="#94a3b8" font-size="10">(via Bender,</text>
+      <text x="940" y="376" text-anchor="middle" fill="#94a3b8" font-size="10">next)</text>
+    </svg>
+  </div>
+
+  <h2>Notes</h2>
+  <ul>
+    <li><strong>Format 2 is where the work happens.</strong> The Cardholder and the Manager both live in Format 2 — only the scope differs.</li>
+    <li><strong>Format 3 is Finance-only.</strong> Tax codes, account references, and CBS values never leak into the cardholder's classify screen.</li>
+    <li><strong>The ML predictor is a participant, not a deciding voice.</strong> It speeds the cardholder up; the cardholder still confirms every row.</li>
+    <li><strong>The Pronto handoff is the next big piece.</strong> Today, Finance generates a file and uploads it manually; tomorrow [[bender]] will drive AP Entry under Finance's eye.</li>
+  </ul>
+
+  <p class="footnote">demo · 2026-05-20 · /villages/gekko-tracks</p>
+</div>
+</body>
+</html>
