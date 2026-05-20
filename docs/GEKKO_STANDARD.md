@@ -1,7 +1,7 @@
 # The Gekko Standard — What Every Village Must Keep
 
-**Version:** 1.1  
-**Effective:** 2026-05-08  
+**Version:** 1.2  
+**Effective:** 2026-05-20  
 **Enforced by:** The Master of Laws
 
 This document is the contract between the Capital (Kingdom infrastructure) and every Village (app, service, system). Villages that meet the Standard are recognised as part of the Realm.
@@ -377,6 +377,7 @@ db/
 - [ ] Repo registered in `github-repos.json`
 - [ ] Standard labels created (`agent-raised`, `steward`, `captain`, `master-of-laws`, `master-builder`)
 - [ ] Agent-raised issues actioned within SLA (critical: 7 days, standard: 30 days)
+- [ ] Scriptorium folder exists at `Kingdom/scriptorium/content/villages/<slug>/` with valid `meta.yml` and all mandatory wiki posts for its type (see Section 15)
 
 **Failure:** Villages that don't meet the Standard will be:
 1. Warned (14 days to fix)
@@ -394,8 +395,9 @@ db/
 5. **Register the repo** with The Master of Laws
 6. **Register the repo** in `github-repos.json` so the Kingdom sync can mirror your issues
 7. **Create standard labels** in your repo (`agent-raised`, `steward`, `captain`, `master-of-laws`, `master-builder`)
-8. **Pass the compliance audit** (automated checks)
-9. **Announced to the kingdom** (Telegram, dashboard)
+8. **Create a Scriptorium folder** at `Kingdom/scriptorium/content/villages/<slug>/` with `meta.yml` and the mandatory wiki posts for your type (see Section 15)
+9. **Pass the compliance audit** (automated checks)
+10. **Announced to the kingdom** (Telegram, dashboard)
 
 The entire process should take <1 hour for a simple service.
 
@@ -456,6 +458,139 @@ Do not close an agent-raised issue without either a linked PR or a comment expla
 
 ---
 
+## 15. Scriptorium Presence
+
+**Requirement:** Every village must have a page in the Scriptorium that describes what it is, how it works, and what its current designs look like.
+
+**Why:** The Scriptorium is the Kingdom's single source of truth for what every village does. Without a page, a village is invisible to the Maester, undiscoverable on the Kingdom dashboard, and impossible to onboard new humans to.
+
+---
+
+### 15.1 Folder layout
+
+A village's Scriptorium content lives in the Kingdom repo at:
+
+```
+scriptorium/content/villages/<slug>/
+├── meta.yml          # village info (see 15.2)
+├── wiki/             # markdown pages
+│   ├── index.md      # required: village overview
+│   └── *.md          # other pages (see 15.4 for required ones)
+└── demos/            # standalone HTML mockups, flow diagrams, design iterations
+    └── <YYYY-MM-DD>-<short-slug>.html
+```
+
+The `<slug>` is the village's url-safe identifier — lowercase, hyphens, no spaces (e.g. `gekko-tracks`, `the-interceptor`, `ap-process`).
+
+---
+
+### 15.2 meta.yml schema
+
+```yaml
+slug: gekko-tracks                          # url-safe, matches folder name
+name: Gekko Tracks                          # display name
+type: app                                   # one of: app, process, service, bridge
+summary: |                                  # one-line description for the homepage card
+  Field service software for technician dispatch and on-site capture.
+owner: lauchlan                             # responsible human
+repo: https://github.com/RSA-Omen/...       # optional, code repo URL
+created: 2026-05-20                         # YYYY-MM-DD the page was first created
+```
+
+All fields are required except `repo`. Missing or malformed `meta.yml` blocks the village from being rendered.
+
+---
+
+### 15.3 Village types
+
+Every village declares one type. The type determines which wiki pages the village is required to have.
+
+| Type | What it is | Examples |
+|---|---|---|
+| **app** | A surface a user interacts with — a UI, a screen, a workflow they perform | Gekko Tracks, PDF Removal |
+| **process** | A flow that runs against systems — automated or human-driven, with steps and decisions | The Interceptor, AP Process |
+| **service** | A capability invoked by other systems — an API, a daemon, an automation harness | Bender, n8n, Open WebUI |
+| **bridge** | An integration to a system we don't control — the seam between us and an external | M365 (via Power Automate), Pronto Xi (via Bender) |
+
+If a village genuinely fits two types, pick the one that captures its **primary** purpose; mention the secondary type in the `summary`. Don't invent new types — propose one to the king first.
+
+---
+
+### 15.4 Mandatory wiki posts per type
+
+Every village's `wiki/` must contain `index.md` (overview). On top of that, each type has required posts:
+
+| Type | Required (beyond `index.md`) |
+|---|---|
+| **app** | `ui.md` (UI mockups, with links to demos), `journeys.md` (user flows) |
+| **process** | `flow.md` (current flow diagram, with link to a demo if visual), `integrations.md` (what connects to what) |
+| **service** | `sequence.md` (sequence diagram of a typical call), `capabilities.md` (what it can do, what it can't) |
+| **bridge** | `crossings.md` (what data crosses, in which direction), `failures.md` (how it breaks, what recovery looks like) |
+
+A village page that's missing a mandatory post displays a **visible gap warning** on its rendered Scriptorium page. Gaps stay loud on purpose — that's the point of having the rule.
+
+Villages may add extra wiki pages freely. Required pages can be stubs initially (one paragraph explaining what will go there), but they must exist.
+
+---
+
+### 15.5 Demo files
+
+Each demo is a standalone HTML file in `demos/`.
+
+- **Naming:** `<YYYY-MM-DD>-<short-slug>.html` (e.g. `2026-05-20-ap-flow-v3.html`)
+- **Title:** the first `<title>` tag in the HTML is used as the demo card's title
+- **Date:** the date in the filename is shown on the card
+- **Self-contained:** demos must render without external scripts on a restricted CSP. Inline styles and embedded SVGs are fine. CDN dependencies are not.
+
+Demos are immutable once committed. To revise a design, drop a new file with a new date — the old version stays accessible as design history.
+
+---
+
+### 15.6 Internal wiki links
+
+Wiki pages may use `[[wiki-link]]` syntax to link to other Scriptorium content:
+
+| Syntax | Resolves to |
+|---|---|
+| `[[bender]]` | The Bender village's `wiki/index.md` |
+| `[[ap-process/flow]]` | The AP Process village's `wiki/flow.md` |
+| `[[#overview]]` | A heading on the same page |
+| `[[gekko-tracks/ui#dispatcher]]` | A heading on another village's page |
+
+Unresolved links (target doesn't exist) render with a dashed underline so gaps are visible.
+
+---
+
+### 15.7 Editing from any Claude session
+
+When Claude (in any village's repo) is asked to add or update Scriptorium content, the convention is:
+
+1. Edit the relevant file under `~/Kingdom/scriptorium/content/villages/<slug>/`
+2. Commit in the **Kingdom repo** (not the village's own repo) with a message prefix:
+   - `wiki(<slug>): <change>` for wiki edits
+   - `demo(<slug>): <description>` for a new demo
+3. Push the Kingdom repo
+
+The build pipeline (forthcoming) rebuilds and redeploys the Scriptorium on commit. Until the pipeline is live, deploy is manual (`cp scriptorium/* ~/reports/`).
+
+Every village's own CLAUDE.md should include a one-line pointer to this section so its Claude sessions know where Scriptorium edits go. The exact wording will land as a template when the build pipeline does.
+
+---
+
+### 15.8 Audit
+
+A village fails this section if:
+
+- Its folder is missing
+- `meta.yml` is missing, malformed, or missing required fields
+- `wiki/index.md` is missing
+- Any mandatory wiki post for its type is missing
+- A required post exists but is empty (zero bytes or whitespace-only)
+
+Stubs are fine. Empty is not.
+
+---
+
 ## Enforcement
 
 The Master of Laws runs automated checks quarterly. Violations are reported to the king and the village owner. Persistent non-compliance results in archival (move to `~/Archive/`) until fixed.
@@ -484,5 +619,6 @@ A: The king (you). Changes require explicit approval. But the Master of Laws enf
 ---
 
 **Version history:**
+- **1.2** (2026-05-20) — Added Section 15: Scriptorium Presence. Every village must have a folder under `Kingdom/scriptorium/content/villages/<slug>/` with `meta.yml` and the mandatory wiki posts for its type (app / process / service / bridge). Updated onboarding checklist and compliance audit accordingly.
 - **1.1** (2026-05-08) — Added Section 14: Issue Tracking. Villages must register in `github-repos.json`, create standard labels, and honour agent-raised issues within SLA. Updated onboarding checklist and compliance audit accordingly.
 - **1.0** (2026-04-29) — Initial Standard. Covers: health, usage, errors, auth, logs, docs, repos, changelog, feedback, notifications, DB, deployment, audit.
