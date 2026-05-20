@@ -6,112 +6,148 @@
 <title>AP Processing — Status</title>
 <style>
   :root {
-    --bg: #f7f8fa;
-    --paper: #ffffff;
-    --fg: #1c1f24;
-    --muted: #5a6470;
-    --border: #d8dde4;
-    --accent: #2b6cb0;
-    --ok: #047857;
-    --ok-soft: #d1fae5;
-    --warn: #b45309;
-    --warn-soft: #fef3c7;
-    --err: #b91c1c;
-    --err-soft: #fee2e2;
-    --shadow: 0 1px 2px rgba(0,0,0,0.04), 0 4px 12px rgba(0,0,0,0.04);
+    --bg: #050510;
+    --bg-elev: #0a0a18;
+    --card: #0f0f1d;
+    --card-2: #14142a;
+    --fg: #e2e8f0;
+    --fg-strong: #f1f5f9;
+    --muted: #94a3b8;
+    --dim: #64748b;
+    --faint: #475569;
+    --border: rgba(148,163,184,0.12);
+    --border-strong: rgba(148,163,184,0.22);
+    --accent: #81e6d9;
+    --accent-deep: #2dd4bf;
+    --accent-soft: rgba(129,230,217,0.08);
+    --ok: #4ade80;
+    --ok-soft: rgba(74,222,128,0.08);
+    --warn: #fbbf24;
+    --warn-soft: rgba(251,191,36,0.08);
+    --err: #f87171;
+    --err-soft: rgba(248,113,113,0.08);
   }
   * { box-sizing: border-box; }
   body {
     margin: 0;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     font-size: 15px;
-    line-height: 1.55;
+    line-height: 1.6;
     color: var(--fg);
     background: var(--bg);
+    background-image:
+      radial-gradient(circle at 20% -10%, rgba(129,230,217,0.05), transparent 50%),
+      radial-gradient(circle at 100% 0%, rgba(129,230,217,0.03), transparent 40%);
+    background-attachment: fixed;
+    -webkit-font-smoothing: antialiased;
   }
-  .wrap { max-width: 900px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
-  header { border-bottom: 1px solid var(--border); padding-bottom: 1.5rem; margin-bottom: 2rem; }
-  h1 { font-size: 1.8rem; margin: 0 0 0.4rem; letter-spacing: -0.01em; }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+  header.page-header { border-bottom: 1px solid var(--border); padding-bottom: 1.5rem; margin-bottom: 2rem; }
+  h1 { font-size: 2rem; margin: 0 0 0.5rem; letter-spacing: -0.02em; color: var(--fg-strong); font-weight: 700; }
   .deck { color: var(--muted); font-size: 1.05rem; margin: 0; }
-  .stamp { margin-top: 0.8rem; color: var(--muted); font-size: 0.85rem; }
-  h2 { font-size: 1.25rem; margin: 2.2rem 0 0.6rem; letter-spacing: -0.005em; }
-  h3 { font-size: 1rem; margin: 1.2rem 0 0.4rem; color: var(--fg); }
-  p { margin: 0.5rem 0; }
-  a { color: var(--accent); text-decoration: none; }
-  a:hover { text-decoration: underline; }
+  .stamp { margin-top: 0.85rem; color: var(--dim); font-size: 0.85rem; }
+  h2 { font-size: 1.3rem; margin: 2.4rem 0 0.7rem; letter-spacing: -0.01em; color: var(--fg-strong); font-weight: 600; }
+  h3 { font-size: 1rem; margin: 1.4rem 0 0.5rem; color: var(--fg-strong); font-weight: 600; }
+  p { margin: 0.6rem 0; }
+  a { color: var(--accent); text-decoration: none; border-bottom: 1px solid rgba(129,230,217,0.25); }
+  a:hover { border-bottom-color: var(--accent); }
+  strong { color: var(--fg-strong); }
+  em { color: var(--fg); font-style: italic; }
   .card {
-    background: var(--paper);
+    background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: 12px;
     padding: 1.25rem 1.5rem;
     margin: 0.8rem 0;
-    box-shadow: var(--shadow);
   }
   ul.bare { list-style: none; padding-left: 0; margin: 0.4rem 0; }
-  ul.bare li { padding: 0.35rem 0; display: flex; align-items: flex-start; gap: 0.65rem; }
+  ul.bare li { padding: 0.4rem 0; display: flex; align-items: flex-start; gap: 0.7rem; color: var(--fg); }
   ul.bare li::before {
     content: '';
     flex-shrink: 0;
     width: 18px; height: 18px;
     margin-top: 3px;
     border-radius: 50%;
-    background: var(--border);
+    background: var(--border-strong);
   }
-  ul.bare li.done::before { background: var(--ok); }
-  ul.bare li.next::before { background: var(--warn); }
-  ul.bare li.todo::before { background: transparent; border: 2px dashed var(--border); }
+  ul.bare li.done::before { background: var(--ok); box-shadow: 0 0 0 3px rgba(74,222,128,0.15); }
+  ul.bare li.next::before { background: var(--warn); box-shadow: 0 0 0 3px rgba(251,191,36,0.15); }
+  ul.bare li.todo::before { background: transparent; border: 2px dashed var(--border-strong); margin-top: 1px; }
   .pipeline {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 0.4rem;
-    margin: 0.8rem 0;
+    gap: 0.5rem;
+    margin: 1rem 0;
   }
   .pipeline .step {
-    background: var(--paper);
+    background: var(--card);
     border: 1px solid var(--border);
     border-radius: 8px;
-    padding: 0.6rem 0.8rem;
+    padding: 0.7rem 0.9rem;
     text-align: center;
     font-size: 0.85rem;
+    color: var(--fg);
   }
-  .pipeline .step .lbl { display: block; font-size: 0.7rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.2rem; }
-  .pipeline .step.done { background: var(--ok-soft); border-color: var(--ok); }
-  .pipeline .step.partial { background: var(--warn-soft); border-color: var(--warn); }
-  .pipeline .step.todo { background: var(--paper); border-style: dashed; color: var(--muted); }
+  .pipeline .step .lbl { display: block; font-size: 0.7rem; color: var(--faint); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.25rem; font-weight: 600; }
+  .pipeline .step.done { background: var(--accent-soft); border-color: rgba(129,230,217,0.35); color: var(--accent); }
+  .pipeline .step.done .lbl { color: var(--accent-deep); }
+  .pipeline .step.partial { background: var(--warn-soft); border-color: rgba(251,191,36,0.4); color: var(--warn); }
+  .pipeline .step.partial .lbl { color: var(--warn); }
+  .pipeline .step.todo { background: transparent; border-style: dashed; color: var(--dim); }
   .stats {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 0.6rem;
-    margin: 0.8rem 0;
+    gap: 0.7rem;
+    margin: 1rem 0;
   }
   .stat {
-    background: var(--paper);
+    background: var(--card);
     border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 0.85rem 1rem;
+    border-radius: 10px;
+    padding: 1rem;
     text-align: center;
   }
-  .stat .num { display: block; font-size: 1.6rem; font-weight: 700; line-height: 1; }
-  .stat .lbl { display: block; font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-top: 0.3rem; }
+  .stat .num { display: block; font-size: 1.7rem; font-weight: 700; line-height: 1; color: var(--fg-strong); font-variant-numeric: tabular-nums; }
+  .stat .lbl { display: block; font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.35rem; font-weight: 600; }
   .stat.ok .num { color: var(--ok); }
   .stat.warn .num { color: var(--warn); }
   .stat.err .num { color: var(--err); }
-  table { width: 100%; border-collapse: collapse; font-size: 0.9rem; margin: 0.8rem 0; }
-  th, td { padding: 0.45rem 0.6rem; text-align: left; border-bottom: 1px solid var(--border); }
-  th { background: #f1f5f9; font-weight: 600; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); }
-  code { font-family: "SF Mono", Menlo, Monaco, Consolas, monospace; font-size: 0.85em; background: #eef2f7; padding: 0.05em 0.4em; border-radius: 4px; }
-  .pill { display: inline-block; font-size: 0.72rem; padding: 0.1rem 0.5rem; border-radius: 999px; border: 1px solid var(--border); background: #eef2f7; color: var(--muted); }
-  .pill.ok { background: var(--ok-soft); border-color: var(--ok); color: var(--ok); }
-  .pill.warn { background: var(--warn-soft); border-color: var(--warn); color: var(--warn); }
-  .pill.err { background: var(--err-soft); border-color: var(--err); color: var(--err); }
+  table { width: 100%; border-collapse: collapse; font-size: 0.92rem; margin: 1rem 0; }
+  th, td { padding: 0.55rem 0.7rem; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { background: var(--bg-elev); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+  td { color: var(--fg); }
+  code {
+    font-family: "JetBrains Mono", "SF Mono", Menlo, Monaco, Consolas, monospace;
+    font-size: 0.85em;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    padding: 0.05em 0.4em;
+    border-radius: 4px;
+    color: var(--fg);
+  }
+  .pill {
+    display: inline-block;
+    font-size: 0.72rem;
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--bg-elev);
+    color: var(--muted);
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+  .pill.ok { background: var(--ok-soft); border-color: rgba(74,222,128,0.4); color: var(--ok); }
+  .pill.warn { background: var(--warn-soft); border-color: rgba(251,191,36,0.4); color: var(--warn); }
+  .pill.err { background: var(--err-soft); border-color: rgba(248,113,113,0.4); color: var(--err); }
   hr.soft { border: none; border-top: 1px dashed var(--border); margin: 2rem 0; }
-  footer { color: var(--muted); font-size: 0.8rem; margin-top: 3rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+  footer { color: var(--dim); font-size: 0.85rem; margin-top: 3.5rem; padding-top: 1.25rem; border-top: 1px solid var(--border); font-family: "JetBrains Mono", "SF Mono", Menlo, monospace; }
+  footer a { font-family: inherit; }
 </style>
 </head>
 <body>
 <div class="wrap">
 
-<header>
+<header class="page-header">
   <h1>AP Processing — where we are</h1>
   <p class="deck">An autonomous pipeline from email to Pronto AP Entry, with Finance keeping the final approval.</p>
   <p class="stamp">Status as of 2026-05-17 · Owner: Lauchlan</p>
