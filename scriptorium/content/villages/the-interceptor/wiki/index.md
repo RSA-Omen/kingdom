@@ -1,10 +1,12 @@
 # The Interceptor
 
-A small, single-purpose process that sits on the Pronto URL path. When a Pronto-generated URL points at something that should land in NextCloud, the Interceptor catches it, rewrites the destination, and sends the user to the right place. Everything else passes through untouched.
+A small, single-purpose process that sits between **Pronto Xi** and **NextCloud**. When a user clicks the **Quick Links** button inside Pronto, Pronto generates a URL and sends the user toward it. The Interceptor catches that request, recognises whether the target should live in NextCloud, and relays the user there.
+
+Everything that isn't a Quick Links destination passes through untouched to Pronto's normal URL handler.
 
 The Interceptor predates [[bender]] and is not replaced by it. The two villages do different jobs:
 
-- The Interceptor handles **one narrow URL-routing case**, on the way in.
-- Bender handles **all other Pronto interactions** by driving the UI keystroke-by-keystroke.
+- **The Interceptor** sits between Pronto and NextCloud — handles the narrow Quick Links routing case on the way through.
+- **[[bender]]** drives Pronto's UI by keystroke for everything else.
 
-Because the Interceptor only cares about a specific URL pattern, it's the smallest production village in the kingdom. The whole story is the [[the-interceptor/flow]] page.
+Because the Interceptor only cares about Quick Links requests, it's the smallest production village in the kingdom. The whole story is the [[the-interceptor/flow]] page.
