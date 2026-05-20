@@ -1,0 +1,7 @@
+slug: the-interceptor
+name: The Interceptor
+type: process
+summary: |
+  Narrow Pronto URL routing — intercepts implied-link URLs and routes them to NextCloud.
+owner: lauchlan
+created: 2026-05-20

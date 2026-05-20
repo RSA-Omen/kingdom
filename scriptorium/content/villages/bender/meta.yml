@@ -1,0 +1,7 @@
+slug: bender
+name: Bender
+type: service
+summary: |
+  Pronto Xi keystroke automation — drives Pronto's UI by keystroke, exposing ERP screens as scriptable actions.
+owner: lauchlan
+created: 2026-05-20
