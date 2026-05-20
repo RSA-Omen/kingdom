@@ -256,6 +256,60 @@ Wrapper script at `/home/lauchlandupreez/Kingdom/bin/hand`:
 
 ---
 
+### 8. The Postmaster
+**Beat:** Reads the king's Gekko M365 inbox and Teams DMs. Drafts village-tagged to-dos for anything that needs action. Files FYI mail to a no-action folder. Sweeps clutter to archive on king-approved rules. Never sends, replies, or contacts subjects.
+
+**Responsibilities:**
+- Read Outlook (Gekko M365) + Teams DMs on a 10-minute cycle
+- Classify each new item with Claude (village, kind, priority)
+- Draft a to-do for items that need action; auto-file FYI mail to `Postmaster/02-No-action`
+- Stage drafts on `/postmaster` dashboard page for operator review
+- Promote approved drafts to village GitHub Issues or `Kingdom/TODO.md`
+- Run a 6-hourly cleanup sweep against king-approved explicit rules (archive-only)
+
+**Schedule:**
+- Every 10 minutes — Triage (read + classify + file)
+- Every 6 hours — Cleanup sweep (no-op if no approved rules)
+
+**Escalation Path (Telegram, action-only):**
+- Any draft with `priority='urgent'` → ping immediately
+- Pending backlog crosses 20 → ping once
+- Cleanup sweep touches more than 50 items → ping with rule id
+
+**State:** `~/.postmaster.db` (drafts, rules, sweep log). Distinct from `~/.chamberlain.db` (The Lord Chamberlain's state).
+
+**Boundary — the line we hold:** acts freely on the king's own surfaces (inbox folders, SQLite, `TODO.md`); never acts outward (no `Mail.Send`, no `Chat.ReadWrite`, no reply, no forward, no Teams writes). Hard-delete is out of v1 — Graph's delete endpoint is not called anywhere in the code.
+
+**Routable villages (v1):**
+- Gekko Tracks · Bender · Interceptor · AP Processing · PDF Removal · Kingdom (+ Personal → `Kingdom/TODO.md` under `## Personal`)
+
+**Current Capabilities (v0):**
+- Stubs only: `run()` and `cleanup()` print "not yet implemented"
+- Static dashboard mock at `/postmaster` with three tabs (Action needed · Filed FYI · Cleanup bench) showing fixture data
+
+**Planned (v1):**
+- Azure AD app + delegated MSAL auth on Gekko M365
+- SQLite migration (`postmaster_drafts`, `postmaster_rules`, `postmaster_cleanup_rules`, `postmaster_sweeps`)
+- Outlook delta-query ingest + folder filing
+- Claude classification
+- Teams DM ingest (`chatType eq 'oneOnOne'` only)
+- Promote-on-approve to village GitHub Issues / `Kingdom/TODO.md`
+- Cleanup sweep (bench + dry-run, then active archive-only)
+- MCP capabilities exposed to `capital/mcp/`
+
+**Commands:**
+```bash
+python3 -m council.the-postmaster run        # Triage cycle (v0: stub)
+python3 -m council.the-postmaster cleanup    # Cleanup sweep (v0: stub)
+python3 -m council.the-postmaster status     # DB / state status (v0: stub)
+```
+
+**Spec:** `docs/council/the-postmaster.md`. **Origin dispatch:** Kingdom Dispatch `2026-05-20 · rev. 4`.
+
+> Not to be confused with **The Lord Chamberlain** (`council/the-lord-chamberlain/`), which has a different beat: subject relations — watching app users for friction and abandonment.
+
+---
+
 ## The Capital
 
 ### The Herald

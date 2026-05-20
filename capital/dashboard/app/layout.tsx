@@ -41,7 +41,7 @@ function TopBar() {
       </a>
       <div className="flex-1" />
       <div className="text-xs text-[var(--color-text-tertiary)]">
-        gvdi-30 · Eight agents in council
+        gvdi-30 · Nine agents in council
       </div>
     </header>
   );
@@ -60,6 +60,7 @@ function Sidebar() {
     {
       heading: "Kingdom Watch",
       items: [
+        { label: "Postmaster", slug: "/postmaster" },
         { label: "Errors", slug: "/errors" },
         { label: "To-Dos", slug: "/todos" },
         { label: "Security", slug: "/security" },
