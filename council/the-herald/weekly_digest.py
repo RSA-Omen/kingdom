@@ -99,12 +99,12 @@ def humanise_commit(msg: str) -> str:
 # Updated by /kingdom-checkpoint at the end of each work session.
 # One plain-English entry per completed feature. Replace with current week's work.
 RECENT_ADDITIONS = [
-    "Bender promoted to a recognised village of the Kingdom — Steward now polls its health every 5 minutes alongside Gekko Tracks, Admin Center, PDF Removal, Interceptor and Open WebUI; if Bender falls over three checks in a row the king gets a Telegram action ping",
-    "Bender's web UI restyled to the Kingdom's Void Teal palette — same near-black surfaces, teal accent, and isometric grid background as the dashboard, so the realm finally looks like one product",
-    "Bender's repo lives at RSA-Omen/bender with all eight standard Kingdom issue labels, registered in github-repos.json — the Kingdom can now mirror its issues onto the dashboard like every other village",
-    "Bender now auto-starts and auto-restarts via two new systemd units (kingdom-bender + kingdom-bender-chrome) — if the process crashes or the server reboots, Bender comes back without anyone touching a terminal",
-    "Bender — a Pronto Xi keystroke-driven village on gvdi-30: a service account logs into Pronto headlessly via SAML/Keycloak, walks the menus by keyboard and click, and runs pre-written recipes. First recipe pulls the entire AP supplier master (3,184 rows) in under a minute through Pronto's native export, with no human in the loop",
-    "Recipe runtime — operators author Pronto flows once via Claude, save them as YAML, and replay forever with no AI in the production hot path. Dry-run mode validates each recipe against live state before it touches data",
+    "The Scriptorium — the Kingdom's new documentation + design-demo village, live at http://gvdi-30:8095/. One page per village, with a wiki on top and HTML demos on the bottom; the first four villages have full pages: Gekko Tracks, Bender, The Interceptor, and AP Process",
+    "Gekko Standard §15 — every village now owes the Kingdom a folder in the Scriptorium with mandatory wiki posts based on its type (app needs UI mockups; process needs a flow diagram; service needs a sequence diagram; bridge needs a crossings doc). Pages missing required posts render with a visible gap warning so they stay loud",
+    "Python renderer for the Scriptorium — reads markdown, meta.yml, and HTML demos from each village folder and produces the live site. Supports [[wikilinks]] that resolve across villages, demo galleries with thumbnails, and a one-command deploy",
+    "Gekko Tracks village page — the full Credit Card Coding story documented end-to-end: three format views (raw → classified → finance), four roles, ML predictions, receipts with OCR matching and reassignment, and the mobile UI with one-tap camera capture. Four diagrams cover data flow, classify screen, receipt pipeline, and the mobile cardholder view",
+    "AP Process village page — the autonomous email-to-Pronto pipeline gets its own home with a flow diagram, a Finance review inbox mockup, and the two existing status reports pinned as demos (restyled to match the Void Teal aesthetic)",
+    "village-checkpoint skill extended — every village checkpoint now appends an entry to that village's wiki/changelog.md inside the Scriptorium, so every village page reflects its actual activity (auto-creates the changelog on first checkpoint, per Standard §15.8)",
 ]
 
 
