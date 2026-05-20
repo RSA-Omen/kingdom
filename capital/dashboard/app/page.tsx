@@ -1,7 +1,6 @@
 import { HandAgendaCard } from "../components/kingdom/HandAgendaCard";
 import { MaesterCard } from "../components/kingdom/MaesterCard";
 import { SearchMaester } from "../components/kingdom/SearchMaester";
-import { BureauCard } from "../components/kingdom/BureauCard";
 import { MasterOfWorksCard } from "../components/kingdom/MasterOfWorksCard";
 import { SummaryCards } from "@/components/kingdom/SummaryCards";
 import { ErrorFeed } from "@/components/kingdom/ErrorFeed";
@@ -21,7 +20,6 @@ export default function ThroneRoom() {
       <HexStatRow />
       <HandAgendaCard />
       <MaesterCard />
-      <BureauCard />
       <MasterOfWorksCard />
       <SearchMaester />
       <section className="mt-10 space-y-4">

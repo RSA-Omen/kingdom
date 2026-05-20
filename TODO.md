@@ -16,6 +16,7 @@ The interim backlog for the Kingdom and the broader cleanup of the realm. This f
 - [x] [P2] Write `docs/ROYAL_COURT.md` — canonical roster of agents, beats, schedules, escalation paths
 - [x] [P2] Create the GitHub repo `kingdom`, `git init` this directory, push first commit
 - [x] [P2] Build a kingdom-themed landing page for `capital/dashboard/app/page.tsx` (replacing the placeholder)
+- [ ] [P3] Resurface the **GKGPU reachability signal** somewhere on the Throne Room. It was the one unique signal lost when BureauCard was removed (the rest was redundant with the Systems hex + `/villages`). Candidates: add a "GPU" hex tile to `HexStatRow`, or fold it into the Master of Works card. Data already comes from `/api/bureau/briefing` → `gkgpu.reachable`.
 
 ## The Royal Court — agents to build (one at a time, only when needed)
 
