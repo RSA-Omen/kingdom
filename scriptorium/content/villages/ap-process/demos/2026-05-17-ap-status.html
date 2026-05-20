@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AP Processing — Status</title>
+<style>
+  :root {
+    --bg: #050510;
+    --bg-elev: #0a0a18;
+    --card: #0f0f1d;
+    --card-2: #14142a;
+    --fg: #e2e8f0;
+    --fg-strong: #f1f5f9;
+    --muted: #94a3b8;
+    --dim: #64748b;
+    --faint: #475569;
+    --border: rgba(148,163,184,0.12);
+    --border-strong: rgba(148,163,184,0.22);
+    --accent: #81e6d9;
+    --accent-deep: #2dd4bf;
+    --accent-soft: rgba(129,230,217,0.08);
+    --ok: #4ade80;
+    --ok-soft: rgba(74,222,128,0.08);
+    --warn: #fbbf24;
+    --warn-soft: rgba(251,191,36,0.08);
+    --err: #f87171;
+    --err-soft: rgba(248,113,113,0.08);
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--fg);
+    background: var(--bg);
+    background-image:
+      radial-gradient(circle at 20% -10%, rgba(129,230,217,0.05), transparent 50%),
+      radial-gradient(circle at 100% 0%, rgba(129,230,217,0.03), transparent 40%);
+    background-attachment: fixed;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 900px; margin: 0 auto; padding: 3rem 1.5rem 5rem; }
+  header.page-header { border-bottom: 1px solid var(--border); padding-bottom: 1.5rem; margin-bottom: 2rem; }
+  h1 { font-size: 2rem; margin: 0 0 0.5rem; letter-spacing: -0.02em; color: var(--fg-strong); font-weight: 700; }
+  .deck { color: var(--muted); font-size: 1.05rem; margin: 0; }
+  .stamp { margin-top: 0.85rem; color: var(--dim); font-size: 0.85rem; }
+  h2 { font-size: 1.3rem; margin: 2.4rem 0 0.7rem; letter-spacing: -0.01em; color: var(--fg-strong); font-weight: 600; }
+  h3 { font-size: 1rem; margin: 1.4rem 0 0.5rem; color: var(--fg-strong); font-weight: 600; }
+  p { margin: 0.6rem 0; }
+  a { color: var(--accent); text-decoration: none; border-bottom: 1px solid rgba(129,230,217,0.25); }
+  a:hover { border-bottom-color: var(--accent); }
+  strong { color: var(--fg-strong); }
+  em { color: var(--fg); font-style: italic; }
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1.25rem 1.5rem;
+    margin: 0.8rem 0;
+  }
+  ul.bare { list-style: none; padding-left: 0; margin: 0.4rem 0; }
+  ul.bare li { padding: 0.4rem 0; display: flex; align-items: flex-start; gap: 0.7rem; color: var(--fg); }
+  ul.bare li::before {
+    content: '';
+    flex-shrink: 0;
+    width: 18px; height: 18px;
+    margin-top: 3px;
+    border-radius: 50%;
+    background: var(--border-strong);
+  }
+  ul.bare li.done::before { background: var(--ok); box-shadow: 0 0 0 3px rgba(74,222,128,0.15); }
+  ul.bare li.next::before { background: var(--warn); box-shadow: 0 0 0 3px rgba(251,191,36,0.15); }
+  ul.bare li.todo::before { background: transparent; border: 2px dashed var(--border-strong); margin-top: 1px; }
+  .pipeline {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.5rem;
+    margin: 1rem 0;
+  }
+  .pipeline .step {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 0.7rem 0.9rem;
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--fg);
+  }
+  .pipeline .step .lbl { display: block; font-size: 0.7rem; color: var(--faint); text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 0.25rem; font-weight: 600; }
+  .pipeline .step.done { background: var(--accent-soft); border-color: rgba(129,230,217,0.35); color: var(--accent); }
+  .pipeline .step.done .lbl { color: var(--accent-deep); }
+  .pipeline .step.partial { background: var(--warn-soft); border-color: rgba(251,191,36,0.4); color: var(--warn); }
+  .pipeline .step.partial .lbl { color: var(--warn); }
+  .pipeline .step.todo { background: transparent; border-style: dashed; color: var(--dim); }
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 0.7rem;
+    margin: 1rem 0;
+  }
+  .stat {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem;
+    text-align: center;
+  }
+  .stat .num { display: block; font-size: 1.7rem; font-weight: 700; line-height: 1; color: var(--fg-strong); font-variant-numeric: tabular-nums; }
+  .stat .lbl { display: block; font-size: 0.72rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; margin-top: 0.35rem; font-weight: 600; }
+  .stat.ok .num { color: var(--ok); }
+  .stat.warn .num { color: var(--warn); }
+  .stat.err .num { color: var(--err); }
+  table { width: 100%; border-collapse: collapse; font-size: 0.92rem; margin: 1rem 0; }
+  th, td { padding: 0.55rem 0.7rem; text-align: left; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { background: var(--bg-elev); font-weight: 600; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+  td { color: var(--fg); }
+  code {
+    font-family: "JetBrains Mono", "SF Mono", Menlo, Monaco, Consolas, monospace;
+    font-size: 0.85em;
+    background: var(--bg-elev);
+    border: 1px solid var(--border);
+    padding: 0.05em 0.4em;
+    border-radius: 4px;
+    color: var(--fg);
+  }
+  .pill {
+    display: inline-block;
+    font-size: 0.72rem;
+    padding: 0.15rem 0.6rem;
+    border-radius: 999px;
+    border: 1px solid var(--border);
+    background: var(--bg-elev);
+    color: var(--muted);
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+  .pill.ok { background: var(--ok-soft); border-color: rgba(74,222,128,0.4); color: var(--ok); }
+  .pill.warn { background: var(--warn-soft); border-color: rgba(251,191,36,0.4); color: var(--warn); }
+  .pill.err { background: var(--err-soft); border-color: rgba(248,113,113,0.4); color: var(--err); }
+  hr.soft { border: none; border-top: 1px dashed var(--border); margin: 2rem 0; }
+  footer { color: var(--dim); font-size: 0.85rem; margin-top: 3.5rem; padding-top: 1.25rem; border-top: 1px solid var(--border); font-family: "JetBrains Mono", "SF Mono", Menlo, monospace; }
+  footer a { font-family: inherit; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="page-header">
+  <h1>AP Processing — where we are</h1>
+  <p class="deck">An autonomous pipeline from email to Pronto AP Entry, with Finance keeping the final approval.</p>
+  <p class="stamp">Status as of 2026-05-17 · Owner: Lauchlan</p>
+</header>
+
+<section>
+  <h2>What it does</h2>
+  <p>
+    The finance team forwards (or saves) AP-related emails into the app. The system unwraps every attachment, splits multi-page scans into individual documents, classifies each one (tax invoice, delivery docket, statement, PO, etc.), extracts every relevant field with Claude, resolves the supplier to a Pronto code against the live supplier master, and queues everything for Finance to review.
+  </p>
+  <p>
+    Finance does the last step — confirm and post. The system never writes to Pronto without a human pressing the button.
+  </p>
+</section>
+
+<section>
+  <h2>Pipeline</h2>
+  <div class="pipeline">
+    <div class="step done"><span class="lbl">1</span>Email in</div>
+    <div class="step done"><span class="lbl">2</span>Unwrap attachments</div>
+    <div class="step done"><span class="lbl">3</span>Split multi-doc</div>
+    <div class="step done"><span class="lbl">4</span>Classify</div>
+    <div class="step done"><span class="lbl">5</span>Extract fields</div>
+    <div class="step done"><span class="lbl">6</span>Match supplier</div>
+    <div class="step todo"><span class="lbl">7</span>Match PO</div>
+    <div class="step todo"><span class="lbl">8</span>Finance review</div>
+    <div class="step todo"><span class="lbl">9</span>Post to Pronto</div>
+  </div>
+</section>
+
+<section>
+  <h2>Live result on a real email</h2>
+  <p>One <code>.eml</code> from the finance inbox (2.2 MB, ≈30 attachments) processed end-to-end this morning:</p>
+  <div class="stats">
+    <div class="stat"><span class="num">39</span><span class="lbl">documents found</span></div>
+    <div class="stat ok"><span class="num">30</span><span class="lbl">tax invoices</span></div>
+    <div class="stat ok"><span class="num">2</span><span class="lbl">delivery dockets</span></div>
+    <div class="stat warn"><span class="num">2</span><span class="lbl">auto invoice ↔ docket matches</span></div>
+    <div class="stat ok"><span class="num">26 / 30</span><span class="lbl">supplier auto-coded</span></div>
+    <div class="stat warn"><span class="num">4 / 30</span><span class="lbl">supplier needs review</span></div>
+    <div class="stat err"><span class="num">0 / 30</span><span class="lbl">wrong auto codes</span></div>
+  </div>
+  <p style="font-size:0.88rem;color:var(--muted)">Auto-coded against the 3,184-supplier Pronto master that Bender exported on 2026-05-15. Two invoice ↔ docket matches at 99.2% and 98.9% (iLASER and Elgas Limited).</p>
+</section>
+
+<section>
+  <h2>The four "needs review" cases</h2>
+  <p>None of these are errors — the matcher refuses to guess when confidence is low. Finance picks from the candidates the matcher surfaces, or marks the supplier as new.</p>
+  <table>
+    <thead><tr><th>Invoice supplier</th><th>Top suggestion</th><th>Score</th><th>Why uncertain</th></tr></thead>
+    <tbody>
+      <tr><td>Workforce Services t/as Workforce&hellip;</td><td>S22897 Workforce Extensions Ballarat</td><td>69</td><td>Same word, different company</td></tr>
+      <tr><td>DS&amp;JA Poppe Electrical</td><td>S20572 AirElec Electrical</td><td>99</td><td>Pronto stores the proprietors' names, not the trading name</td></tr>
+      <tr><td>Malone Carpentry Services</td><td>S24105 Joe Malone</td><td>98</td><td>Same surname, different business</td></tr>
+      <tr><td>JJ Fab</td><td>S24755 Tupps Metal Fab</td><td>93</td><td>Short name, weak overlap</td></tr>
+    </tbody>
+  </table>
+  <p style="font-size:0.88rem;color:var(--muted)">Mining the "Trading Name and Address" column from Bender's export into the matcher's aliases would close the Poppe-style gap automatically.</p>
+</section>
+
+<section>
+  <h2>What's working today <span class="pill ok">in production-shaped form</span></h2>
+  <ul class="bare">
+    <li class="done">Drop a <code>.eml</code> or a stack of PDFs at <a href="http://gvdi-30:5013/">gvdi-30:5013</a> → attachments unwrap, classify, extract, dedup, match supplier — fully unattended</li>
+    <li class="done">Multi-document scans split into individual invoices/dockets (the splitter uses Claude vision)</li>
+    <li class="done">Persistent storage at <code>~/Operations/ap-processing/storage/</code> outside any worktree — raw <code>.eml</code> and PDFs survive a worktree wipe</li>
+    <li class="done">Content-hash deduplication — re-dropping the same email is a no-op, never re-pays for extraction</li>
+    <li class="done">Supplier matcher tuned to 96.7% correct decisions on first real batch, with zero false positives</li>
+    <li class="done">Cross-invoice docket matching with 4-signal weighted score (supplier, reference, date, line items)</li>
+    <li class="done">Side-panel worksheet for any document — every extracted field editable, copy-JSON / copy-Pronto-reference buttons, all flags Claude raised visible</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Coming next <span class="pill warn">design + scope locked in</span></h2>
+  <ul class="bare">
+    <li class="next"><strong>Three-screen finance UI.</strong> One inbox per concept — <em>Invoices</em>, <em>Supporting documents</em>, <em>Ready for Pronto</em>. Each screen surfaces auto-resolved items as green-ticked, uncertain ones flagged for review.</li>
+    <li class="next"><strong>Bender PO export.</strong> Same pattern as Friday's supplier export, filtered to open POs only. Daily refresh, snapshot in <code>storage/po_master.csv</code>. Unlocks 3-way matching.</li>
+    <li class="next"><strong>PO matching.</strong> For each invoice, validate the extracted <code>order_number</code> against the open-PO master. Cross-check supplier and total. Flag over-billing, wrong supplier, missing PO.</li>
+    <li class="todo"><strong>Bender drives Pronto AP Entry.</strong> When Finance clicks "Approve", Bender opens AP Entry, types the fields, shows Finance what it's about to do; Finance hits Enter to commit.</li>
+    <li class="todo"><strong>Aliases mined from Bender's "Trading Name and Address" column</strong> — closes the Poppe-style edge cases without manual work.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>For the AP team — what we'd love your input on</h2>
+  <p>The pipeline above does the mechanical work (unwrap, classify, extract, supplier-match). It does not — and should not — guess your AP policy. A few decisions will shape the next phase. Please react to anything that's wrong; we'd rather change it now than after we build.</p>
+
+  <h3>Our assumed AP lifecycle</h3>
+  <p>Every invoice flows through these stages once it lands in the app. The app's job is to close as many of these as possible before showing the invoice to a human, then surface the ones that need attention.</p>
+  <ol>
+    <li><strong>Receipt</strong> — arrives by email or scanner. <span class="pill ok">done</span></li>
+    <li><strong>Identification</strong> — supplier matched to the Pronto code. <span class="pill ok">done · 87% auto on first batch</span></li>
+    <li><strong>Coding</strong> — invoice gets linked to the right thing in the GL: a Purchase Order, an expense account, a project code, etc. <span class="pill warn">next</span></li>
+    <li><strong>Validation</strong> — for PO-backed invoices, three-way match: invoice header matches PO header, invoice lines match goods received. <span class="pill warn">next</span></li>
+    <li><strong>Approval</strong> — under threshold = auto-clear; over threshold = sent to a named approver. <span class="pill">later</span></li>
+    <li><strong>Posting</strong> — written into Pronto AP Entry, paid in the next run. <span class="pill">later (Bender drives)</span></li>
+  </ol>
+
+  <h3>Decisions we need from AP</h3>
+  <table>
+    <thead><tr><th>Question</th><th>Why it matters</th></tr></thead>
+    <tbody>
+      <tr><td>What % of invoices have a PO vs direct-pay?</td><td>Drives whether PO matching is the main path or a side-path. Direct-pay (utilities, subscriptions) needs GL coding logic instead.</td></tr>
+      <tr><td>Approval thresholds — who approves what amount?</td><td>The app routes the right invoices to the right person. Wrong rules = bottlenecks.</td></tr>
+      <tr><td>For non-PO invoices, what's the coding source?</td><td>Spreadsheet? Memory? Vendor-default? Determines if we can pre-fill GL codes too.</td></tr>
+      <tr><td>What invoices get parked most often, and why?</td><td>"Disputed", "missing PO", "wrong supplier name" — knowing the top three failure modes lets us design for them, not against them.</td></tr>
+      <tr><td>Is anyone approving on mobile / outside hours?</td><td>If yes, the approval step needs an email / Teams notification, not just an inbox.</td></tr>
+      <tr><td>How does Pronto check tax / GST on invoices?</td><td>If Pronto auto-calculates tax from the supplier code, we don't need to extract it. If AP enters tax per line, we do.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>What an "actionable inbox" will look like</h3>
+  <p>Each invoice row will end up in one of these states, with a single primary action visible inline:</p>
+  <table>
+    <thead><tr><th>State</th><th>Means</th><th>Primary action</th></tr></thead>
+    <tbody>
+      <tr><td><span class="pill ok">Ready</span></td><td>Supplier resolved, PO matches, total under threshold</td><td>Approve &amp; post</td></tr>
+      <tr><td><span class="pill warn">Confirm supplier</span></td><td>Supplier in the master but only as a fuzzy suggestion</td><td>Pick from candidates</td></tr>
+      <tr><td><span class="pill err">New supplier</span></td><td>Supplier not in Pronto master at all</td><td>Create in Pronto</td></tr>
+      <tr><td><span class="pill warn">Needs coding</span></td><td>No PO; needs a GL account</td><td>Code to GL</td></tr>
+      <tr><td><span class="pill warn">Needs PO link</span></td><td>PO number doesn't validate against the open-PO master</td><td>Find PO</td></tr>
+      <tr><td><span class="pill warn">Over threshold</span></td><td>Amount above the current user's auto-approve limit</td><td>Send to approver</td></tr>
+      <tr><td><span class="pill err">Has flags</span></td><td>Claude flagged something (unusual amount, missing tax line, suspicious total)</td><td>Review flags</td></tr>
+    </tbody>
+  </table>
+
+  <h3>What the AP team will <em>not</em> have to do</h3>
+  <ul class="bare">
+    <li class="done">Re-type any field from a PDF — extraction is already accurate enough that the data is pre-filled</li>
+    <li class="done">Hunt for the supplier code — it's resolved before they see the invoice</li>
+    <li class="done">Open multiple browser tabs to compare invoice / docket / PO — the side panel shows all three together</li>
+    <li class="done">Worry about losing the original PDF — every email and attachment is archived outside the working code</li>
+  </ul>
+</section>
+
+<section>
+  <h2>Design principle that anchors all of this</h2>
+  <div class="card">
+    <p style="margin:0">
+      Agents observe, analyse, and recommend. <strong>The human keeps the final action.</strong> "Autonomous" means everything up to the Approve button runs without a human in the loop — pressing the button stays with Finance, always. This is a hard guarantee, not a configurable preference.
+    </p>
+  </div>
+</section>
+
+<footer>
+  <p>App: <a href="http://gvdi-30:5013/">gvdi-30:5013</a> · Reports: <a href="http://gvdi-30:8095/">gvdi-30:8095</a> · Repo: <code>~/Operations/ap-processing</code></p>
+  <p>This page is regenerated whenever there's a material status change.</p>
+</footer>
+
+</div>
+</body>
+</html>

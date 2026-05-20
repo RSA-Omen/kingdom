@@ -1,0 +1,7 @@
+slug: gekko-tracks
+name: Gekko Tracks
+type: app
+summary: |
+  Credit-card coding (CCC) system — bank CSV → cardholder classification → manager approval → Pronto Xi export. FastAPI backend, React frontend, Azure AD SSO.
+owner: lauchlan
+created: 2026-05-20

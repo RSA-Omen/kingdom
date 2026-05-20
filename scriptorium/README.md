@@ -1,59 +1,85 @@
 # The Scriptorium
 
-The Kingdom's documentation + design-demo village.
+The Kingdom's documentation + design-demo village. One page per village (an
+app, service, process, or bridge in the Kingdom), with a **wiki** on top and
+a gallery of **HTML demos** on the bottom.
 
-One page per village (an app, service, process, or bridge in the Kingdom).
-Each village page has two halves: a **wiki** on top (searchable markdown
-documentation) and a gallery of **HTML demos** on the bottom (mockups, flow
-diagrams, design iterations pushed in from any Claude Code session).
+Live at `http://gvdi-30:8095/`.
 
-## What's here today
+The rules for what every village owes the Scriptorium are codified in
+`docs/GEKKO_STANDARD.md` Section 15 — village-type taxonomy and mandatory
+wiki posts per type.
 
-This folder is the static design prototype, generated via claude.ai/design
-and implemented from the handoff bundle on 2026-05-20.
+---
 
-| File | Purpose |
-|---|---|
-| `index.html` | The Kingdom — homepage with village grid, search, type filters |
-| `village.html` | A single village's page (wiki + demos zone) |
-| `demo.html` | Full-screen demo viewer with floating control bar |
-| `search.html` | Full-text search results across all village wikis |
-| `styles.css` | Void Teal design tokens + shared components |
-| `scriptorium.js` | ⌘K focus + search-input → search.html on Enter |
-
-### How to view
-
-Open `index.html` directly in a browser, or serve the folder:
+## How this folder is organised
 
 ```
-python3 -m http.server -d scriptorium 8090
-# then visit http://localhost:8090
+scriptorium/
+├── build.py              # the renderer (this folder's main entry point)
+├── requirements.txt      # python deps (jinja2, markdown, pyyaml)
+├── styles.css            # shared Void Teal stylesheet (copied into build/)
+├── scriptorium.js        # ⌘K focus + Enter → search.html
+├── content/
+│   └── villages/<slug>/
+│       ├── meta.yml      # village info — see Standard §15.2
+│       ├── wiki/         # markdown pages — see Standard §15.4
+│       └── demos/        # HTML demos — see Standard §15.5
+├── templates/            # Jinja2 templates the renderer uses
+│   ├── index.html        # homepage with village grid
+│   ├── village.html      # a single village's page (wiki + demos)
+│   └── search.html       # search-results placeholder
+└── build/                # generated output (gitignored, deployed)
 ```
 
-## What's next
+The static HTML files at `scriptorium/` root (`index.html`, `village.html`,
+`demo.html`, `search.html`) are the original design prototype from the
+claude.ai/design handoff. They will be removed in a follow-up; the renderer
++ templates replace them.
 
-The static prototype is the visual contract. To turn this into a working
-village we still need:
+---
 
-1. **Charter** — village-type taxonomy + mandatory-post rules, written into
-   `docs/GEKKO_STANDARD.md` so every village knows what it owes its page.
-2. **Content store** — `villages/<slug>/wiki/*.md` + `villages/<slug>/demos/*.html`
-   layout on disk, edited from any Claude Code session and committed to git.
-3. **Renderer** — replace the hard-coded mock content in the HTML files with
-   markdown rendering + a SQLite FTS5 index for site-wide search.
-4. **Seed demos** — migrate the existing HTML reports from `~/reports/Kingdom/`
-   into the demos gallery as the first batch.
+## Building
 
-## Design notes
+```sh
+# one-time setup
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
 
-- **Void Teal palette** — near-black background (`#050510`) with teal accent
-  (`#81e6d9`). Kingdom metaphor is conceptual scaffolding, never visual
-  decoration. No parchment, no medieval imagery.
-- **Mock content** in the cards (Quarry, Postmaster, Almanac, Drawbridge,
-  Beacon, Foundry) is design-fill. The three real villages depicted are
-  Gekko Tracks, The Interceptor, and Bender; the rest will be replaced as
-  real villages register.
-- **Removed from the design** during iteration: village health dots, sync
-  language, the three header buttons (Watch / Open repo / Edit page). The
-  CSS still defines `--health-*` tokens because the warning-callout colour
-  uses one of them.
+# build
+.venv/bin/python build.py
+```
+
+Output lands in `build/`. The renderer prints a summary including any
+required wiki posts missing per the Standard.
+
+---
+
+## Deploying
+
+The site is served by nginx from `~/reports/` on port 8095. To deploy:
+
+```sh
+cp -r build/* ~/reports/
+```
+
+The existing dispatches at `~/reports/Kingdom/` and the legacy reports listing
+at `~/reports/legacy-reports.html` are not touched by this and stay
+accessible.
+
+There is no automated build/deploy yet. The follow-up is an `inotifywait`
+watcher service that rebuilds on commit.
+
+---
+
+## Adding or editing content from any Claude Code session
+
+Per the Standard (Section 15.7), Scriptorium edits land in the Kingdom repo,
+not in the village's own repo.
+
+1. Edit the relevant file under `scriptorium/content/villages/<slug>/`
+2. Commit in the Kingdom repo with a message prefix:
+   - `wiki(<slug>): <change>` for wiki edits
+   - `demo(<slug>): <description>` for a new demo
+3. Push the Kingdom repo
+4. Run the renderer and redeploy (until the watcher service lands)

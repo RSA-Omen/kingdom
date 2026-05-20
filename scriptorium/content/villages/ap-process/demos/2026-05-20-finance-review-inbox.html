@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Finance review inbox — user interaction</title>
+<style>
+  body { margin: 0; background: #050510; color: #e2e8f0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 48px 24px 80px; }
+  h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; color: #f1f5f9; margin: 0 0 8px; }
+  .lead { color: #94a3b8; font-size: 15px; max-width: 65ch; margin: 0; }
+  .diagram { background: #0a0a18; border: 1px solid rgba(148,163,184,0.10); border-radius: 14px; padding: 32px 24px; margin: 32px 0; }
+  .diagram svg { display: block; width: 100%; height: auto; }
+  h2 { font-size: 14px; font-weight: 600; color: #f1f5f9; margin: 32px 0 10px; letter-spacing: -0.01em; }
+  ul { color: #cbd5e1; font-size: 14px; line-height: 1.7; padding-left: 22px; margin: 0; }
+  .footnote { color: #475569; font-size: 11px; margin-top: 32px; font-family: 'JetBrains Mono', ui-monospace, monospace; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Finance review inbox — user interaction</h1>
+  <p class="lead">Where a Finance reviewer spends time. Each invoice the pipeline could not auto-close lands here with the candidate matches already surfaced and one primary action visible inline.</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 1000 540" xmlns="http://www.w3.org/2000/svg">
+
+      <!-- Browser frame -->
+      <rect x="20" y="20" width="960" height="500" rx="10" fill="#0d0d1a" stroke="rgba(148,163,184,0.3)" stroke-width="1"/>
+      <rect x="20" y="20" width="960" height="32" rx="10" fill="rgba(148,163,184,0.05)"/>
+      <rect x="20" y="40" width="960" height="12" fill="rgba(148,163,184,0.05)"/>
+      <circle cx="36" cy="36" r="4" fill="rgba(248,113,113,0.5)"/>
+      <circle cx="52" cy="36" r="4" fill="rgba(251,191,36,0.5)"/>
+      <circle cx="68" cy="36" r="4" fill="rgba(74,222,128,0.5)"/>
+      <text x="500" y="40" text-anchor="middle" fill="#64748b" font-size="11" font-family="'JetBrains Mono', ui-monospace, monospace">finance.kingdom.local/ap/review</text>
+
+      <!-- Sidebar -->
+      <rect x="20" y="52" width="180" height="468" fill="rgba(148,163,184,0.03)"/>
+      <text x="36" y="80" fill="#81e6d9" font-size="13" font-weight="700">AP Review</text>
+      <rect x="36" y="100" width="130" height="22" rx="4" fill="rgba(129,230,217,0.08)"/>
+      <text x="46" y="116" fill="#81e6d9" font-size="11" font-weight="600">Needs review</text>
+      <text x="155" y="116" text-anchor="end" fill="#81e6d9" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">14</text>
+      <text x="46" y="142" fill="#94a3b8" font-size="11">Recently posted</text>
+      <text x="155" y="142" text-anchor="end" fill="#475569" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">37</text>
+      <text x="46" y="166" fill="#94a3b8" font-size="11">Rejected</text>
+      <text x="155" y="166" text-anchor="end" fill="#475569" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">2</text>
+      <text x="46" y="190" fill="#94a3b8" font-size="11">All</text>
+      <text x="155" y="190" text-anchor="end" fill="#475569" font-size="10" font-family="'JetBrains Mono', ui-monospace, monospace">53</text>
+
+      <line x1="36" y1="210" x2="184" y2="210" stroke="rgba(148,163,184,0.15)" stroke-width="0.8"/>
+
+      <text x="36" y="234" fill="#64748b" font-size="10" font-weight="600" letter-spacing="0.1em">FILTERS</text>
+      <rect x="36" y="244" width="130" height="20" rx="3" fill="rgba(148,163,184,0.05)"/>
+      <text x="46" y="258" fill="#cbd5e1" font-size="10">Supplier (3 selected)</text>
+      <rect x="36" y="270" width="130" height="20" rx="3" fill="rgba(148,163,184,0.05)"/>
+      <text x="46" y="284" fill="#cbd5e1" font-size="10">Confidence &lt; 90%</text>
+
+      <!-- Main column header -->
+      <text x="220" y="86" fill="#f1f5f9" font-size="18" font-weight="700">Needs review · 14</text>
+      <text x="220" y="106" fill="#94a3b8" font-size="12">Each row shows the matcher's candidates. Pick one or mark supplier as new.</text>
+
+      <!-- Row 1: low-confidence supplier match -->
+      <rect x="220" y="124" width="744" height="72" rx="6" fill="rgba(251,191,36,0.04)" stroke="rgba(251,191,36,0.3)" stroke-width="1"/>
+      <text x="234" y="146" fill="#f1f5f9" font-size="13" font-weight="600">Invoice 4827 — POPPE LIGHTING (PTY) LTD</text>
+      <text x="234" y="164" fill="#94a3b8" font-size="11">Closest match: <tspan fill="#fde68a" font-weight="600">POPPE — 71%</tspan> · 3 other candidates</text>
+      <text x="234" y="180" fill="#64748b" font-size="11" font-family="'JetBrains Mono', ui-monospace, monospace">R 4,820.00 · 2026-05-18 · supplier-name fuzzy</text>
+      <rect x="804" y="138" width="100" height="30" rx="5" fill="rgba(129,230,217,0.10)" stroke="#81e6d9" stroke-width="1.2"/>
+      <text x="854" y="158" text-anchor="middle" fill="#81e6d9" font-size="11" font-weight="600">Confirm match</text>
+      <rect x="804" y="174" width="100" height="18" rx="4" fill="rgba(148,163,184,0.05)" stroke="rgba(148,163,184,0.2)" stroke-width="0.8"/>
+      <text x="854" y="186" text-anchor="middle" fill="#94a3b8" font-size="10">Mark new</text>
+
+      <!-- Row 2: amount mismatch -->
+      <rect x="220" y="206" width="744" height="72" rx="6" fill="rgba(251,191,36,0.04)" stroke="rgba(251,191,36,0.3)" stroke-width="1"/>
+      <text x="234" y="228" fill="#f1f5f9" font-size="13" font-weight="600">Invoice 4831 — iLASER (PTY) LTD</text>
+      <text x="234" y="246" fill="#94a3b8" font-size="11">Supplier matched <tspan fill="#4ade80" font-weight="600">99.2%</tspan> · totals disagree with docket by <tspan fill="#fde68a" font-weight="600">R 14.50</tspan></text>
+      <text x="234" y="262" fill="#64748b" font-size="11" font-family="'JetBrains Mono', ui-monospace, monospace">R 12,350.00 invoice · R 12,335.50 docket · amount mismatch</text>
+      <rect x="804" y="220" width="100" height="30" rx="5" fill="rgba(129,230,217,0.10)" stroke="#81e6d9" stroke-width="1.2"/>
+      <text x="854" y="240" text-anchor="middle" fill="#81e6d9" font-size="11" font-weight="600">Accept invoice</text>
+      <rect x="804" y="256" width="100" height="18" rx="4" fill="rgba(148,163,184,0.05)" stroke="rgba(148,163,184,0.2)" stroke-width="0.8"/>
+      <text x="854" y="268" text-anchor="middle" fill="#94a3b8" font-size="10">Reject</text>
+
+      <!-- Row 3: missing docket -->
+      <rect x="220" y="288" width="744" height="72" rx="6" fill="rgba(251,191,36,0.04)" stroke="rgba(251,191,36,0.3)" stroke-width="1"/>
+      <text x="234" y="310" fill="#f1f5f9" font-size="13" font-weight="600">Invoice 4838 — ELGAS LIMITED</text>
+      <text x="234" y="328" fill="#94a3b8" font-size="11">Supplier matched <tspan fill="#4ade80" font-weight="600">98.9%</tspan> · no docket attached to the email</text>
+      <text x="234" y="344" fill="#64748b" font-size="11" font-family="'JetBrains Mono', ui-monospace, monospace">R 2,180.00 · 2026-05-19 · docket missing</text>
+      <rect x="804" y="302" width="100" height="30" rx="5" fill="rgba(129,230,217,0.10)" stroke="#81e6d9" stroke-width="1.2"/>
+      <text x="854" y="322" text-anchor="middle" fill="#81e6d9" font-size="11" font-weight="600">Attach docket</text>
+      <rect x="804" y="338" width="100" height="18" rx="4" fill="rgba(148,163,184,0.05)" stroke="rgba(148,163,184,0.2)" stroke-width="0.8"/>
+      <text x="854" y="350" text-anchor="middle" fill="#94a3b8" font-size="10">Post anyway</text>
+
+      <!-- Row 4: unknown supplier -->
+      <rect x="220" y="370" width="744" height="72" rx="6" fill="rgba(251,191,36,0.04)" stroke="rgba(251,191,36,0.3)" stroke-width="1"/>
+      <text x="234" y="392" fill="#f1f5f9" font-size="13" font-weight="600">Invoice 4842 — unknown supplier</text>
+      <text x="234" y="410" fill="#94a3b8" font-size="11">No candidates above 50%. The supplier may not exist in Pronto yet.</text>
+      <text x="234" y="426" fill="#64748b" font-size="11" font-family="'JetBrains Mono', ui-monospace, monospace">R 980.00 · 2026-05-19 · unknown supplier</text>
+      <rect x="804" y="384" width="100" height="30" rx="5" fill="rgba(129,230,217,0.10)" stroke="#81e6d9" stroke-width="1.2"/>
+      <text x="854" y="404" text-anchor="middle" fill="#81e6d9" font-size="11" font-weight="600">Add supplier</text>
+      <rect x="804" y="420" width="100" height="18" rx="4" fill="rgba(148,163,184,0.05)" stroke="rgba(148,163,184,0.2)" stroke-width="0.8"/>
+      <text x="854" y="432" text-anchor="middle" fill="#94a3b8" font-size="10">Reject</text>
+
+      <!-- Pagination -->
+      <text x="220" y="478" fill="#64748b" font-size="11">Showing 4 of 14</text>
+      <text x="964" y="478" text-anchor="end" fill="#64748b" font-size="11" font-family="'JetBrains Mono', ui-monospace, monospace">‹ prev   1   2   3   4   next ›</text>
+
+    </svg>
+  </div>
+
+  <h2>What the reviewer does</h2>
+  <ul>
+    <li><strong>One primary action per row.</strong> The matcher decides what's most likely useful — Confirm, Accept, Attach, or Add. The reviewer either approves or picks a different path.</li>
+    <li><strong>Confidence shown inline.</strong> Green for high (≥90%), amber for low. The reviewer never has to dig for it.</li>
+    <li><strong>Approved rows leave the inbox immediately</strong> and queue for posting to Pronto via [[bender]].</li>
+    <li><strong>The pipeline never asks "what should I do here?"</strong> — it only surfaces the cases it can't close, with the data the reviewer needs to decide.</li>
+  </ul>
+
+  <p class="footnote">demo · 2026-05-20 · /villages/ap-process · UI mockup, not yet built</p>
+</div>
+</body>
+</html>

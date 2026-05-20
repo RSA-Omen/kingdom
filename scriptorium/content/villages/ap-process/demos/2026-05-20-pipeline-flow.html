@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>AP pipeline — invoice flow</title>
+<style>
+  body { margin: 0; background: #050510; color: #e2e8f0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 48px 24px 80px; }
+  h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; color: #f1f5f9; margin: 0 0 8px; }
+  .lead { color: #94a3b8; font-size: 15px; max-width: 65ch; margin: 0; }
+  .diagram { background: #0a0a18; border: 1px solid rgba(148,163,184,0.10); border-radius: 14px; padding: 32px 24px; margin: 32px 0; }
+  .diagram svg { display: block; width: 100%; height: auto; }
+  h2 { font-size: 14px; font-weight: 600; color: #f1f5f9; margin: 32px 0 10px; letter-spacing: -0.01em; }
+  ul { color: #cbd5e1; font-size: 14px; line-height: 1.7; padding-left: 22px; margin: 0; }
+  .footnote { color: #475569; font-size: 11px; margin-top: 32px; font-family: 'JetBrains Mono', ui-monospace, monospace; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>AP pipeline — invoice flow</h1>
+  <p class="lead">An invoice arrives by email and passes through five mechanical stages before either auto-posting or surfacing in the Finance review inbox. The pipeline does no AP policy — it only does the work that can be done without human judgment.</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 1000 380" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="ap-ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#81e6d9"/>
+        </marker>
+        <marker id="ap-ar-s" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="rgba(148,163,184,0.7)"/>
+        </marker>
+      </defs>
+
+      <!-- Email input -->
+      <rect x="20" y="120" width="120" height="80" rx="10" fill="rgba(148,163,184,0.06)" stroke="rgba(148,163,184,0.4)" stroke-width="1.2"/>
+      <text x="80" y="152" text-anchor="middle" fill="#cbd5e1" font-size="13" font-weight="600">📧 Email</text>
+      <text x="80" y="170" text-anchor="middle" fill="#94a3b8" font-size="10">invoice PDF</text>
+      <text x="80" y="184" text-anchor="middle" fill="#94a3b8" font-size="10">+ docket</text>
+
+      <!-- 5 stages -->
+      <g font-family="-apple-system, BlinkMacSystemFont, sans-serif">
+        <rect x="170" y="140" width="120" height="40" rx="6" fill="rgba(129,230,217,0.08)" stroke="#81e6d9" stroke-width="1.2"/>
+        <text x="230" y="158" text-anchor="middle" fill="#81e6d9" font-size="12" font-weight="600">1 · Unwrap</text>
+        <text x="230" y="172" text-anchor="middle" fill="#94a3b8" font-size="10">open attachments</text>
+
+        <rect x="320" y="140" width="120" height="40" rx="6" fill="rgba(129,230,217,0.08)" stroke="#81e6d9" stroke-width="1.2"/>
+        <text x="380" y="158" text-anchor="middle" fill="#81e6d9" font-size="12" font-weight="600">2 · Classify</text>
+        <text x="380" y="172" text-anchor="middle" fill="#94a3b8" font-size="10">invoice? docket?</text>
+
+        <rect x="470" y="140" width="120" height="40" rx="6" fill="rgba(129,230,217,0.08)" stroke="#81e6d9" stroke-width="1.2"/>
+        <text x="530" y="158" text-anchor="middle" fill="#81e6d9" font-size="12" font-weight="600">3 · Extract</text>
+        <text x="530" y="172" text-anchor="middle" fill="#94a3b8" font-size="10">line items + totals</text>
+
+        <rect x="620" y="140" width="140" height="40" rx="6" fill="rgba(129,230,217,0.08)" stroke="#81e6d9" stroke-width="1.2"/>
+        <text x="690" y="158" text-anchor="middle" fill="#81e6d9" font-size="12" font-weight="600">4 · Supplier-match</text>
+        <text x="690" y="172" text-anchor="middle" fill="#94a3b8" font-size="10">against Bender export</text>
+
+        <rect x="790" y="140" width="120" height="40" rx="6" fill="rgba(129,230,217,0.08)" stroke="#81e6d9" stroke-width="1.2"/>
+        <text x="850" y="158" text-anchor="middle" fill="#81e6d9" font-size="12" font-weight="600">5 · Decide</text>
+        <text x="850" y="172" text-anchor="middle" fill="#94a3b8" font-size="10">post / review</text>
+      </g>
+
+      <!-- Arrows between stages -->
+      <path d="M140 160 L 170 160" stroke="#81e6d9" stroke-width="1.4" fill="none" marker-end="url(#ap-ar)"/>
+      <path d="M290 160 L 320 160" stroke="#81e6d9" stroke-width="1.4" fill="none" marker-end="url(#ap-ar)"/>
+      <path d="M440 160 L 470 160" stroke="#81e6d9" stroke-width="1.4" fill="none" marker-end="url(#ap-ar)"/>
+      <path d="M590 160 L 620 160" stroke="#81e6d9" stroke-width="1.4" fill="none" marker-end="url(#ap-ar)"/>
+      <path d="M760 160 L 790 160" stroke="#81e6d9" stroke-width="1.4" fill="none" marker-end="url(#ap-ar)"/>
+
+      <!-- Branching outcomes -->
+      <!-- High confidence → Pronto -->
+      <path d="M850 180 L 850 240 L 950 240" stroke="#81e6d9" stroke-width="1.5" fill="none" marker-end="url(#ap-ar)"/>
+      <text x="900" y="232" text-anchor="middle" fill="#81e6d9" font-size="10" font-weight="600">high confidence</text>
+      <rect x="800" y="265" width="170" height="60" rx="8" fill="rgba(129,230,217,0.10)" stroke="#81e6d9" stroke-width="1.4"/>
+      <text x="885" y="290" text-anchor="middle" fill="#81e6d9" font-size="12" font-weight="600">Pronto AP entry</text>
+      <text x="885" y="306" text-anchor="middle" fill="#94a3b8" font-size="10">via [[bender]] (pending)</text>
+
+      <!-- Needs review → Finance inbox -->
+      <path d="M730 180 L 730 280 L 600 280" stroke="rgba(251,191,36,0.7)" stroke-width="1.5" fill="none" marker-end="url(#ap-ar-s)"/>
+      <text x="720" y="240" text-anchor="middle" fill="rgba(251,191,36,0.9)" font-size="10" font-weight="600">low confidence</text>
+      <rect x="420" y="260" width="180" height="60" rx="8" fill="rgba(251,191,36,0.06)" stroke="rgba(251,191,36,0.6)" stroke-width="1.4"/>
+      <text x="510" y="285" text-anchor="middle" fill="rgba(251,191,36,0.95)" font-size="12" font-weight="600">Finance review inbox</text>
+      <text x="510" y="301" text-anchor="middle" fill="#94a3b8" font-size="10">human picks from candidates</text>
+
+      <!-- Bender supplier export feeds stage 4 -->
+      <rect x="620" y="60" width="140" height="44" rx="6" fill="rgba(196,181,253,0.06)" stroke="rgba(196,181,253,0.5)" stroke-width="1"/>
+      <text x="690" y="82" text-anchor="middle" fill="#c4b5fd" font-size="11" font-weight="600">Bender</text>
+      <text x="690" y="96" text-anchor="middle" fill="#94a3b8" font-size="10">supplier master (3,184)</text>
+      <path d="M690 104 L 690 140" stroke="rgba(196,181,253,0.5)" stroke-width="1.2" stroke-dasharray="3 2" fill="none" marker-end="url(#ap-ar-s)"/>
+
+      <!-- Claude annotation on stage 3 -->
+      <rect x="470" y="60" width="120" height="44" rx="6" fill="rgba(148,163,184,0.06)" stroke="rgba(148,163,184,0.35)" stroke-width="1"/>
+      <text x="530" y="80" text-anchor="middle" fill="#cbd5e1" font-size="11" font-weight="600">Anthropic API</text>
+      <text x="530" y="94" text-anchor="middle" fill="#94a3b8" font-size="10">document parsing</text>
+      <path d="M530 104 L 530 140" stroke="rgba(148,163,184,0.45)" stroke-width="1.2" stroke-dasharray="3 2" fill="none" marker-end="url(#ap-ar-s)"/>
+    </svg>
+  </div>
+
+  <h2>The shape</h2>
+  <ul>
+    <li><strong>Email → Pronto AP entry</strong> is the full happy path, with Finance as the gate before anything posts.</li>
+    <li><strong>Bender's supplier export</strong> feeds stage 4 (supplier-match); 3,184 suppliers in the most recent dump.</li>
+    <li><strong>Anthropic's API</strong> handles document parsing in stage 3. The data-handling scope is documented in the formal memo demo on this page.</li>
+    <li><strong>Recent benchmark:</strong> top invoice ↔ docket matches at 99.2% and 98.9% confidence. Below that threshold, items go to review.</li>
+    <li>The pipeline never guesses AP policy. When confidence is low, Finance sees the candidates and decides.</li>
+  </ul>
+
+  <p class="footnote">demo · 2026-05-20 · /villages/ap-process</p>
+</div>
+</body>
+</html>

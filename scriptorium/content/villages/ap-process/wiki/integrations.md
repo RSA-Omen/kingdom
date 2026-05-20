@@ -1,15 +1,23 @@
 # Integrations
 
-_Stub — to be replaced with a real integration map._
+The AP Process pipeline reads from a small set of inputs and writes to a single target. Most of the surface area is the human review step in the middle.
 
-**Likely inputs**
+## Inputs
 
-- Invoice receipt channels — email, scanned PDFs, supplier portals
-- Pronto Xi (via [[bender]]) for reading existing financial records
+| Source | What arrives | Notes |
+|---|---|---|
+| **Email inbox** | Invoice PDFs and docket attachments | Inbound channel; one email may contain multiple documents |
+| **[[bender]]** | Pronto supplier master export | Used by the supplier-match stage; 3,184 suppliers in the recent export |
+| **Claude (Anthropic API)** | Document extraction | Sends invoice content to Anthropic for parsing; see the Data Handling Notice demo for the formal scope |
 
-**Likely outputs**
+## Outputs
 
-- Pronto Xi (via [[bender]]) for posting AP entries
-- Reconciliation reports
+| Target | What goes | Status |
+|---|---|---|
+| **Finance inbox (in-app)** | "Needs review" cases with candidate matches and reasons | Active; Finance approves or rejects |
+| **Pronto Xi** (via [[bender]]) | AP entry posting | Pending — happens once Finance approves an invoice |
+| **Status reports** | Pipeline state, daily benchmark on a real email | Published as demos on this village page |
 
-To be confirmed as the design lands.
+## Sensitive data flow
+
+Invoice content is sent to Anthropic for extraction. The data-handling scope and controls are documented in the **Data Handling Notice** demo on this page — formal memo to Barry & management.

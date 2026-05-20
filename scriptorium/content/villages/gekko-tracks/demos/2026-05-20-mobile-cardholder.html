@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Mobile cardholder — receipt capture &amp; classify</title>
+<style>
+  body { margin: 0; background: #050510; color: #e2e8f0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 48px 24px 80px; }
+  h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; color: #f1f5f9; margin: 0 0 8px; }
+  .lead { color: #94a3b8; font-size: 15px; max-width: 65ch; margin: 0; }
+  .diagram { background: #0a0a18; border: 1px solid rgba(148,163,184,0.10); border-radius: 14px; padding: 32px 24px; margin: 32px 0; }
+  .diagram svg { display: block; width: 100%; height: auto; }
+  h2 { font-size: 14px; font-weight: 600; color: #f1f5f9; margin: 32px 0 10px; letter-spacing: -0.01em; }
+  ul { color: #cbd5e1; font-size: 14px; line-height: 1.7; padding-left: 22px; margin: 0; }
+  .footnote { color: #475569; font-size: 11px; margin-top: 32px; font-family: 'JetBrains Mono', ui-monospace, monospace; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Mobile cardholder — receipt capture &amp; classify</h1>
+  <p class="lead">The phone view of Gekko Tracks. Three tabs: Inbox, Ledger, and Receipts. The Receipts tab is the moment-of-purchase tool — tap "Take a photo", the back-facing camera opens, snap, upload. The Inbox is where receipts land after OCR and need a transaction picked.</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 1000 720" xmlns="http://www.w3.org/2000/svg">
+
+      <!-- Three phones, side by side -->
+      <text x="500" y="32" text-anchor="middle" fill="#475569" font-size="11" font-weight="600" letter-spacing="0.16em">CARDHOLDER MOBILE — THREE SCREENS</text>
+
+      <!-- ============ PHONE 1: Receipts tab (capture) ============ -->
+      <g transform="translate(80, 60)">
+        <!-- phone outline -->
+        <rect x="0" y="0" width="240" height="500" rx="28" fill="#0d0d1a" stroke="rgba(148,163,184,0.4)" stroke-width="2"/>
+        <rect x="6" y="6" width="228" height="488" rx="22" fill="#050510" stroke="rgba(148,163,184,0.15)" stroke-width="0.6"/>
+        <!-- notch -->
+        <rect x="95" y="6" width="50" height="14" rx="7" fill="#0a0a18"/>
+
+        <!-- App header -->
+        <rect x="14" y="30" width="212" height="50" fill="rgba(129,230,217,0.04)"/>
+        <text x="120" y="50" text-anchor="middle" fill="#81e6d9" font-size="11" font-weight="700">Gekko Tracks</text>
+        <text x="120" y="64" text-anchor="middle" fill="#64748b" font-size="9">@s.botha · cardholder</text>
+
+        <!-- Tabs -->
+        <rect x="14" y="84" width="212" height="32" fill="rgba(148,163,184,0.04)"/>
+        <text x="44" y="104" text-anchor="middle" fill="#94a3b8" font-size="10">Inbox</text>
+        <text x="92" y="104" text-anchor="middle" fill="#94a3b8" font-size="10">Ledger</text>
+        <rect x="130" y="92" width="80" height="20" rx="3" fill="rgba(129,230,217,0.10)"/>
+        <text x="170" y="104" text-anchor="middle" fill="#81e6d9" font-size="10" font-weight="700">Receipts</text>
+
+        <!-- Receipts list -->
+        <text x="22" y="138" fill="#f1f5f9" font-size="13" font-weight="700">Receipts</text>
+        <text x="218" y="138" text-anchor="end" fill="#94a3b8" font-size="10">12 attached · 3 review</text>
+
+        <!-- Capture CTA -->
+        <rect x="22" y="148" width="196" height="56" rx="10" fill="rgba(129,230,217,0.10)" stroke="#81e6d9" stroke-width="1.6"/>
+        <circle cx="50" cy="176" r="14" fill="rgba(129,230,217,0.2)"/>
+        <rect x="42" y="170" width="16" height="12" rx="2" fill="#81e6d9"/>
+        <circle cx="50" cy="176" r="3" fill="#050510"/>
+        <text x="76" y="170" fill="#81e6d9" font-size="12" font-weight="700">Take a photo</text>
+        <text x="76" y="184" fill="#94a3b8" font-size="9">opens back camera · one tap</text>
+        <text x="76" y="196" fill="#94a3b8" font-size="9">— or — pick from files</text>
+
+        <!-- Receipts list items -->
+        <rect x="22" y="216" width="196" height="44" rx="6" fill="rgba(129,230,217,0.04)" stroke="rgba(129,230,217,0.2)" stroke-width="0.8"/>
+        <rect x="30" y="222" width="32" height="32" rx="3" fill="rgba(148,163,184,0.12)"/>
+        <text x="46" y="240" text-anchor="middle" fill="#64748b" font-size="9">PDF</text>
+        <text x="70" y="234" fill="#cbd5e1" font-size="10" font-weight="600">UBER EATS</text>
+        <text x="70" y="246" fill="#94a3b8" font-size="9">R 285 · matched</text>
+        <text x="212" y="240" text-anchor="end" fill="#81e6d9" font-size="9" font-weight="600">✓</text>
+
+        <rect x="22" y="266" width="196" height="44" rx="6" fill="rgba(251,191,36,0.05)" stroke="rgba(251,191,36,0.35)" stroke-width="0.8"/>
+        <rect x="30" y="272" width="32" height="32" rx="3" fill="rgba(148,163,184,0.12)"/>
+        <text x="46" y="290" text-anchor="middle" fill="#64748b" font-size="9">JPG</text>
+        <text x="70" y="284" fill="#cbd5e1" font-size="10" font-weight="600">TAKEALOT</text>
+        <text x="70" y="296" fill="#fbbf24" font-size="9">R 1,249 · review</text>
+        <text x="212" y="290" text-anchor="end" fill="#fbbf24" font-size="9" font-weight="600">▸</text>
+
+        <rect x="22" y="316" width="196" height="44" rx="6" fill="rgba(148,163,184,0.04)" stroke="rgba(148,163,184,0.18)" stroke-width="0.8"/>
+        <rect x="30" y="322" width="32" height="32" rx="3" fill="rgba(148,163,184,0.12)"/>
+        <text x="46" y="340" text-anchor="middle" fill="#64748b" font-size="9">JPG</text>
+        <text x="70" y="334" fill="#cbd5e1" font-size="10" font-weight="600">CITY OF CT</text>
+        <text x="70" y="346" fill="#94a3b8" font-size="9">processing…</text>
+        <text x="212" y="340" text-anchor="end" fill="#94a3b8" font-size="9">⏳</text>
+
+        <rect x="22" y="366" width="196" height="44" rx="6" fill="rgba(129,230,217,0.04)" stroke="rgba(129,230,217,0.2)" stroke-width="0.8"/>
+        <rect x="30" y="372" width="32" height="32" rx="3" fill="rgba(148,163,184,0.12)"/>
+        <text x="46" y="390" text-anchor="middle" fill="#64748b" font-size="9">PDF</text>
+        <text x="70" y="384" fill="#cbd5e1" font-size="10" font-weight="600">SHELL</text>
+        <text x="70" y="396" fill="#94a3b8" font-size="9">R 820 · matched</text>
+        <text x="212" y="390" text-anchor="end" fill="#81e6d9" font-size="9" font-weight="600">✓</text>
+
+        <text x="120" y="430" text-anchor="middle" fill="#64748b" font-size="9" font-style="italic">8 more above</text>
+
+        <!-- Bottom nav -->
+        <rect x="14" y="450" width="212" height="42" fill="rgba(148,163,184,0.03)"/>
+        <text x="60" y="475" text-anchor="middle" fill="#94a3b8" font-size="10">Inbox (5)</text>
+        <text x="120" y="475" text-anchor="middle" fill="#94a3b8" font-size="10">Ledger</text>
+        <text x="180" y="475" text-anchor="middle" fill="#81e6d9" font-size="10" font-weight="700">Receipts</text>
+
+        <!-- Caption -->
+      </g>
+      <text x="200" y="592" text-anchor="middle" fill="#81e6d9" font-size="12" font-weight="700">1 · Receipts tab</text>
+      <text x="200" y="608" text-anchor="middle" fill="#94a3b8" font-size="11">Capture · review · attach</text>
+
+      <!-- ============ PHONE 2: Camera capture moment ============ -->
+      <g transform="translate(380, 60)">
+        <rect x="0" y="0" width="240" height="500" rx="28" fill="#0d0d1a" stroke="rgba(148,163,184,0.4)" stroke-width="2"/>
+        <rect x="6" y="6" width="228" height="488" rx="22" fill="#050510" stroke="rgba(148,163,184,0.15)" stroke-width="0.6"/>
+        <rect x="95" y="6" width="50" height="14" rx="7" fill="#0a0a18"/>
+
+        <!-- Native camera viewfinder simulation -->
+        <rect x="14" y="30" width="212" height="370" fill="#1a1a24"/>
+
+        <!-- Receipt in viewfinder -->
+        <g transform="translate(50, 60)">
+          <rect width="140" height="240" rx="3" fill="#f5f5f0" transform="rotate(-3 70 120)"/>
+          <g transform="rotate(-3 70 120)">
+            <rect x="20" y="20" width="100" height="6" rx="1" fill="#1a1a1a"/>
+            <rect x="20" y="32" width="60" height="3" rx="1" fill="#666"/>
+            <rect x="20" y="50" width="100" height="2" rx="1" fill="#888"/>
+            <rect x="20" y="56" width="80" height="2" rx="1" fill="#888"/>
+            <rect x="20" y="62" width="90" height="2" rx="1" fill="#888"/>
+            <rect x="20" y="68" width="70" height="2" rx="1" fill="#888"/>
+
+            <rect x="20" y="82" width="100" height="2" rx="1" fill="#aaa"/>
+            <rect x="20" y="88" width="100" height="2" rx="1" fill="#aaa"/>
+            <rect x="20" y="94" width="100" height="2" rx="1" fill="#aaa"/>
+            <rect x="20" y="100" width="100" height="2" rx="1" fill="#aaa"/>
+            <rect x="20" y="106" width="100" height="2" rx="1" fill="#aaa"/>
+            <rect x="20" y="112" width="100" height="2" rx="1" fill="#aaa"/>
+
+            <rect x="20" y="130" width="100" height="2" rx="1" fill="#999"/>
+            <rect x="20" y="148" width="50" height="6" rx="1" fill="#1a1a1a"/>
+            <rect x="80" y="148" width="40" height="6" rx="1" fill="#1a1a1a"/>
+            <rect x="20" y="170" width="100" height="2" rx="1" fill="#bbb"/>
+            <rect x="20" y="180" width="100" height="2" rx="1" fill="#bbb"/>
+            <rect x="20" y="200" width="60" height="3" rx="1" fill="#777"/>
+          </g>
+        </g>
+
+        <!-- Frame corners -->
+        <path d="M28 44 L 28 60 M 28 44 L 44 44" stroke="#81e6d9" stroke-width="2" fill="none"/>
+        <path d="M212 44 L 212 60 M 212 44 L 196 44" stroke="#81e6d9" stroke-width="2" fill="none"/>
+        <path d="M28 386 L 28 370 M 28 386 L 44 386" stroke="#81e6d9" stroke-width="2" fill="none"/>
+        <path d="M212 386 L 212 370 M 212 386 L 196 386" stroke="#81e6d9" stroke-width="2" fill="none"/>
+
+        <!-- Shutter UI -->
+        <rect x="14" y="400" width="212" height="92" fill="rgba(5,5,16,0.85)"/>
+        <text x="120" y="422" text-anchor="middle" fill="#cbd5e1" font-size="10">Receipt — back camera</text>
+
+        <circle cx="120" cy="456" r="22" fill="none" stroke="#81e6d9" stroke-width="2.5"/>
+        <circle cx="120" cy="456" r="15" fill="#81e6d9"/>
+
+        <text x="40" y="461" text-anchor="middle" fill="#94a3b8" font-size="9">Cancel</text>
+        <rect x="178" y="446" width="34" height="20" rx="3" fill="rgba(148,163,184,0.1)"/>
+        <text x="195" y="460" text-anchor="middle" fill="#cbd5e1" font-size="9">Flip</text>
+      </g>
+      <text x="500" y="592" text-anchor="middle" fill="#81e6d9" font-size="12" font-weight="700">2 · Camera capture</text>
+      <text x="500" y="608" text-anchor="middle" fill="#94a3b8" font-size="11">capture="environment" · one tap</text>
+
+      <!-- ============ PHONE 3: Manual-review pick ============ -->
+      <g transform="translate(680, 60)">
+        <rect x="0" y="0" width="240" height="500" rx="28" fill="#0d0d1a" stroke="rgba(148,163,184,0.4)" stroke-width="2"/>
+        <rect x="6" y="6" width="228" height="488" rx="22" fill="#050510" stroke="rgba(148,163,184,0.15)" stroke-width="0.6"/>
+        <rect x="95" y="6" width="50" height="14" rx="7" fill="#0a0a18"/>
+
+        <rect x="14" y="30" width="212" height="50" fill="rgba(251,191,36,0.05)"/>
+        <text x="120" y="50" text-anchor="middle" fill="#fbbf24" font-size="11" font-weight="700">⚠ Pick a transaction</text>
+        <text x="120" y="64" text-anchor="middle" fill="#94a3b8" font-size="9">TAKEALOT · R 1,249 · 09 May</text>
+
+        <!-- Receipt preview -->
+        <rect x="14" y="88" width="212" height="80" fill="rgba(148,163,184,0.04)" stroke="rgba(148,163,184,0.15)" stroke-width="0.6"/>
+        <rect x="98" y="98" width="44" height="62" rx="2" fill="#e5e5e0"/>
+        <rect x="106" y="106" width="28" height="3" rx="1" fill="#1a1a1a"/>
+        <rect x="106" y="114" width="20" height="2" rx="1" fill="#666"/>
+        <rect x="106" y="124" width="28" height="1.5" rx="1" fill="#999"/>
+        <rect x="106" y="128" width="28" height="1.5" rx="1" fill="#999"/>
+        <rect x="106" y="132" width="28" height="1.5" rx="1" fill="#999"/>
+        <rect x="106" y="146" width="14" height="3" rx="1" fill="#1a1a1a"/>
+        <rect x="122" y="146" width="12" height="3" rx="1" fill="#1a1a1a"/>
+
+        <text x="22" y="184" fill="#cbd5e1" font-size="10" font-weight="700">Candidate transactions</text>
+
+        <!-- Candidate 1: best match -->
+        <rect x="14" y="194" width="212" height="62" fill="rgba(129,230,217,0.06)" stroke="rgba(129,230,217,0.4)" stroke-width="1.2"/>
+        <text x="22" y="212" fill="#e2e8f0" font-size="10" font-weight="600">TAKEALOT.COM</text>
+        <text x="22" y="226" fill="#94a3b8" font-size="9">09 May · R 1,249.00</text>
+        <text x="22" y="240" fill="#94a3b8" font-size="9">card *2847</text>
+        <rect x="180" y="200" width="38" height="20" rx="10" fill="rgba(129,230,217,0.18)" stroke="#81e6d9" stroke-width="1"/>
+        <text x="199" y="213" text-anchor="middle" fill="#81e6d9" font-size="9" font-weight="700">0.94</text>
+        <rect x="120" y="230" width="98" height="18" rx="4" fill="#81e6d9"/>
+        <text x="169" y="242" text-anchor="middle" fill="#050510" font-size="9" font-weight="700">Use this match</text>
+
+        <!-- Candidate 2 -->
+        <rect x="14" y="262" width="212" height="42" fill="rgba(148,163,184,0.04)" stroke="rgba(148,163,184,0.18)" stroke-width="0.8"/>
+        <text x="22" y="280" fill="#cbd5e1" font-size="10" font-weight="600">TAKEALOT.COM</text>
+        <text x="22" y="294" fill="#94a3b8" font-size="9">10 May · R 1,249.00 · *2847</text>
+        <rect x="180" y="270" width="38" height="20" rx="10" fill="rgba(148,163,184,0.06)" stroke="rgba(148,163,184,0.3)" stroke-width="1"/>
+        <text x="199" y="283" text-anchor="middle" fill="#94a3b8" font-size="9" font-weight="600">0.71</text>
+
+        <!-- Candidate 3 -->
+        <rect x="14" y="310" width="212" height="42" fill="rgba(148,163,184,0.04)" stroke="rgba(148,163,184,0.18)" stroke-width="0.8"/>
+        <text x="22" y="328" fill="#cbd5e1" font-size="10" font-weight="600">TAKEALOT.COM</text>
+        <text x="22" y="342" fill="#94a3b8" font-size="9">02 May · R 1,180.00 · *2847</text>
+        <rect x="180" y="318" width="38" height="20" rx="10" fill="rgba(148,163,184,0.06)" stroke="rgba(148,163,184,0.3)" stroke-width="1"/>
+        <text x="199" y="331" text-anchor="middle" fill="#94a3b8" font-size="9" font-weight="600">0.42</text>
+
+        <!-- Other actions -->
+        <rect x="14" y="364" width="212" height="36" fill="rgba(148,163,184,0.03)"/>
+        <text x="120" y="380" text-anchor="middle" fill="#94a3b8" font-size="10">Reassign to someone else</text>
+        <text x="120" y="392" text-anchor="middle" fill="#94a3b8" font-size="10">— or — Mark as unmatchable</text>
+
+        <!-- Bottom nav -->
+        <rect x="14" y="450" width="212" height="42" fill="rgba(148,163,184,0.03)"/>
+        <text x="60" y="475" text-anchor="middle" fill="#94a3b8" font-size="10">Inbox (5)</text>
+        <text x="120" y="475" text-anchor="middle" fill="#94a3b8" font-size="10">Ledger</text>
+        <text x="180" y="475" text-anchor="middle" fill="#81e6d9" font-size="10" font-weight="700">Receipts</text>
+      </g>
+      <text x="800" y="592" text-anchor="middle" fill="#81e6d9" font-size="12" font-weight="700">3 · Manual review</text>
+      <text x="800" y="608" text-anchor="middle" fill="#94a3b8" font-size="11">Pick from scored candidates</text>
+
+      <!-- Arrows between phones -->
+      <path d="M325 320 L 375 320" stroke="rgba(129,230,217,0.5)" stroke-width="1.5" fill="none"/>
+      <polygon points="375,320 367,316 367,324" fill="rgba(129,230,217,0.5)"/>
+      <text x="350" y="312" text-anchor="middle" fill="#94a3b8" font-size="9">tap</text>
+
+      <path d="M625 320 L 675 320" stroke="rgba(129,230,217,0.5)" stroke-width="1.5" fill="none"/>
+      <polygon points="675,320 667,316 667,324" fill="rgba(129,230,217,0.5)"/>
+      <text x="650" y="312" text-anchor="middle" fill="#94a3b8" font-size="9">low score</text>
+
+      <!-- Bottom note band -->
+      <rect x="15" y="640" width="970" height="70" rx="10" fill="rgba(255,255,255,0.02)" stroke="rgba(148,163,184,0.15)" stroke-width="1"/>
+      <text x="35" y="664" fill="#cbd5e1" font-size="12" font-weight="600">Why mobile-first for cardholders</text>
+      <text x="35" y="684" fill="#94a3b8" font-size="11">The receipt is on paper in their hand or in an SMS on their phone. Asking the cardholder to wait, get to a desk,</text>
+      <text x="35" y="700" fill="#94a3b8" font-size="11">and upload from a laptop is the slow path that loses receipts. The phone view exists so receipts are captured now, not later.</text>
+
+    </svg>
+  </div>
+
+  <h2>What this is</h2>
+  <ul>
+    <li><strong>Three tabs in the bottom nav</strong> — Inbox, Ledger, Receipts. Cardholders mostly live on Receipts and Inbox.</li>
+    <li><strong>"Take a photo" opens the back camera directly</strong> via the HTML <code>capture="environment"</code> attribute. No native app, no upload-from-gallery step required.</li>
+    <li><strong>Receipt status pills:</strong> ✓ matched · ⏳ processing · ▸ needs review.</li>
+    <li><strong>Manual review</strong> presents candidate transactions ranked by score; the cardholder picks one with a single tap or reassigns the receipt to someone else.</li>
+    <li><strong>The classify table</strong> on desktop collapses into stacked cards on mobile — the same editors, sized for thumb input.</li>
+  </ul>
+
+  <p class="footnote">demo · 2026-05-20 · /villages/gekko-tracks · mobile UI mockup</p>
+</div>
+</body>
+</html>
