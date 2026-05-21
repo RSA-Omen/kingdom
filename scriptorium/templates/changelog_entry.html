@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>{{ entry.title }} · {{ village.name }} · The Scriptorium</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/styles.css" />
+<style>
+  .page { max-width: 820px; margin: 0 auto; padding: 32px 24px 80px; }
+  .crumbs { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-dim); margin-bottom: 18px; }
+  .crumbs a { color: var(--text-dim); text-decoration: none; }
+  .crumbs a:hover { color: var(--teal); }
+  .crumbs span { color: var(--text-faint); }
+  .meta-row { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12px; color: var(--text-dim); margin: 16px 0 28px; padding: 12px 16px; background: var(--bg-elev-1); border: 1px solid var(--border); border-radius: var(--r-md); }
+  .meta-row .label { color: var(--text-faint); margin-right: 6px; }
+  .meta-row code { font-family: var(--font-mono); color: var(--text-strong); }
+  .article { font-size: 14.5px; line-height: 1.7; color: var(--text); max-width: 70ch; }
+  .article h1 { font-size: 26px; font-weight: 700; color: var(--text-strong); letter-spacing: -0.02em; margin: 0 0 12px; }
+  .article h2 { font-size: 18px; font-weight: 600; color: var(--text-strong); margin: 30px 0 12px; }
+  .article h3 { font-size: 15px; font-weight: 600; color: var(--text-strong); margin: 24px 0 8px; }
+  .article p { margin: 12px 0; }
+  .article ul, .article ol { margin: 12px 0; padding-left: 22px; }
+  .article li { margin: 4px 0; }
+  .article a { color: var(--teal); text-decoration: none; border-bottom: 1px solid rgba(129,230,217,0.3); }
+  .article a:hover { border-bottom-color: var(--teal); }
+  .article code { background: var(--bg-elev-1); border: 1px solid var(--border); padding: 1px 6px; border-radius: 4px; font-family: var(--font-mono); font-size: 12.5px; color: var(--text); }
+  .article pre { background: var(--bg-elev-1); border: 1px solid var(--border); border-radius: var(--r-md); padding: 14px 16px; overflow: auto; font-family: var(--font-mono); font-size: 12.5px; line-height: 1.6; color: var(--text); margin: 16px 0 20px; }
+  .article pre code { background: none; border: none; padding: 0; font-size: inherit; }
+  .article table { border-collapse: collapse; margin: 16px 0; width: 100%; }
+  .article th, .article td { padding: 8px 12px; text-align: left; border-bottom: 1px solid var(--border); }
+  .article th { color: var(--text-strong); font-weight: 600; font-size: 13px; background: var(--bg-elev-1); }
+  .article blockquote { margin: 16px 0; padding: 4px 16px; border-left: 2px solid var(--border-strong); color: var(--text-muted); }
+</style>
+</head>
+<body>
+<main class="page">
+  <div class="crumbs">
+    <a href="/">The Scriptorium</a>
+    <span>›</span>
+    <a href="/villages/{{ village.slug }}.html">{{ village.name }}</a>
+    <span>›</span>
+    <a href="/villages/{{ village.slug }}.html#changelog">Changelog</a>
+    <span>›</span>
+    <span>{{ entry.title }}</span>
+  </div>
+
+  <div class="meta-row">
+    {% if entry.commit_date %}<span><span class="label">Date</span>{{ entry.commit_date }}</span>{% endif %}
+    {% if entry.commit_sha %}<span><span class="label">Commit</span><code>{{ entry.commit_sha[:7] }}</code></span>{% endif %}
+    {% if entry.branch %}<span><span class="label">Branch</span><code>{{ entry.branch }}</code></span>{% endif %}
+    {% if entry.files_changed is not none %}<span><span class="label">Files changed</span>{{ entry.files_changed }}</span>{% endif %}
+  </div>
+
+  <article class="article">
+    {{ body_html | safe }}
+  </article>
+</main>
+</body>
+</html>

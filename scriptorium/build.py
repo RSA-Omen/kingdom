@@ -66,6 +66,22 @@ def extract_h1(md_text: str) -> str:
     return m.group(1).strip() if m else ""
 
 
+def _split_front_matter(text: str):
+    """Return (front_dict, body) for a markdown file with optional YAML front-matter."""
+    if text.startswith("---\n"):
+        end = text.find("\n---\n", 4)
+        if end != -1:
+            front_raw = text[4:end]
+            body = text[end + 5:]
+            try:
+                front = yaml.safe_load(front_raw) or {}
+                if isinstance(front, dict):
+                    return front, body
+            except yaml.YAMLError:
+                pass
+    return {}, text
+
+
 def extract_title_tag(html: str) -> str:
     m = re.search(r"<title>(.+?)</title>", html, re.IGNORECASE | re.DOTALL)
     return m.group(1).strip() if m else "Untitled demo"
@@ -108,6 +124,23 @@ def load_village(village_dir: Path):
                 "path": demo_file,
             })
 
+    changelog_dir = village_dir / "changelog"
+    changelog_entries = []
+    if changelog_dir.exists():
+        for md_file in sorted(changelog_dir.glob("*.md"), reverse=True):
+            raw = md_file.read_text()
+            front, body = _split_front_matter(raw)
+            changelog_entries.append({
+                "filename": md_file.stem,
+                "title": front.get("title") or extract_h1(body) or md_file.stem,
+                "commit_sha": front.get("commit_sha", ""),
+                "commit_date": front.get("commit_date", ""),
+                "branch": front.get("branch", ""),
+                "files_changed": front.get("files_changed"),
+                "source": body,
+                "path": md_file,
+            })
+
     page_names = {p["name"] for p in wiki_pages}
     required = MANDATORY_POSTS.get(meta["type"], set()) | {"index"}
     missing = sorted(required - page_names)
@@ -123,6 +156,7 @@ def load_village(village_dir: Path):
         "repo": meta.get("repo"),
         "wiki_pages": wiki_pages,
         "demos": demos,
+        "changelog_entries": changelog_entries,
         "doc_count": len(wiki_pages),
         "demo_count": len(demos),
         "missing_required": missing,
@@ -264,6 +298,20 @@ def build():
             demos_out.mkdir(parents=True)
             for d in v["demos"]:
                 shutil.copy(d["path"], demos_out / d["filename"])
+
+        if v["changelog_entries"]:
+            changelog_out = villages_out / v["slug"] / "changelog"
+            changelog_out.mkdir(parents=True, exist_ok=True)
+            entry_md = markdown.Markdown(extensions=["fenced_code", "tables", "sane_lists"])
+            entry_tpl = env.get_template("changelog_entry.html")
+            for entry in v["changelog_entries"]:
+                body_text = resolve_wikilinks(entry["source"], villages_by_slug)
+                body_text = re.sub(r"^#\s+.+$", "", body_text, count=1, flags=re.MULTILINE).lstrip()
+                body_html = entry_md.convert(body_text)
+                entry_md.reset()
+                (changelog_out / f"{entry['filename']}.html").write_text(
+                    entry_tpl.render(village=v, entry=entry, body_html=body_html)
+                )
 
     (BUILD / "search.html").write_text(env.get_template("search.html").render(villages=villages))
 
