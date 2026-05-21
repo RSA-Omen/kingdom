@@ -475,12 +475,17 @@ scriptorium/content/villages/<slug>/
 ├── meta.yml          # village info (see 15.2)
 ├── wiki/             # markdown pages
 │   ├── index.md      # required: village overview
+│   ├── changelog.md  # auto-managed by village-checkpoint (see 15.8)
 │   └── *.md          # other pages (see 15.4 for required ones)
+├── changelog/        # auto-managed per-checkpoint detail pages (see 15.8)
+│   └── <YYYY-MM-DD>-<short-sha>.md
 └── demos/            # standalone HTML mockups, flow diagrams, design iterations
     └── <YYYY-MM-DD>-<short-slug>.html
 ```
 
 The `<slug>` is the village's url-safe identifier — lowercase, hyphens, no spaces (e.g. `gekko-tracks`, `the-interceptor`, `ap-process`).
+
+`wiki/changelog.md` and the `changelog/` sibling folder are both auto-created on a village's first checkpoint; no village needs to pre-create them.
 
 ---
 
@@ -577,19 +582,71 @@ Every village's own CLAUDE.md should include a one-line pointer to this section 
 
 ---
 
-### 15.8 Auto-managed wiki pages
+### 15.8 Auto-managed changelog and per-checkpoint detail pages
 
-Some wiki pages are maintained automatically by Kingdom processes, not by humans editing markdown.
+Every village's checkpoint history is exposed via **two paired surfaces** in the Scriptorium — a one-line index and a per-entry detail page. Both are maintained automatically by the `village-checkpoint` skill; neither is edited by hand.
 
-| Page | Maintained by | Contents |
+#### 15.8.1 What each checkpoint produces
+
+| Surface | Path | Purpose |
 |---|---|---|
-| `wiki/changelog.md` | `village-checkpoint` skill | One line per checkpoint — date, commit summary, short SHA |
+| **Index line** | `wiki/changelog.md` | One bullet per checkpoint, shown on the village's main Scriptorium page. The bullet's commit summary is a hyperlink to that checkpoint's detail page (not to GitHub). |
+| **Detail page** | `changelog/<YYYY-MM-DD>-<short-sha>.md` | Standalone page with the full commit message body + metadata (date, SHA, branch, files changed). Rendered by the build to `/villages/<slug>/changelog/<filename>.html`. |
 
-When a checkpoint runs in a village, it appends an entry to that village's `wiki/changelog.md` in the Scriptorium and commits the addition to the Kingdom repo. The file is created on first checkpoint if it does not already exist.
+This pattern is **mandatory** for every village. The skill produces both surfaces on every checkpoint, atomically, in one Kingdom commit.
 
-Auto-managed pages may not be edited by hand. To correct a wrong entry, delete the line directly in the Kingdom repo with a commit explaining why.
+#### 15.8.2 Detail-page file format
 
-If a village's checkpoint runs but the Scriptorium folder for that village does not exist, the skill emits a warning (Standard §15 gap) and the checkpoint still proceeds — the village's own commit is the source of truth, the wiki update is a Kingdom-side mirror.
+Each `changelog/*.md` file begins with a YAML front-matter block read by the renderer:
+
+```markdown
+---
+title: "<commit summary, same string the index line uses>"
+commit_sha: <full 40-char SHA>
+commit_date: <YYYY-MM-DD from the commit's author date>
+branch: <branch name at the time of commit>
+files_changed: <int>
+---
+
+# <commit summary>
+
+<full commit body — preserved verbatim, multi-line>
+```
+
+The renderer uses the front-matter to fill the meta strip on the detail page and falls back to extracting the H1 if `title` is absent. Body content is rendered with the same markdown extensions used elsewhere in the Scriptorium (fenced_code, tables, sane_lists) and supports `[[wikilinks]]`.
+
+#### 15.8.3 Index line format
+
+The line appended to `wiki/changelog.md` for each checkpoint is:
+
+```markdown
+- **<YYYY-MM-DD>** — [<commit summary>](/villages/<slug>/changelog/<YYYY-MM-DD>-<short-sha>.html) (`<short-sha>`)
+```
+
+Newest entries are appended to the bottom. The short-SHA is shown in monospace so the reader can correlate with `git log` quickly. The hyperlink always points to the local Scriptorium detail page — **never** to GitHub.
+
+#### 15.8.4 Build and deploy cadence
+
+The Scriptorium is a static site; new detail pages and updated index lines do not become visible until the renderer runs and the output is deployed. The `village-checkpoint` skill (Step 5.6) runs `~/Kingdom/scriptorium/build.py` and copies `build/*` → `~/reports/` (served by nginx on port 8095) at the end of every successful checkpoint. No additional human step is required.
+
+If the build or deploy fails for any reason, the source markdown remains committed to the Kingdom repo. The king can recover by running:
+
+```sh
+cd ~/Kingdom/scriptorium && .venv/bin/python build.py && cp -r build/* ~/reports/
+```
+
+#### 15.8.5 Editing rules
+
+Auto-managed surfaces (the wiki index line and the changelog detail file) **may not be edited by hand**. To correct a wrong entry:
+
+- **Wrong index line:** delete the line directly in the Kingdom repo with a commit explaining why.
+- **Wrong detail page:** delete the file (or amend its body, preserving the front-matter) directly in the Kingdom repo with a commit explaining why. The H1 and front-matter `title` must stay in sync.
+
+Manual edits to fix renderer-side bugs (template tweaks, etc.) are not "edits to auto-managed content" — those are edits to the Scriptorium machinery and are normal.
+
+#### 15.8.6 Folder-missing fallback
+
+If a village's checkpoint runs but the Scriptorium folder for that village does not exist, the skill emits a warning (Standard §15 gap) and the checkpoint still proceeds — the village's own commit is the source of truth, the Scriptorium update is a Kingdom-side mirror that can be repaired later.
 
 ### 15.9 Resolving a village's Scriptorium slug
 
@@ -610,7 +667,11 @@ A village fails this section if:
 - Any mandatory wiki post for its type is missing
 - A required post exists but is empty (zero bytes or whitespace-only)
 
-Stubs are fine. Empty is not. `wiki/changelog.md` is exempt from the empty-file check on first creation — the header alone is sufficient until the first checkpoint lands.
+Stubs are fine. Empty is not. `wiki/changelog.md` and the `changelog/` folder are exempt from the empty-file check — both are auto-created on first checkpoint, and the header alone is sufficient until the first checkpoint lands.
+
+Each entry in `wiki/changelog.md` must hyperlink to a sibling file in `changelog/` (per §15.8.3); a plain-text changelog line without a hyperlink is a §15.8 violation. The renderer does not enforce this, but the Master of Laws audit flags it.
+
+**Grandfather:** plain-text entries written *before* Standard v1.4 (2026-05-21) — typically "village registered in the Scriptorium" seed lines added when a village's folder was first created — are exempt. They predate the paired-surface convention and aren't associated with a real checkpoint commit. All entries dated 2026-05-21 or later must follow §15.8.3.
 
 ---
 
@@ -642,6 +703,7 @@ A: The king (you). Changes require explicit approval. But the Master of Laws enf
 ---
 
 **Version history:**
+- **1.4** (2026-05-21) — Expanded §15.8 from a single auto-managed page into the full **paired-surface convention**: every checkpoint now produces both a hyperlinked one-line index entry in `wiki/changelog.md` *and* a per-checkpoint detail page at `changelog/<YYYY-MM-DD>-<short-sha>.md` (rendered by the build to a standalone HTML page). Detail files use YAML front-matter for metadata. The `village-checkpoint` skill also runs build+deploy after every checkpoint so changes go live without a manual step. §15.1 folder layout updated, §15.10 audit gained a new failure mode (plain-text changelog line without hyperlink).
 - **1.3** (2026-05-20) — Extended Section 15 with auto-managed wiki pages (§15.8): every village-checkpoint appends an entry to that village's `wiki/changelog.md` in the Scriptorium. Added §15.9 on slug resolution from CLAUDE.md. Renumbered audit subsection.
 - **1.2** (2026-05-20) — Added Section 15: Scriptorium Presence. Every village must have a folder under `Kingdom/scriptorium/content/villages/<slug>/` with `meta.yml` and the mandatory wiki posts for its type (app / process / service / bridge). Updated onboarding checklist and compliance audit accordingly.
 - **1.1** (2026-05-08) — Added Section 14: Issue Tracking. Villages must register in `github-repos.json`, create standard labels, and honour agent-raised issues within SLA. Updated onboarding checklist and compliance audit accordingly.
