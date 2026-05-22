@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Internal review share — collaborative clarification flow</title>
+<style>
+  body { margin: 0; background: #050510; color: #e2e8f0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; -webkit-font-smoothing: antialiased; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 48px 24px 80px; }
+  h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; color: #f1f5f9; margin: 0 0 8px; }
+  .lead { color: #94a3b8; font-size: 15px; max-width: 70ch; margin: 0; }
+  .diagram { background: #0a0a18; border: 1px solid rgba(148,163,184,0.10); border-radius: 14px; padding: 32px 24px; margin: 32px 0; }
+  .diagram svg { display: block; width: 100%; height: auto; }
+  h2 { font-size: 14px; font-weight: 600; color: #f1f5f9; margin: 32px 0 10px; letter-spacing: -0.01em; }
+  ul { color: #cbd5e1; font-size: 14px; line-height: 1.7; padding-left: 22px; margin: 0; }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0 0; font-size: 13px; color: #cbd5e1; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid rgba(148,163,184,0.10); vertical-align: top; }
+  th { color: #81e6d9; font-weight: 600; font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; }
+  td code { color: #fde68a; font-size: 12px; }
+  .callout { background: rgba(129,230,217,0.05); border-left: 2px solid #81e6d9; padding: 12px 16px; margin: 18px 0 0; border-radius: 0 6px 6px 0; }
+  .callout p { margin: 0; color: #cbd5e1; font-size: 13px; line-height: 1.6; }
+  .callout strong { color: #f1f5f9; }
+  .footnote { color: #475569; font-size: 11px; margin-top: 32px; font-family: 'JetBrains Mono', ui-monospace, monospace; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>Internal review share — collaborative clarification flow</h1>
+  <p class="lead">Today, when Finance can't tell what an invoice is for or whether it's legitimate, they print it, scribble a note, and leave it on someone's desk. This is the digital version of that — same hand-off, with the conversation captured against the invoice forever.</p>
+
+  <div class="diagram">
+    <svg viewBox="0 0 1000 420" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="rev-ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+          <path d="M0,0 L10,5 L0,10 z" fill="#81e6d9"/>
+        </marker>
+      </defs>
+
+      <!-- Lane backgrounds -->
+      <rect x="20" y="20" width="960" height="170" rx="10" fill="rgba(129,230,217,0.03)" stroke="rgba(129,230,217,0.15)" stroke-width="1"/>
+      <rect x="20" y="220" width="960" height="170" rx="10" fill="rgba(148,163,184,0.04)" stroke="rgba(148,163,184,0.15)" stroke-width="1"/>
+
+      <!-- Lane labels -->
+      <text x="36" y="44" fill="#81e6d9" font-size="10" font-weight="700" letter-spacing="0.12em">FINANCE</text>
+      <text x="36" y="244" fill="#94a3b8" font-size="10" font-weight="700" letter-spacing="0.12em">REVIEWER (colleague)</text>
+
+      <!-- Step 1: Invoice in queue, Finance unsure -->
+      <rect x="50" y="64" width="170" height="100" rx="8" fill="#0d0d1a" stroke="rgba(251,191,36,0.4)" stroke-width="1.2"/>
+      <text x="135" y="86" text-anchor="middle" fill="#fde68a" font-size="11" font-weight="700">1 · UNSURE</text>
+      <text x="135" y="108" text-anchor="middle" fill="#f1f5f9" font-size="12" font-weight="600">Invoice 4842</text>
+      <text x="135" y="124" text-anchor="middle" fill="#94a3b8" font-size="10">unknown supplier</text>
+      <text x="135" y="140" text-anchor="middle" fill="#94a3b8" font-size="10">R 980.00</text>
+      <text x="135" y="156" text-anchor="middle" fill="#64748b" font-size="9" font-family="'JetBrains Mono', ui-monospace, monospace">"what is this?"</text>
+
+      <!-- Step 2: Send for review modal -->
+      <rect x="270" y="64" width="200" height="100" rx="8" fill="#0d0d1a" stroke="rgba(129,230,217,0.5)" stroke-width="1.2"/>
+      <text x="370" y="86" text-anchor="middle" fill="#81e6d9" font-size="11" font-weight="700">2 · SEND FOR REVIEW</text>
+      <text x="282" y="108" fill="#cbd5e1" font-size="10">To: <tspan fill="#f1f5f9" font-weight="600">Sarah (Ops)</tspan></text>
+      <text x="282" y="124" fill="#cbd5e1" font-size="10">CC: <tspan fill="#94a3b8">Mike</tspan></text>
+      <text x="282" y="142" fill="#94a3b8" font-size="9" font-style="italic">"Did we order parts</text>
+      <text x="282" y="154" fill="#94a3b8" font-size="9" font-style="italic">from this supplier?"</text>
+
+      <!-- Step 3: Reviewer inbox -->
+      <rect x="520" y="264" width="200" height="100" rx="8" fill="#0d0d1a" stroke="rgba(129,230,217,0.5)" stroke-width="1.2"/>
+      <text x="620" y="286" text-anchor="middle" fill="#81e6d9" font-size="11" font-weight="700">3 · INBOX + NOTIFY</text>
+      <text x="532" y="308" fill="#cbd5e1" font-size="10">📧 email · 🔔 Telegram</text>
+      <text x="532" y="326" fill="#94a3b8" font-size="10">PDF + Finance's note</text>
+      <text x="532" y="342" fill="#94a3b8" font-size="10">+ annotation tools</text>
+      <text x="532" y="356" fill="#64748b" font-size="9" font-family="'JetBrains Mono', ui-monospace, monospace">status: pending_review</text>
+
+      <!-- Step 4: Reviewer responds -->
+      <rect x="770" y="264" width="180" height="100" rx="8" fill="#0d0d1a" stroke="rgba(74,222,128,0.5)" stroke-width="1.2"/>
+      <text x="860" y="286" text-anchor="middle" fill="#4ade80" font-size="11" font-weight="700">4 · REPLY</text>
+      <text x="860" y="310" text-anchor="middle" fill="#f1f5f9" font-size="11" font-weight="600">✓ Approve</text>
+      <text x="860" y="328" text-anchor="middle" fill="#94a3b8" font-size="9" font-style="italic">"Yes — job 4421,</text>
+      <text x="860" y="340" text-anchor="middle" fill="#94a3b8" font-size="9" font-style="italic">code to consumables"</text>
+      <text x="860" y="356" text-anchor="middle" fill="#64748b" font-size="9" font-family="'JetBrains Mono', ui-monospace, monospace">+ GL + project</text>
+
+      <!-- Step 5: Returns to Finance -->
+      <rect x="770" y="64" width="180" height="100" rx="8" fill="#0d0d1a" stroke="rgba(74,222,128,0.5)" stroke-width="1.2"/>
+      <text x="860" y="86" text-anchor="middle" fill="#4ade80" font-size="11" font-weight="700">5 · POST</text>
+      <text x="860" y="108" text-anchor="middle" fill="#f1f5f9" font-size="11" font-weight="600">Apply reviewer's</text>
+      <text x="860" y="122" text-anchor="middle" fill="#f1f5f9" font-size="11" font-weight="600">suggestion · post</text>
+      <text x="860" y="142" text-anchor="middle" fill="#94a3b8" font-size="10">thread stays on</text>
+      <text x="860" y="156" text-anchor="middle" fill="#94a3b8" font-size="10">invoice (audit)</text>
+
+      <!-- Arrows -->
+      <!-- 1 → 2 -->
+      <line x1="220" y1="114" x2="266" y2="114" stroke="#81e6d9" stroke-width="1.5" marker-end="url(#rev-ar)"/>
+      <!-- 2 → 3 (down + right) -->
+      <path d="M 370 168 Q 370 215 470 215 Q 620 215 620 260" fill="none" stroke="#81e6d9" stroke-width="1.5" marker-end="url(#rev-ar)"/>
+      <!-- 3 → 4 -->
+      <line x1="720" y1="314" x2="766" y2="314" stroke="#81e6d9" stroke-width="1.5" marker-end="url(#rev-ar)"/>
+      <!-- 4 → 5 (up) -->
+      <path d="M 860 260 L 860 168" fill="none" stroke="#4ade80" stroke-width="1.5" marker-end="url(#rev-ar)"/>
+
+    </svg>
+  </div>
+
+  <h2>Three flavours of review request</h2>
+  <p style="color:#94a3b8;font-size:13px;margin:0 0 8px;">The same hand-off pattern, but the structure of the reply differs by intent. Worth distinguishing because flavour 3 — coding help — has the biggest payoff if the reply is structured rather than free text.</p>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Flavour</th>
+        <th>Finance is asking</th>
+        <th>Reviewer is</th>
+        <th>Reply shape</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><strong>"What is this?"</strong></td>
+        <td>Identification / context</td>
+        <td>Person likely to have ordered it</td>
+        <td>Free-text comment</td>
+      </tr>
+      <tr>
+        <td><strong>"Is this legit?"</strong></td>
+        <td>Approval / fraud check</td>
+        <td>Dept head, project manager</td>
+        <td><code>approve</code> / <code>reject</code> + reason</td>
+      </tr>
+      <tr>
+        <td><strong>"How do I code it?"</strong></td>
+        <td>GL / project allocation</td>
+        <td>Cost-centre owner</td>
+        <td>Structured: GL + project + split %</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2>Design choices worth deciding before building</h2>
+  <ul>
+    <li><strong>Internal only, or also external reviewers?</strong> Contractor PMs might need a magic-link email instead of a login.</li>
+    <li><strong>One reviewer or many?</strong> Sequential approval chain vs. parallel "anyone can answer."</li>
+    <li><strong>SLA / nudge?</strong> Auto-Telegram the assignee after 2 days; escalate after 5.</li>
+    <li><strong>Annotation depth.</strong> Sticky-note comments are cheap; freehand drawing on the PDF needs a real annotation layer (PSPDFKit, react-pdf + canvas).</li>
+    <li><strong>Scope creep risk:</strong> once you have an inbox + thread model, it stops being AP-specific — same pattern could carry expense queries, PO approvals, vendor onboarding.</li>
+  </ul>
+
+  <div class="callout">
+    <p><strong>Smallest useful first slice:</strong> assignee + free-text thread + email notification + Approve/Reject/Comment buttons + audit log. No PDF drawing, no structured GL replies, no external reviewers. Covers ~80% of what the paper-and-desk flow does today.</p>
+  </div>
+
+  <p class="footnote">demo · 2026-05-21 · /villages/ap-process · spitballed flow, not yet specced</p>
+</div>
+</body>
+</html>

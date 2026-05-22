@@ -10,7 +10,7 @@ This is **active design work**. The pipeline is being built in stages, and the f
 - **Output (eventually):** an AP entry posted into Pronto Xi via [[bender]].
 - **Humans in the loop:** Finance reviews everything Bender posts before it's final.
 
-See [[ap-process/flow]] for the pipeline stages and [[ap-process/integrations]] for the systems involved.
+See [[ap-process/flow]] for the pipeline stages, [[ap-process/subprocesses]] for the human loops that branch off it (manager comment, supplier onboarding, etc.), and [[ap-process/integrations]] for the systems involved.
 
 ## Where to read more
 
