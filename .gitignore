@@ -37,3 +37,9 @@ Operations/
 Platform/
 admin-center/
 .next/
+
+# Per-machine Claude Code state (worktrees, settings.local.json, etc.)
+.claude/
+
+# Runtime cache written by the Hand of the King for the dashboard
+.hand-snapshot.json
