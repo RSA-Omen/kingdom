@@ -10,7 +10,7 @@ The cardholder is the person who actually made the purchase. The phone is the ri
 2. **Tap the Receipts tab** on the mobile cardholder view.
 3. **Tap "Take a photo"** — the back-facing camera opens directly. Snap the receipt. (Or pick a file if it's already on the device.)
 4. **Upload progress** runs in-app. Status starts at `unassigned`.
-5. **OCR runs server-side** — pytesseract extracts amount, date, merchant tokens. Status flips to `processing`, then to `matched` (auto-attached to a transaction) or `manual_review` (needs the cardholder to pick).
+5. **OCR runs server-side** — glm-ocr (GPU visual model on gkgpu-01) extracts amount, date, merchant tokens; falls back to Tesseract if gkgpu-01 is unreachable. Status flips to `processing`, then to `matched` (auto-attached to a transaction) or `manual_review` (needs the cardholder to pick).
 6. **Confirm or pick.** If auto-matched, the cardholder taps "Looks right" to confirm. If `manual_review`, they see candidate transactions ranked by score and pick one.
 
 The receipt is now bound to the transaction and travels with it through approval and export.
