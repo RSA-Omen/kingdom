@@ -25,7 +25,7 @@ GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 VILLAGES = {
     "gekko-tracks": {
         "name": "Gekko Tracks",
-        "health_url": "http://gvdi-30.netbird.selfhosted:8002/health",
+        "health_url": "http://localhost:8002/health",
         "repo": "gekkotech/gekko-tracks",
         "port": 8002,
     },

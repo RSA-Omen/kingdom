@@ -16,6 +16,7 @@ The interim backlog for the Kingdom and the broader cleanup of the realm. This f
 - [x] [P2] Write `docs/ROYAL_COURT.md` — canonical roster of agents, beats, schedules, escalation paths
 - [x] [P2] Create the GitHub repo `kingdom`, `git init` this directory, push first commit
 - [x] [P2] Build a kingdom-themed landing page for `capital/dashboard/app/page.tsx` (replacing the placeholder)
+- [x] [P2] **NetBird audit** — audited all internal service comms; removed NetBird overlay hostnames from Kingdom (`master_of_laws.py` Gekko Tracks health check) and admin-center (docker-compose, Graylog, integration telemetry files); replaced with `gvdi-30.gekkosystems.local` / `localhost`
 
 ## The Royal Court — agents to build (one at a time, only when needed)
 
