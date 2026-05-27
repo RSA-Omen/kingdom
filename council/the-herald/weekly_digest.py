@@ -99,8 +99,10 @@ def humanise_commit(msg: str) -> str:
 # Updated by /kingdom-checkpoint at the end of each work session.
 # One plain-English entry per completed feature. Replace with current week's work.
 RECENT_ADDITIONS = [
-    "Email Logs page — Kingdom Watch now surfaces every notification sent by Gekko Tracks. New /email-logs page with recipient search, type and status filters, and a colour-coded table (green = sent, red = failed). Diagnoses 'I didn't get my email' complaints in seconds without touching a database",
-    "Gekko Tracks notification API — new GET /api/notifications/logs endpoint added to the village; Kingdom dashboard proxies through it. All 74 sent emails visible with recipient name, batch ID, subject, and timestamp",
+    "Monthly Cadence view — Email Logs now has a grid showing every cardholder × every month: green tick if their batch-assigned email fired, red cross if it didn't. Instantly answers 'did the monthly email go out?' without touching a database",
+    "Email audit vs smtp2go — cross-referenced Kingdom logs against smtp2go delivery export; confirmed all sent emails show Delivered, identified two logging gaps (Eloise manager-approved notifications were sent but not recorded)",
+    "Eloise notification logging fixed in Gekko Tracks — manager-approved alerts to Eloise now log to notification_logs so Kingdom has a complete audit trail of every email the system sends",
+    "Custom Select component — replaced native dropdowns on the email-logs page with a fully styled dark-theme component (readable options, teal hover, closes on outside click); reusable across the dashboard",
 ]
 
 

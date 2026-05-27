@@ -4,8 +4,17 @@ const GEKKO_TRACKS = process.env.GEKKO_TRACKS_URL ?? "http://localhost:8002";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const upstream = new URL(`${GEKKO_TRACKS}/api/notifications/logs`);
-  searchParams.forEach((v, k) => upstream.searchParams.set(k, v));
+  const view = searchParams.get("view");
+  const upstream =
+    view === "cadence"
+      ? new URL(`${GEKKO_TRACKS}/api/notifications/monthly-cadence`)
+      : new URL(`${GEKKO_TRACKS}/api/notifications/logs`);
+
+  // Forward all params except our own "view" key
+  searchParams.forEach((v, k) => {
+    if (k !== "view") upstream.searchParams.set(k, v);
+  });
+
   try {
     const res = await fetch(upstream.toString(), { next: { revalidate: 0 } });
     const data = await res.json();

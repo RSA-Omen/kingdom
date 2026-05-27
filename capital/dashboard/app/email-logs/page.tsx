@@ -1,5 +1,8 @@
 "use client";
 import { useEffect, useState, useCallback } from "react";
+import { Select } from "@/components/kingdom/Select";
+
+// ── Types ────────────────────────────────────────────────────────────────────
 
 interface EmailLog {
   id: number;
@@ -14,11 +17,30 @@ interface EmailLog {
   user_name: string | null;
 }
 
+interface MonthCell {
+  batches: number;
+  emails: number;
+}
+
+interface CardholderRow {
+  name: string;
+  email: string;
+  months: Record<string, MonthCell>;
+}
+
+interface CadenceData {
+  months: string[];
+  cardholders: CardholderRow[];
+}
+
+// ── Constants ────────────────────────────────────────────────────────────────
+
 const TYPE_LABELS: Record<string, string> = {
   batch_assigned: "Assigned",
   batch_submitted: "Submitted",
   batch_approved: "Approved",
   batch_rejected: "Rejected",
+  eloise_manager_approved: "Mgr Approved →Eloise",
 };
 
 const TYPE_COLORS: Record<string, string> = {
@@ -26,6 +48,7 @@ const TYPE_COLORS: Record<string, string> = {
   batch_submitted: "#f59e0b",
   batch_approved: "#22c55e",
   batch_rejected: "#ef4444",
+  eloise_manager_approved: "#0ea5e9",
 };
 
 const STATUS_COLORS: Record<string, string> = {
@@ -34,10 +57,11 @@ const STATUS_COLORS: Record<string, string> = {
   pending: "#f59e0b",
 };
 
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
 function formatDate(iso: string | null): string {
   if (!iso) return "—";
-  const d = new Date(iso);
-  return d.toLocaleString("en-AU", {
+  return new Date(iso).toLocaleString("en-AU", {
     day: "2-digit",
     month: "short",
     hour: "2-digit",
@@ -46,7 +70,9 @@ function formatDate(iso: string | null): string {
   });
 }
 
-export default function EmailLogsPage() {
+// ── Sub-components ───────────────────────────────────────────────────────────
+
+function LogsTab() {
   const [logs, setLogs] = useState<EmailLog[]>([]);
   const [total, setTotal] = useState(0);
   const [search, setSearch] = useState("");
@@ -83,21 +109,11 @@ export default function EmailLogsPage() {
   const failCount = logs.filter((l) => l.status === "failed").length;
 
   return (
-    <div className="space-y-6">
-      <header className="border-b border-[var(--color-border)] pb-6">
-        <p className="text-xs uppercase tracking-wider text-[var(--color-text-tertiary)] font-medium">
-          Kingdom Watch
-        </p>
-        <h1 className="text-2xl font-semibold mt-2 text-[var(--color-text-primary)]">
-          Email Logs
-        </h1>
-        <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
-          Notification history from Gekko Tracks —{" "}
-          {loading ? "loading…" : `${total} total${failCount > 0 ? `, ${failCount} failed` : ""}`}
-        </p>
-      </header>
+    <div className="space-y-4">
+      <p className="text-sm text-[var(--color-text-secondary)]">
+        {loading ? "Loading…" : `${total} total${failCount > 0 ? `, ${failCount} failed` : ""}`}
+      </p>
 
-      {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <input
           type="text"
@@ -106,46 +122,42 @@ export default function EmailLogsPage() {
           onChange={(e) => setSearch(e.target.value)}
           className="flex-1 px-3 py-2 rounded border border-[var(--color-border)] bg-[var(--color-bg-subtle)] text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-tertiary)] focus:outline-none focus:border-[var(--color-accent)]"
         />
-        <select
+        <Select
           value={typeFilter}
-          onChange={(e) => setTypeFilter(e.target.value)}
-          className="px-3 py-2 rounded border border-[var(--color-border)] bg-[var(--color-bg-subtle)] text-sm text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-accent)]"
-        >
-          <option value="all">All types</option>
-          <option value="batch_assigned">Assigned</option>
-          <option value="batch_submitted">Submitted</option>
-          <option value="batch_approved">Approved</option>
-          <option value="batch_rejected">Rejected</option>
-        </select>
-        <select
+          onChange={setTypeFilter}
+          className="w-48"
+          options={[
+            { value: "all", label: "All types" },
+            { value: "batch_assigned", label: "Assigned" },
+            { value: "batch_submitted", label: "Submitted" },
+            { value: "batch_approved", label: "Approved" },
+            { value: "batch_rejected", label: "Rejected" },
+            { value: "eloise_manager_approved", label: "Mgr Approved →Eloise" },
+          ]}
+        />
+        <Select
           value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-3 py-2 rounded border border-[var(--color-border)] bg-[var(--color-bg-subtle)] text-sm text-[var(--color-text-primary)] focus:outline-none focus:border-[var(--color-accent)]"
-        >
-          <option value="all">All statuses</option>
-          <option value="sent">Sent</option>
-          <option value="failed">Failed</option>
-          <option value="pending">Pending</option>
-        </select>
+          onChange={setStatusFilter}
+          className="w-36"
+          options={[
+            { value: "all", label: "All statuses" },
+            { value: "sent", label: "Sent" },
+            { value: "failed", label: "Failed" },
+            { value: "pending", label: "Pending" },
+          ]}
+        />
       </div>
 
-      {/* Error state */}
       {error && (
         <div className="surface p-4 border-l-4 border-red-500">
           <p className="text-sm text-red-400">Could not reach Gekko Tracks: {error}</p>
-          <p className="text-xs text-[var(--color-text-tertiary)] mt-1">
-            Is Gekko Tracks running on port 8002?
-          </p>
         </div>
       )}
 
-      {/* Table */}
       {!error && (
         <div className="surface overflow-hidden">
           {loading ? (
-            <p className="px-5 py-8 text-sm text-[var(--color-text-tertiary)] text-center">
-              Loading…
-            </p>
+            <p className="px-5 py-8 text-sm text-[var(--color-text-tertiary)] text-center">Loading…</p>
           ) : logs.length === 0 ? (
             <p className="px-5 py-8 text-sm text-[var(--color-text-tertiary)] text-center">
               No emails match these filters.
@@ -154,21 +166,14 @@ export default function EmailLogsPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-[var(--color-border)]">
-                  <th className="px-5 py-3 text-left text-xs uppercase tracking-wider text-[var(--color-text-tertiary)] font-medium">
-                    Type
-                  </th>
-                  <th className="px-5 py-3 text-left text-xs uppercase tracking-wider text-[var(--color-text-tertiary)] font-medium">
-                    Recipient
-                  </th>
-                  <th className="px-5 py-3 text-left text-xs uppercase tracking-wider text-[var(--color-text-tertiary)] font-medium hidden md:table-cell">
-                    Subject
-                  </th>
-                  <th className="px-5 py-3 text-left text-xs uppercase tracking-wider text-[var(--color-text-tertiary)] font-medium">
-                    Status
-                  </th>
-                  <th className="px-5 py-3 text-left text-xs uppercase tracking-wider text-[var(--color-text-tertiary)] font-medium hidden sm:table-cell">
-                    Sent
-                  </th>
+                  {["Type", "Recipient", "Subject", "Status", "Sent"].map((h) => (
+                    <th
+                      key={h}
+                      className="px-5 py-3 text-left text-xs uppercase tracking-wider text-[var(--color-text-tertiary)] font-medium"
+                    >
+                      {h}
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
@@ -186,9 +191,7 @@ export default function EmailLogsPage() {
                     <td className="px-5 py-3">
                       <span
                         className="inline-block px-2 py-0.5 rounded text-xs font-medium text-white"
-                        style={{
-                          background: TYPE_COLORS[log.notification_type] ?? "#888",
-                        }}
+                        style={{ background: TYPE_COLORS[log.notification_type] ?? "#888" }}
                       >
                         {TYPE_LABELS[log.notification_type] ?? log.notification_type}
                       </span>
@@ -196,12 +199,10 @@ export default function EmailLogsPage() {
                     <td className="px-5 py-3">
                       <div className="text-[var(--color-text-primary)]">{log.recipient}</div>
                       {log.user_name && (
-                        <div className="text-xs text-[var(--color-text-tertiary)]">
-                          {log.user_name}
-                        </div>
+                        <div className="text-xs text-[var(--color-text-tertiary)]">{log.user_name}</div>
                       )}
                     </td>
-                    <td className="px-5 py-3 text-[var(--color-text-secondary)] hidden md:table-cell max-w-xs">
+                    <td className="px-5 py-3 text-[var(--color-text-secondary)] max-w-xs">
                       <span className="truncate block" title={log.subject ?? ""}>
                         {log.subject ?? "—"}
                       </span>
@@ -217,13 +218,8 @@ export default function EmailLogsPage() {
                         />
                         {log.status}
                       </span>
-                      {log.error_message && (
-                        <p className="text-xs text-red-400 mt-0.5 max-w-xs" title={log.error_message}>
-                          {log.error_message.slice(0, 80)}
-                        </p>
-                      )}
                     </td>
-                    <td className="px-5 py-3 text-xs text-[var(--color-text-tertiary)] hidden sm:table-cell whitespace-nowrap">
+                    <td className="px-5 py-3 text-xs text-[var(--color-text-tertiary)] whitespace-nowrap">
                       {formatDate(log.sent_at)}
                     </td>
                   </tr>
@@ -239,6 +235,198 @@ export default function EmailLogsPage() {
           Showing {logs.length} of {total} — refine your search to narrow results.
         </p>
       )}
+    </div>
+  );
+}
+
+function CadenceTab() {
+  const [data, setData] = useState<CadenceData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/email-logs?view=cadence&months=6")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.error) throw new Error(d.error);
+        setData(d);
+      })
+      .catch((err) => setError(String(err)))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <p className="text-sm text-[var(--color-text-tertiary)] py-8 text-center">Loading…</p>;
+  if (error)
+    return (
+      <div className="surface p-4 border-l-4 border-red-500">
+        <p className="text-sm text-red-400">Could not reach Gekko Tracks: {error}</p>
+      </div>
+    );
+  if (!data) return null;
+
+  // Summary counts
+  let missedTotal = 0;
+  let coveredTotal = 0;
+  let noDataTotal = 0;
+  for (const ch of data.cardholders) {
+    for (const month of data.months) {
+      const cell = ch.months[month];
+      if (!cell || cell.batches === 0) { noDataTotal++; continue; }
+      if (cell.emails > 0) coveredTotal++;
+      else missedTotal++;
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Legend + summary */}
+      <div className="flex items-center gap-6 text-sm">
+        <div className="flex items-center gap-2">
+          <span className="w-5 h-5 rounded flex items-center justify-center bg-emerald-900/60 text-emerald-400 text-xs">✓</span>
+          <span className="text-[var(--color-text-secondary)]">Email sent ({coveredTotal})</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-5 h-5 rounded flex items-center justify-center bg-red-900/60 text-red-400 text-xs">✗</span>
+          <span className="text-[var(--color-text-secondary)]">Missed ({missedTotal})</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-5 h-5 rounded flex items-center justify-center bg-[var(--color-bg-subtle)] text-[var(--color-text-tertiary)] text-xs">—</span>
+          <span className="text-[var(--color-text-secondary)]">No batch</span>
+        </div>
+      </div>
+
+      {missedTotal > 0 && (
+        <div className="surface p-3 border-l-4 border-amber-500">
+          <p className="text-sm text-amber-400 font-medium">
+            {missedTotal} batch{missedTotal !== 1 ? "es" : ""} assigned without a notification email
+          </p>
+          <p className="text-xs text-[var(--color-text-tertiary)] mt-0.5">
+            Red cells below — cardholder had a batch that month but no email was logged.
+          </p>
+        </div>
+      )}
+
+      {/* Matrix */}
+      <div className="surface overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="border-b border-[var(--color-border)]">
+              <th className="px-5 py-3 text-left text-xs uppercase tracking-wider text-[var(--color-text-tertiary)] font-medium sticky left-0 bg-[var(--color-bg-surface)] min-w-[160px]">
+                Cardholder
+              </th>
+              {data.months.map((m) => (
+                <th
+                  key={m}
+                  className="px-3 py-3 text-center text-xs uppercase tracking-wider text-[var(--color-text-tertiary)] font-medium min-w-[80px]"
+                >
+                  {m}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {data.cardholders.map((ch, i) => {
+              const rowHasMiss = data.months.some((m) => {
+                const cell = ch.months[m];
+                return cell && cell.batches > 0 && cell.emails === 0;
+              });
+              return (
+                <tr
+                  key={ch.email}
+                  className={`border-b border-[var(--color-border)] last:border-0 ${
+                    i % 2 === 1 ? "bg-[var(--color-bg-subtle)]/30" : ""
+                  }`}
+                >
+                  <td className="px-5 py-2.5 sticky left-0 bg-inherit">
+                    <div
+                      className={`text-sm font-medium ${
+                        rowHasMiss ? "text-amber-400" : "text-[var(--color-text-primary)]"
+                      }`}
+                    >
+                      {ch.name}
+                    </div>
+                    <div className="text-xs text-[var(--color-text-tertiary)]">{ch.email}</div>
+                  </td>
+                  {data.months.map((m) => {
+                    const cell = ch.months[m] ?? { batches: 0, emails: 0 };
+                    if (cell.batches === 0) {
+                      return (
+                        <td key={m} className="px-3 py-2.5 text-center">
+                          <span className="text-[var(--color-text-tertiary)] text-xs">—</span>
+                        </td>
+                      );
+                    }
+                    const ok = cell.emails > 0;
+                    return (
+                      <td key={m} className="px-3 py-2.5 text-center">
+                        <span
+                          className={`inline-flex items-center justify-center w-7 h-7 rounded text-sm font-bold ${
+                            ok
+                              ? "bg-emerald-900/60 text-emerald-400"
+                              : "bg-red-900/60 text-red-400"
+                          }`}
+                          title={
+                            ok
+                              ? `${cell.emails} email(s) sent`
+                              : `Batch exists, no email sent`
+                          }
+                        >
+                          {ok ? "✓" : "✗"}
+                        </span>
+                      </td>
+                    );
+                  })}
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      <p className="text-xs text-[var(--color-text-tertiary)]">
+        Showing last 6 months. Only batch_assigned emails counted — this is the monthly notification cardholders receive when their batch is ready to classify.
+      </p>
+    </div>
+  );
+}
+
+// ── Page ─────────────────────────────────────────────────────────────────────
+
+type Tab = "logs" | "cadence";
+
+export default function EmailLogsPage() {
+  const [tab, setTab] = useState<Tab>("cadence");
+
+  return (
+    <div className="space-y-6">
+      <header className="border-b border-[var(--color-border)] pb-6">
+        <p className="text-xs uppercase tracking-wider text-[var(--color-text-tertiary)] font-medium">
+          Kingdom Watch · Gekko Tracks
+        </p>
+        <h1 className="text-2xl font-semibold mt-2 text-[var(--color-text-primary)]">Email Logs</h1>
+        <p className="mt-1 text-sm text-[var(--color-text-secondary)]">
+          Notification history — who got what, and whether monthly assignments are firing.
+        </p>
+      </header>
+
+      {/* Tabs */}
+      <div className="flex gap-1 border-b border-[var(--color-border)]">
+        {(["cadence", "logs"] as Tab[]).map((t) => (
+          <button
+            key={t}
+            onClick={() => setTab(t)}
+            className={`px-4 py-2 text-sm font-medium border-b-2 -mb-px transition-colors ${
+              tab === t
+                ? "border-[var(--color-accent)] text-[var(--color-accent)]"
+                : "border-transparent text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]"
+            }`}
+          >
+            {t === "cadence" ? "Monthly Cadence" : "All Logs"}
+          </button>
+        ))}
+      </div>
+
+      {tab === "cadence" ? <CadenceTab /> : <LogsTab />}
     </div>
   );
 }

@@ -111,4 +111,10 @@
     border-radius: var(--radius-lg);
     box-shadow: 0 4px 24px -1px rgb(0 0 0 / 0.4);
   }
+
+  /* Native select option lists — force dark background so text is readable */
+  select option {
+    background-color: #0a0a2a;
+    color: var(--color-text-primary);
+  }
 }
