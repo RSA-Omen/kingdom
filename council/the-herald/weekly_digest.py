@@ -99,12 +99,8 @@ def humanise_commit(msg: str) -> str:
 # Updated by /kingdom-checkpoint at the end of each work session.
 # One plain-English entry per completed feature. Replace with current week's work.
 RECENT_ADDITIONS = [
-    "The Scriptorium — the Kingdom's new documentation + design-demo village, live at http://gvdi-30:8095/. One page per village, with a wiki on top and HTML demos on the bottom; the first four villages have full pages: Gekko Tracks, Bender, The Interceptor, and AP Process",
-    "Gekko Standard §15 — every village now owes the Kingdom a folder in the Scriptorium with mandatory wiki posts based on its type (app needs UI mockups; process needs a flow diagram; service needs a sequence diagram; bridge needs a crossings doc). Pages missing required posts render with a visible gap warning so they stay loud",
-    "Python renderer for the Scriptorium — reads markdown, meta.yml, and HTML demos from each village folder and produces the live site. Supports [[wikilinks]] that resolve across villages, demo galleries with thumbnails, and a one-command deploy",
-    "Gekko Tracks village page — the full Credit Card Coding story documented end-to-end: three format views (raw → classified → finance), four roles, ML predictions, receipts with OCR matching and reassignment, and the mobile UI with one-tap camera capture. Four diagrams cover data flow, classify screen, receipt pipeline, and the mobile cardholder view",
-    "AP Process village page — the autonomous email-to-Pronto pipeline gets its own home with a flow diagram, a Finance review inbox mockup, and the two existing status reports pinned as demos (restyled to match the Void Teal aesthetic)",
-    "village-checkpoint skill extended — every village checkpoint now appends an entry to that village's wiki/changelog.md inside the Scriptorium, so every village page reflects its actual activity (auto-creates the changelog on first checkpoint, per Standard §15.8)",
+    "Email Logs page — Kingdom Watch now surfaces every notification sent by Gekko Tracks. New /email-logs page with recipient search, type and status filters, and a colour-coded table (green = sent, red = failed). Diagnoses 'I didn't get my email' complaints in seconds without touching a database",
+    "Gekko Tracks notification API — new GET /api/notifications/logs endpoint added to the village; Kingdom dashboard proxies through it. All 74 sent emails visible with recipient name, batch ID, subject, and timestamp",
 ]
 
 

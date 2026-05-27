@@ -1,0 +1,805 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Status &amp; Metrics — Gekko Custom Tools · May 2026</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: #050510;
+    color: #c8cde8;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+  }
+  .wrap { max-width: 1060px; margin: 0 auto; padding: 48px 24px 100px; }
+
+  .page-header { margin-bottom: 48px; }
+  .page-header h1 { font-size: 30px; font-weight: 800; letter-spacing: -0.03em; color: #f1f5f9; margin: 0 0 6px; }
+  .page-header .sub { color: #64748b; font-size: 14px; margin: 0; }
+
+  .section { margin: 48px 0 0; }
+  .section-title {
+    display: flex; align-items: center; gap: 10px;
+    font-size: 18px; font-weight: 700; color: #f1f5f9;
+    letter-spacing: -0.02em; margin: 0 0 6px;
+  }
+  .section-sub { font-size: 13px; color: #64748b; margin: 0 0 20px; }
+  .chip { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; letter-spacing: 0.04em; }
+  .chip-live    { background: rgba(52,211,153,0.12); color: #34d399; }
+  .chip-testing { background: rgba(251,191,36,0.12); color: #f59e0b; }
+
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 24px; }
+  .card { background: #0a0a18; border: 1px solid #1e2235; border-radius: 10px; padding: 14px 16px; }
+  .card-label { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #3d4460; margin-bottom: 4px; }
+  .card-value { font-size: 26px; font-weight: 800; color: #81e6d9; letter-spacing: -0.04em; line-height: 1.1; }
+  .card-sub { font-size: 11.5px; color: #4a5070; margin-top: 3px; line-height: 1.4; }
+
+  .hero {
+    background: linear-gradient(135deg, #0d1a18 0%, #090912 100%);
+    border: 1px solid rgba(129,230,217,0.2);
+    border-radius: 14px; padding: 28px 32px;
+    display: flex; align-items: center; gap: 28px; margin-bottom: 48px;
+  }
+  .hero-hrs { font-size: 64px; font-weight: 900; color: #81e6d9; letter-spacing: -0.05em; flex-shrink: 0; line-height: 1; }
+  .hero-title { font-size: 20px; font-weight: 700; color: #f1f5f9; margin: 0 0 6px; }
+  .hero-desc { font-size: 13px; color: #64748b; margin: 0; line-height: 1.6; }
+  .hero-desc strong { color: #94a3b8; }
+
+  .chart-wrap { background: #080813; border: 1px solid #1e2235; border-radius: 12px; padding: 24px; margin-bottom: 20px; }
+  .chart-title { font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: #3d4460; margin: 0 0 8px; }
+  .chart-legend { display: flex; gap: 20px; margin: 0 0 16px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: #64748b; }
+  .legend-swatch { width: 12px; height: 12px; border-radius: 3px; flex-shrink: 0; }
+  .legend-swatch.real    { background: #81e6d9; }
+  .legend-swatch.partial { background: rgba(129,230,217,0.45); border: 1px solid #81e6d9; }
+  .legend-swatch.imagined { background: rgba(251,191,36,0.15); border: 2px dashed #f59e0b; }
+
+  .table-wrap { overflow-x: auto; margin-bottom: 16px; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th { font-size: 10px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: #3d4460; padding: 0 0 10px; text-align: left; border-bottom: 1px solid #1e2235; }
+  tbody td { padding: 10px 0; color: #8892b0; border-bottom: 1px solid #0f1020; vertical-align: top; line-height: 1.4; }
+  tbody td:first-child { color: #94a3b8; }
+  tbody td.num { text-align: right; color: #81e6d9; font-weight: 700; white-space: nowrap; }
+  tbody td.teal { color: #81e6d9; font-weight: 600; }
+  tbody tr.imagined td { color: #4a3a0a; }
+  tbody tr.imagined td:first-child { color: #7a6020; }
+  tbody tr.imagined td.num { color: #c97c10; }
+  tfoot td { padding: 12px 0 0; font-size: 13px; font-weight: 700; color: #f1f5f9; border-top: 1px solid #1e2235; }
+  tfoot td.num { text-align: right; color: #81e6d9; }
+
+  .note { display: flex; align-items: flex-start; gap: 8px; background: rgba(251,191,36,0.05); border: 1px solid rgba(251,191,36,0.18); border-radius: 8px; padding: 10px 14px; font-size: 12.5px; color: #92400e; line-height: 1.55; margin: 0 0 20px; }
+  .note strong { color: #f59e0b; }
+  .imagined-notice { display: flex; align-items: flex-start; gap: 10px; background: rgba(251,191,36,0.04); border: 1px dashed rgba(251,191,36,0.3); border-radius: 8px; padding: 12px 16px; font-size: 13px; color: #7a6020; line-height: 1.6; margin: 0 0 20px; }
+  .imagined-notice .tag { flex-shrink: 0; background: rgba(251,191,36,0.18); color: #f59e0b; font-size: 10px; font-weight: 800; letter-spacing: 0.1em; padding: 2px 7px; border-radius: 4px; margin-top: 1px; }
+  .info { background: rgba(129,230,217,0.04); border: 1px solid rgba(129,230,217,0.12); border-radius: 8px; padding: 12px 16px; font-size: 13px; color: #64748b; margin: 0 0 20px; line-height: 1.6; }
+  .info strong { color: #94a3b8; }
+  hr { border: none; border-top: 1px solid #0f1020; margin: 48px 0; }
+
+  @media (max-width: 640px) {
+    .hero { flex-direction: column; gap: 12px; padding: 20px; }
+    .hero-hrs { font-size: 48px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="page-header">
+    <h1>Status &amp; Metrics Report</h1>
+    <p class="sub">Custom tools built for Gekko · Numbers drawn from live databases and system logs · May 2026</p>
+  </div>
+
+  <!-- GRAND TOTAL HERO -->
+  <div class="hero">
+    <div class="hero-hrs">~166 hrs</div>
+    <div>
+      <p class="hero-title">Verified staff time saved since November 2025</p>
+      <p class="hero-desc">
+        Across <strong>four active tools</strong> with confirmed usage logs —
+        the Interceptor (~89 hrs · system journals),
+        PDF Page Removal (~29 hrs · syslog, 58 confirmed jobs),
+        Gekko Tracks (~45 hrs) and
+        the legacy Credit Card Coding system (~2 hrs).
+        Voicemail routing adds to this but isn't yet counted.
+      </p>
+    </div>
+  </div>
+
+  <!-- TOOL COMPARISON CHART -->
+  <div class="chart-wrap" style="margin-bottom: 48px;">
+    <div class="chart-title">Hours saved by tool (verified from logs)</div>
+    <canvas id="toolChart" height="130"></canvas>
+  </div>
+
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-title">
+      The Interceptor — Pronto Document Links
+      <span class="chip chip-live">● Live</span>
+    </div>
+    <p class="section-sub">Catches clicks on Pronto's implied document links and redirects staff to the correct NextCloud folder automatically.</p>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-label">Verified Redirects</div>
+        <div class="card-value">1,068</div>
+        <div class="card-sub">From system journals · Nov 2025 – May 2026</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Biggest Month</div>
+        <div class="card-value">480</div>
+        <div class="card-sub">April 2026 — AU instance</div>
+      </div>
+      <div class="card">
+        <div class="card-label">May 2026 (AU+ZA)</div>
+        <div class="card-value">386</div>
+        <div class="card-sub">359 AU + 27 ZA · month still running</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Time Saved</div>
+        <div class="card-value">~90 hrs</div>
+        <div class="card-sub">1,072 redirects × 5 min each</div>
+      </div>
+    </div>
+
+    <div class="imagined-notice">
+      <span class="tag">ESTIMATED</span>
+      <span>
+        <strong style="color:#c97c10;">January, February and full-March are not in any log.</strong>
+        Journals only go back to March 26. The amber portions below are <em>illustrative estimates only</em>,
+        based on the growth trend between December (112) and April (480). Excluded from all totals.
+      </span>
+    </div>
+
+    <div class="chart-wrap">
+      <div class="chart-title">Redirects by month</div>
+      <div class="chart-legend">
+        <div class="legend-item"><div class="legend-swatch real"></div> Verified (system journals)</div>
+        <div class="legend-item"><div class="legend-swatch partial"></div> Partial — Mar 26–31 only</div>
+        <div class="legend-item"><div class="legend-swatch imagined"></div> Estimated — not in any log, not counted</div>
+      </div>
+      <canvas id="interceptorChart" height="220"></canvas>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Month</th><th>Source</th><th>Redirects</th><th>Rate</th><th class="num">Time Saved</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="teal">November 2025</td>
+            <td>Admin-center DB</td><td>31</td><td>5 min each</td><td class="num">2.6 hrs</td>
+          </tr>
+          <tr>
+            <td class="teal">December 2025</td>
+            <td>Admin-center DB</td><td>112</td><td>5 min each</td><td class="num">9.3 hrs</td>
+          </tr>
+          <tr class="imagined">
+            <td>January 2026 ✦</td><td>Estimated</td><td>~220</td><td>—</td><td class="num">not counted</td>
+          </tr>
+          <tr class="imagined">
+            <td>February 2026 ✦</td><td>Estimated</td><td>~340</td><td>—</td><td class="num">not counted</td>
+          </tr>
+          <tr class="imagined">
+            <td>March 2026 ✦ <span style="color:#3a2a00;font-size:11px">(full est. ~325)</span></td>
+            <td>Journals Mar 26–31 + estimated</td><td>63 real + ~262 est.</td><td>—</td><td class="num">5.3 hrs (real only)</td>
+          </tr>
+          <tr>
+            <td class="teal">April 2026</td>
+            <td>System journal</td><td>480</td><td>5 min each</td><td class="num">40.0 hrs</td>
+          </tr>
+          <tr>
+            <td class="teal">May 2026 <span style="font-size:11px;color:#4a5070;font-weight:400">(month in progress)</span></td>
+            <td>System journal (AU+ZA)</td><td>386</td><td>5 min each</td><td class="num">32.2 hrs</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colspan="2">Verified total (estimated months excluded)</td>
+            <td>1,072</td><td></td><td class="num">~90 hrs</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    <p style="font-size:11px;color:#2d3350;margin:4px 0 20px;">✦ Estimated. Based on observed growth trend. Not included in totals.</p>
+
+    <div class="info">
+      <strong>Reliability benefit:</strong> Every logged redirect resolved to exactly the right folder, first time. Before this tool, clicking a Pronto document link did nothing — staff navigated manually and sometimes landed in the wrong place. This matters most in the Purchase-Order workflow where finding the right supporting document quickly has a direct effect on approval speed.
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-title">
+      PDF Page Removal Tool
+      <span class="chip chip-live">● Live</span>
+    </div>
+    <p class="section-sub">Removes specified pages from a PDF — web interface and API. Used primarily for Work Order packs. Replaces Acrobat Pro or manual editing.</p>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-label">Jobs Processed</div>
+        <div class="card-value">58</div>
+        <div class="card-sub">Confirmed from syslog · Dec 2025 – Apr 2026</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Busiest Month</div>
+        <div class="card-value">21</div>
+        <div class="card-sub">April 2026</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Time Saved per Job</div>
+        <div class="card-value">30 min</div>
+        <div class="card-sub">vs. Acrobat Pro or manual editing</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Total Time Saved</div>
+        <div class="card-value">~29 hrs</div>
+        <div class="card-sub">58 jobs × 30 min</div>
+      </div>
+    </div>
+
+    <div class="chart-wrap">
+      <div class="chart-title">PDF jobs processed per month (from syslog)</div>
+      <canvas id="pdfChart" height="160"></canvas>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Month</th><th>Jobs</th><th>Sample files</th><th>Rate</th><th class="num">Time Saved</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="teal">December 2025</td>
+            <td>7</td>
+            <td>WO1195, WO1196, WO1199…</td>
+            <td>30 min each</td>
+            <td class="num">3.5 hrs</td>
+          </tr>
+          <tr>
+            <td class="teal">January 2026</td>
+            <td>18</td>
+            <td>WO1133, WO1134, WO1266 series…</td>
+            <td>30 min each</td>
+            <td class="num">9.0 hrs</td>
+          </tr>
+          <tr>
+            <td class="teal">February 2026</td>
+            <td>4</td>
+            <td>WO1280, WO1282, WO1304, WO1314</td>
+            <td>30 min each</td>
+            <td class="num">2.0 hrs</td>
+          </tr>
+          <tr>
+            <td class="teal">March 2026</td>
+            <td>8</td>
+            <td>WO1312, WO1335, WO1339, WO1340…</td>
+            <td>30 min each</td>
+            <td class="num">4.0 hrs</td>
+          </tr>
+          <tr>
+            <td class="teal">April 2026</td>
+            <td>21</td>
+            <td>WO1405, WO1414, WO1415, WO1419…</td>
+            <td>30 min each</td>
+            <td class="num">10.5 hrs</td>
+          </tr>
+          <tr>
+            <td style="color:#4a5070;">May 2026 <span style="font-size:11px">(month in progress)</span></td>
+            <td style="color:#4a5070;">0 logged so far</td>
+            <td style="color:#4a5070;">—</td>
+            <td style="color:#4a5070;">—</td>
+            <td class="num" style="color:#4a5070;">—</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr>
+            <td>Total · Dec 2025 – May 2026</td>
+            <td>58 jobs</td>
+            <td></td>
+            <td></td>
+            <td class="num">~29 hrs</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+    <div class="info">
+      All 58 confirmed jobs are Work Order packs — the tool is being used as part of the works-order preparation workflow. Usage is growing month-on-month: December averaged 2 jobs/week, April averaged 5 jobs/week.
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-title">
+      Gekko Tracks — Expense Coding
+      <span class="chip chip-live">● Live</span>
+    </div>
+    <p class="section-sub">Credit card cardholders code their own transactions online. Managers approve. Finance exports to Pronto. Replaced a manual spreadsheet process.</p>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-label">Completed Cycles</div>
+        <div class="card-value">2</div>
+        <div class="card-sub">Feb and Apr 2026 — May closing now</div>
+      </div>
+      <div class="card">
+        <div class="card-label">May — Active Users</div>
+        <div class="card-value">17</div>
+        <div class="card-sub">Users coding this cycle · 693 field edits logged</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Transactions Loaded</div>
+        <div class="card-value">4,205</div>
+        <div class="card-sub">Jan 2025 – May 2026 in the system</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Pronto Exports</div>
+        <div class="card-value">1</div>
+        <div class="card-sub">1,000 rows pushed to Pronto (Feb)</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Time Saved</div>
+        <div class="card-value">~45 hrs</div>
+        <div class="card-sub">Across two completed cycles</div>
+      </div>
+    </div>
+
+    <div class="chart-wrap">
+      <div class="chart-title">Hours saved per cycle</div>
+      <canvas id="gtCycleChart" height="140"></canvas>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Action</th><th>Count (Apr cycle)</th><th>Rate</th><th class="num">Time Saved</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Cardholders coding online</td><td>27 people</td><td>45 min each</td><td class="num">20.25 hrs</td></tr>
+          <tr><td>Manager approvals</td><td>9 approvals</td><td>15 min each</td><td class="num">2.25 hrs</td></tr>
+          <tr><td>Batch CSV upload (Louise)</td><td>3 uploads to date</td><td>30 min each</td><td class="num">1.5 hrs</td></tr>
+          <tr><td>Pronto export (Louise)</td><td>1 export</td><td>60 min</td><td class="num">1.0 hr</td></tr>
+        </tbody>
+        <tfoot>
+          <tr><td colspan="3">April cycle alone</td><td class="num">~25 hrs</td></tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-title">
+      Credit Card Coding (predecessor to Gekko Tracks)
+      <span class="chip chip-testing">Retired</span>
+    </div>
+    <p class="section-sub">The original credit card coding system — Eloise ran monthly cycles before Gekko Tracks replaced it. November 2025 through March 2026.</p>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-label">Cycles Run</div>
+        <div class="card-value">4</div>
+        <div class="card-sub">Nov 2025, Jan, Feb, Mar 2026</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Time Saved</div>
+        <div class="card-value">~2 hrs</div>
+        <div class="card-sub">~30 min per cycle (Eloise)</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Transactions</div>
+        <div class="card-value">3,291</div>
+        <div class="card-sub">Historical records processed</div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-title">
+      Reception Voicemail Routing
+      <span class="chip chip-live">● Live</span>
+    </div>
+    <p class="section-sub">Picks up voicemails on the reception line and routes them directly to the right person — no shared inbox, no manual forwarding.</p>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-label">Volume</div>
+        <div class="card-value">~2×/wk</div>
+        <div class="card-sub">~8 voicemails routed per month</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Saved per Route</div>
+        <div class="card-value">5 min</div>
+        <div class="card-sub">~40 min/month recaptured</div>
+      </div>
+    </div>
+    <div class="info">
+      <strong>The real value is reliability, not time.</strong> Before this flow, a voicemail left on the reception line could go unnoticed. Now every voicemail is delivered directly to the right person, every time.
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-title">
+      Bender — Automated Pronto Access
+      <span class="chip chip-testing">⬡ In Testing</span>
+    </div>
+    <p class="section-sub">Automates repetitive Pronto tasks by operating the UI directly — no API licence required. First testing cycle underway for the AP process.</p>
+
+    <div class="info">
+      <strong>New capability — not yet in savings count.</strong> Any workflow done manually in Pronto on a regular basis is a candidate. The AP supplier export is the first test case.
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-title">
+      Platform &amp; Monitoring
+      <span class="chip chip-live">● Live</span>
+    </div>
+    <p class="section-sub">The infrastructure that watches all of the above and flags problems before staff notice them.</p>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-label">Systems Monitored</div>
+        <div class="card-value">9</div>
+        <div class="card-sub">Health-checked every 5 min, 24/7</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Average Uptime</div>
+        <div class="card-value">99.7%</div>
+        <div class="card-sub">Across all monitored tools</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Health Checks Run</div>
+        <div class="card-value">10,800+</div>
+        <div class="card-sub">Since monitoring began</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Incidents Tracked</div>
+        <div class="card-value">61</div>
+        <div class="card-sub">Auto-detected and logged</div>
+      </div>
+    </div>
+  </div>
+
+  <hr>
+
+  <!-- ══════════════════════════════════════════════════════ -->
+  <div class="section">
+    <div class="section-title">
+      2026 Savings Forecast
+      <span class="chip" style="background:rgba(129,230,217,0.07);color:#81e6d9;border:1px dashed rgba(129,230,217,0.3);">Projection</span>
+    </div>
+    <p class="section-sub">Cumulative hours saved across 2026 — verified actuals through May, then projected on current trajectory. Two scenarios: current tools only, and with Bender going live in June.</p>
+
+    <div class="chart-wrap">
+      <div class="chart-title">Cumulative hours saved — 2026 (actual + projected)</div>
+      <div class="chart-legend">
+        <div class="legend-item"><div class="legend-swatch real"></div> Verified actual</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:rgba(129,230,217,0.2);border:2px dashed rgba(129,230,217,0.55);"></div> Projected · current tools only (~68 hrs/month)</div>
+        <div class="legend-item"><div class="legend-swatch" style="background:rgba(251,191,36,0.15);border:2px dashed #f59e0b;"></div> Projected · with Bender (~104 hrs/month) — shaded area = Bender's contribution</div>
+      </div>
+      <canvas id="forecastChart" height="210"></canvas>
+    </div>
+
+    <div class="cards">
+      <div class="card">
+        <div class="card-label">End of 2026 (with Bender)</div>
+        <div class="card-value">~900 hrs</div>
+        <div class="card-sub">Full-year projection if Bender live from June</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Run-rate with Bender</div>
+        <div class="card-value">~104 hrs/mo</div>
+        <div class="card-sub">Existing tools + AP automation combined</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Bender (AP) alone</div>
+        <div class="card-value">~36 hrs/mo</div>
+        <div class="card-sub">50 transactions/wk × 10 min = 8.3 hrs/wk</div>
+      </div>
+      <div class="card">
+        <div class="card-label">Tools baseline (ex-Bender)</div>
+        <div class="card-value">~68 hrs/mo</div>
+        <div class="card-sub">Interceptor + PDF + Gekko Tracks on current trend</div>
+      </div>
+    </div>
+
+    <div class="note" style="border-color:rgba(129,230,217,0.16);background:rgba(129,230,217,0.03);color:#3d6060;">
+      <strong style="color:#81e6d9;">What these projections are based on —</strong>
+      <br><br>
+      <strong style="color:#6ab0a8;">Bender (the only firm number):</strong> 50 AP transactions/week · 10 min saved per transaction · assumed live June 2026.
+      Note: Bender handles both the <em>export</em> and <em>input</em> sides of AP processing — so this estimate may grow once the full workflow is confirmed in testing.
+      <br><br>
+      <strong style="color:#6ab0a8;">Existing tools:</strong> The "tools only" line is extrapolated from recent months and should be treated as indicative, not a firm forecast. Monthly volumes vary — Gekko Tracks depends on cycle timing, the Interceptor spiked in April and may not hold that pace, and the PDF tool averages ~12 jobs/month historically (April's 21 was the peak). The tools-only trajectory could be higher or lower.
+    </div>
+  </div>
+
+</div>
+
+<script>
+Chart.defaults.color = '#4a5070';
+Chart.defaults.borderColor = '#1e2235';
+Chart.defaults.font.family = "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+
+const TEAL     = '#81e6d9';
+const TEAL_MID = 'rgba(129,230,217,0.45)';
+const AMBER_BG = 'rgba(251,191,36,0.13)';
+const AMBER_BD = '#f59e0b';
+
+/* ── 1. Tool comparison ── */
+new Chart(document.getElementById('toolChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Interceptor\n(system journals)', 'Gekko Tracks\n(2 cycles)', 'PDF Page Removal\n(syslog, 58 jobs)', 'Credit Card Coding\n(predecessor)'],
+    datasets: [{
+      data: [90, 45, 29, 2],
+      backgroundColor: [TEAL, TEAL, 'rgba(129,230,217,0.7)', 'rgba(129,230,217,0.35)'],
+      borderColor: 'transparent',
+      borderRadius: 6,
+      barThickness: 34,
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: ctx => ` ${ctx.raw} hrs saved` } }
+    },
+    scales: {
+      x: { grid: { color: '#0f1020' }, ticks: { callback: v => v + ' hrs' }, max: 100 },
+      y: { grid: { display: false }, ticks: { font: { size: 12 } } }
+    }
+  }
+});
+
+/* ── 2. Gekko Tracks cycles ── */
+new Chart(document.getElementById('gtCycleChart'), {
+  type: 'bar',
+  data: {
+    labels: ['February 2026', 'April 2026', 'May 2026\n(in progress)'],
+    datasets: [{
+      data: [20, 25, null],
+      backgroundColor: [TEAL, TEAL, TEAL_MID],
+      borderColor: ['transparent', 'transparent', TEAL_MID],
+      borderRadius: 6,
+      barThickness: 56,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      tooltip: { callbacks: { label: ctx => ctx.raw ? ` ${ctx.raw} hrs` : ' In progress' } }
+    },
+    scales: {
+      y: { grid: { color: '#0f1020' }, ticks: { callback: v => v + ' hrs' }, max: 30 },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+/* ── 3. Interceptor — stacked: verified + estimated ── */
+// For March: verified = 63 (Mar 26-31), estimated extension = 262 (to reach ~325 full month)
+// For Jan/Feb: all estimated, shown as estimated dataset only
+// Stacked bar approach: dataset A = verified, dataset B = estimated extension
+const months = ['Nov 25', 'Dec 25', 'Jan 26 ✦', 'Feb 26 ✦', 'Mar 26 ✦\n(26–31 real)', 'Apr 26', 'May 26'];
+const verified  = [31,  112, 0,   0,   63,  480, 386];  // real data; 0 for fully-estimated months
+const estimated = [0,   0,   220, 340, 262, 0,   0  ];  // estimated extension only
+
+new Chart(document.getElementById('interceptorChart'), {
+  type: 'bar',
+  data: {
+    labels: months,
+    datasets: [
+      {
+        label: 'Verified',
+        data: verified,
+        backgroundColor: (ctx) => ctx.dataIndex === 4 ? TEAL_MID : TEAL,
+        borderColor: 'transparent',
+        borderRadius: 0,
+        barThickness: 44,
+        order: 2,
+      },
+      {
+        label: 'Estimated (not counted)',
+        data: estimated,
+        backgroundColor: AMBER_BG,
+        borderColor: AMBER_BD,
+        borderWidth: 2,
+        borderDash: [4, 3],
+        borderRadius: 6,
+        barThickness: 44,
+        order: 1,
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: (ctx) => {
+            if (ctx.datasetIndex === 0 && ctx.raw > 0) {
+              const suffix = ctx.dataIndex === 4 ? ' (Mar 26–31 verified)' : ' verified';
+              return ` ${ctx.raw}${suffix}`;
+            }
+            if (ctx.datasetIndex === 1 && ctx.raw > 0) {
+              const total = verified[ctx.dataIndex] + estimated[ctx.dataIndex];
+              return ` ~${ctx.raw} estimated extension → ~${total} est. total (not counted)`;
+            }
+            return null;
+          },
+          filter: item => item.raw > 0,
+        }
+      }
+    },
+    scales: {
+      x: { stacked: true, grid: { display: false } },
+      y: {
+        stacked: true,
+        grid: { color: '#0f1020' },
+        max: 520,
+      }
+    }
+  }
+});
+
+/* ── 4. PDF jobs per month ── */
+new Chart(document.getElementById('pdfChart'), {
+  type: 'bar',
+  data: {
+    labels: ['Dec 2025', 'Jan 2026', 'Feb 2026', 'Mar 2026', 'Apr 2026', 'May 2026\n(in progress)'],
+    datasets: [{
+      label: 'Jobs processed',
+      data: [7, 18, 4, 8, 21, 0],
+      backgroundColor: [
+        'rgba(129,230,217,0.4)',
+        'rgba(129,230,217,0.55)',
+        'rgba(129,230,217,0.35)',
+        'rgba(129,230,217,0.55)',
+        TEAL,
+        'rgba(129,230,217,0.15)',
+      ],
+      borderColor: ['transparent','transparent','transparent','transparent','transparent', TEAL_MID],
+      borderWidth: [0,0,0,0,0,1],
+      borderDash: [4,3],
+      borderRadius: 6,
+      barThickness: 48,
+    }]
+  },
+  options: {
+    responsive: true,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: ctx => ctx.dataIndex === 5
+            ? ' 0 logged — month still running'
+            : ` ${ctx.raw} jobs · ${ctx.raw * 0.5} hrs saved`
+        }
+      }
+    },
+    scales: {
+      y: {
+        grid: { color: '#0f1020' },
+        ticks: { stepSize: 5 },
+        max: 25,
+      },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+/* ── 5. 2026 Savings Forecast — cumulative line ── */
+// Cumulative actuals through May 2026
+// Jan: PDF 9 hrs | Feb: +GT 22 = 31 | Mar: +Interceptor 5.3 + PDF 4 = 40 | Apr: +76 = 116 | May: +52 = 168
+const fLabels      = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const fActual      = [9, 31, 40, 116, 168, null, null, null, null, null, null, null];
+// Projected: current tools only, ~68 hrs/month from Jun
+const fToolsOnly   = [null, null, null, null, 168, 236, 304, 372, 440, 508, 576, 644];
+// Projected: tools + Bender (50 AP/wk × 10 min = ~36 hrs/mo), ~104 hrs/month from Jun
+const fWithBender  = [null, null, null, null, 168, 272, 376, 480, 584, 688, 792, 896];
+
+new Chart(document.getElementById('forecastChart'), {
+  type: 'line',
+  data: {
+    labels: fLabels,
+    datasets: [
+      {
+        label: 'Verified actual',
+        data: fActual,
+        borderColor: TEAL,
+        backgroundColor: 'rgba(129,230,217,0.07)',
+        borderWidth: 3,
+        pointRadius: 5,
+        pointBackgroundColor: TEAL,
+        fill: 'origin',
+        tension: 0.35,
+        spanGaps: false,
+        order: 3,
+      },
+      {
+        label: 'Projected (tools only)',
+        data: fToolsOnly,
+        borderColor: 'rgba(129,230,217,0.5)',
+        borderWidth: 2,
+        borderDash: [7, 4],
+        pointRadius: 3,
+        pointBackgroundColor: 'rgba(129,230,217,0.5)',
+        fill: false,
+        tension: 0.35,
+        spanGaps: false,
+        order: 2,
+      },
+      {
+        label: 'Projected (with Bender)',
+        data: fWithBender,
+        borderColor: AMBER_BD,
+        borderWidth: 2,
+        borderDash: [5, 3],
+        pointRadius: 3,
+        pointBackgroundColor: AMBER_BD,
+        fill: '-1',
+        backgroundColor: 'rgba(251,191,36,0.09)',
+        tension: 0.35,
+        spanGaps: false,
+        order: 1,
+      },
+    ]
+  },
+  options: {
+    responsive: true,
+    interaction: { mode: 'index', intersect: false },
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          title: ctx => `2026 — ${ctx[0].label}`,
+          label: ctx => {
+            if (ctx.raw === null) return null;
+            const names = ['Actual', 'Without Bender', 'With Bender'];
+            return ` ${names[ctx.datasetIndex]}: ${ctx.raw} hrs cumulative`;
+          }
+        }
+      }
+    },
+    scales: {
+      y: {
+        grid: { color: '#0f1020' },
+        ticks: { callback: v => v + ' hrs' },
+        min: 0,
+        max: 960,
+        title: { display: true, text: 'Cumulative hours saved', color: '#2d3350', font: { size: 11 } }
+      },
+      x: { grid: { display: false } }
+    }
+  }
+});
+</script>
+</body>
+</html>

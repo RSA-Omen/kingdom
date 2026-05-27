@@ -48,7 +48,10 @@ function TopBar() {
 }
 
 function Sidebar() {
-  const sections: { heading: string; items: { label: string; slug: string }[] }[] = [
+  const sections: {
+    heading: string;
+    items: { label: string; slug: string; external?: boolean }[];
+  }[] = [
     {
       heading: "The Capital",
       items: [
@@ -62,6 +65,7 @@ function Sidebar() {
       items: [
         { label: "Errors", slug: "/errors" },
         { label: "To-Dos", slug: "/todos" },
+        { label: "Email Logs", slug: "/email-logs" },
         { label: "Security", slug: "/security" },
         { label: "Schedules", slug: "/schedules" },
       ],
@@ -71,6 +75,7 @@ function Sidebar() {
       items: [
         { label: "Villages", slug: "/villages" },
         { label: "Bridges", slug: "/bridges" },
+        { label: "Scriptorium", slug: "http://gvdi-30:8095/", external: true },
       ],
     },
     {
@@ -100,6 +105,9 @@ function Sidebar() {
               <a
                 key={item.slug}
                 href={item.slug}
+                {...(item.external
+                  ? { target: "_blank", rel: "noopener noreferrer" }
+                  : {})}
                 className="px-3 py-2 rounded text-sm text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-subtle)] hover:text-[var(--color-text-primary)] transition-colors"
               >
                 {item.label}

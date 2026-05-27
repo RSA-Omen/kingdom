@@ -132,7 +132,7 @@ Total transactions loaded across both cycles: **4,205** — covering Jan 2025 th
   <strong>Beyond time savings:</strong>&nbsp; Before this tool, a broken link meant the document was either not found or staff navigated manually and sometimes landed in the wrong place. The Interceptor guarantees every link resolves correctly — no missed documents, no wrong-folder errors. This matters especially in the Purchase-Order workflow where finding the right supporting document quickly has a direct effect on how fast approvals happen.
 </div>
 
-Usage grew sharply in May (194 of the total 337 redirects), meaning the tool is being discovered by more staff as it embeds in their daily workflow.
+Usage grew sharply in May (194 of the total 337 logged redirects). The usage logger did not capture events January–April 2026 — the tool was running throughout that period, so actual total use since launch is higher than 337.
 
 </div>
 

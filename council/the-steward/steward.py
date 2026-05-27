@@ -54,6 +54,7 @@ VILLAGES = {
     "PDF Removal API": "http://localhost:5007/api/health",
     "PDF Removal Web": "http://localhost:3007/",
     "Bender": "http://localhost:8092/health",
+    "Scriptorium": "http://localhost:8095/",
 }
 
 # npm projects to audit for dependency vulnerabilities
