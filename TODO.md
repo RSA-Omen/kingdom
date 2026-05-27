@@ -70,9 +70,11 @@ To be written into `docs/GEKKO_STANDARD.md`. Captured here from design discussio
 
 ## Migrations into the Kingdom
 
-- [ ] [P2] Migrate `~/admin-center/backend/` → `~/Kingdom/capital/api/` — running service; requires careful migration; do not break Power Automate's POST `/api/track` integration
-- [ ] [P2] Migrate `~/admin-center/frontend/` references and styling lessons → `~/Kingdom/capital/dashboard/`; eventually the old frontend is replaced (do not delete until parity is reached)
-- [ ] [P2] Migrate `~/admin-center/mcp-server/` → `~/Kingdom/capital/mcp/`
+- [x] [P2] **Lift admin-center source into Kingdom** *(2026-05-27)* — `backend/` → `capital/api/`, `mcp-server/` → `capital/mcp/`. Source-of-truth code now lives in Kingdom. `admin-center-frontend` container stopped; `admin-center-backend` container still running on port 5001 (Kingdom dashboard still routes through it). GitHub repo `RSA-Omen/Admin-Center` archived.
+- [ ] [P1] **Build `kingdom-capital-api` container from `capital/api/`** — point at a migrated copy of `~/admin-center/data/app-registry.db` on a test port, verify all routes (`/api/track`, `/api/errors`, `/api/todos`, `/api/checkpoints`, `/api/health`, etc.), then cut over from `admin-center-backend`. Critical — this is what frees admin-center entirely.
+- [ ] [P1] **Migrate `~/admin-center/data/` → `~/Kingdom/capital/api/data/`** — coordinate with the container cutover above. The live SQLite DB (~14 MB) must move atomically.
+- [ ] [P3] **Archive `~/admin-center/` → `~/Archive/admin-center-final/`** — only after the cutover is verified and the container is rebuilt from Kingdom's source.
+- [ ] [P2] Migrate `~/admin-center/frontend/` references and styling lessons → `~/Kingdom/capital/dashboard/`; eventually the old frontend is replaced (frontend container already stopped 2026-05-27 — nobody used it; salvage what's useful then drop)
 - [ ] [P2] Migrate `~/Operations/The Bureau/` content into the Kingdom — the morning-digest scripts that already exist; absorb into `capital/herald/` and the Telegram delivery layer
 
 ## Kingdom cleanup (delegate to The Castellan once it exists)

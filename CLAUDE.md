@@ -66,10 +66,10 @@ Kingdom/
 │   ├── PRONTO_ACCESS.md      ← how the Kingdom talks to Pronto Xi (Bender vs. Interceptor)
 │   └── admin-center-audit.md ← inventory of what already exists in admin-center
 ├── capital/
-│   ├── api/                  ← *(forthcoming)* migrated from ~/admin-center/backend/
-│   ├── dashboard/            ← Next.js 16 + Tailwind 4 + shadcn (scaffolded)
-│   ├── mcp/                  ← *(forthcoming)* MCP servers, migrated from admin-center/mcp-server
-│   └── herald/               ← *(forthcoming)* Telegraph composition + delivery
+│   ├── api/                  ← Express + TypeScript backend, lifted from admin-center 2026-05-27
+│   ├── dashboard/            ← Next.js 16 + Tailwind 4 + shadcn
+│   ├── mcp/                  ← Stdio MCP server, lifted from admin-center 2026-05-27
+│   └── herald/               ← Telegraph composition + delivery
 ├── council/                  ← agent subfolders, created only when an agent is built
 └── bridges/                  ← *(forthcoming)* external system integrations
 ```
