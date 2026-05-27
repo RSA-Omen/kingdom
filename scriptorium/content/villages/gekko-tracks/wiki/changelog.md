@@ -7,3 +7,4 @@ Auto-maintained by the village-checkpoint skill (Gekko Standard §15.8). Each ch
 - **2026-05-21** — [fix(cardholder): close rejected-batch UX gaps + restore Zac tx #4320](/villages/gekko-tracks/changelog/2026-05-21-d100f17.html) (`d100f17`)
 - **2026-05-22** — [fix(cardholder): wire project/cost picker into mobile transaction-detail modal](/villages/gekko-tracks/changelog/2026-05-22-ca1f54b.html) (`ca1f54b`)
 - **2026-05-26** — [fix(ux): suppress silent "X saved." toast on field edits](/villages/gekko-tracks/changelog/2026-05-26-4aa77eb.html) (`4aa77eb`)
+- **2026-05-27** — [feat(notifications): Telegram batch-summary alert + email log API](/villages/gekko-tracks/changelog/2026-05-27-246433b.html) (`246433b`)
