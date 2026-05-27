@@ -1,0 +1,66 @@
+# Kingdom — Capital services
+#
+# Lifted from ~/admin-center/docker-compose.yml on 2026-05-27.
+# The backend source now lives in capital/api/; this compose builds it into
+# the kingdom-capital-api container, which serves the Capital API on port 5001
+# (replacing the legacy admin-center-backend container).
+
+services:
+  capital-api:
+    build:
+      context: ./capital/api
+      dockerfile: Dockerfile
+    container_name: kingdom-capital-api
+    restart: unless-stopped
+    ports:
+      - "5001:5000"
+    environment:
+      - NODE_ENV=production
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-changeme}
+      - DB_PATH=/data/app-registry.db
+      - DOCKER_SOCKET=/var/run/docker.sock
+      - HEALTH_CHECK_INTERVAL=300000
+      - ADMIN_CENTER_API_URL=http://gvdi-30.gekkosystems.local:5001
+      - HOST_IP=172.23.0.1
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID:-5871848434}
+      - GRAYLOG_URL=http://gvdi-30.gekkosystems.local:19000
+      - GRAYLOG_USER=${GRAYLOG_USER:-admin}
+      - GRAYLOG_PASSWORD=${GRAYLOG_PASSWORD:-admin}
+      - GKGPU_HEALTH_URL=${GKGPU_HEALTH_URL:-http://192.168.0.59:11434/api/tags}
+      - GKGPU_BRIEFING_TIMEOUT_MS=${GKGPU_BRIEFING_TIMEOUT_MS:-15000}
+    extra_hosts:
+      - "gkgpu-01:192.168.0.59"
+    volumes:
+      - ./capital/api/data:/data
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./capital/api/apps:/apps:ro
+      - /home/lauchlandupreez/Operations:/workspace/lauchlandupreez/Operations
+      - /home/lauchlandupreez/Management:/workspace/lauchlandupreez/Management
+      - /home/lauchlandupreez/Kingdom:/workspace/lauchlandupreez/Kingdom
+    networks:
+      - kingdom-network
+      - ops-network
+      - interceptor-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:5000/health', (r) => process.exit(r.statusCode === 200 ? 0 : 1))"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+networks:
+  kingdom-network:
+    driver: bridge
+  ops-network:
+    external: true
+    name: ops-network
+  interceptor-network:
+    external: true
+    name: interceptor-app_interceptor-network

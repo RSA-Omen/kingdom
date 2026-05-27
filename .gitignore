@@ -43,3 +43,6 @@ admin-center/
 
 # Runtime cache written by the Hand of the King for the dashboard
 .hand-snapshot.json
+
+# Capital API runtime data — live SQLite DB, WAL files, backups
+capital/api/data/
