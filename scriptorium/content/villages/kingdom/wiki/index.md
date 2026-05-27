@@ -40,3 +40,7 @@ Sixteen agents running continuously:
 | The Inspector | Quality gate enforcement | On-demand |
 
 See [[kingdom/status-metrics]] for the live numbers.
+
+## Components
+
+- **[[kingdom/capital-api]]** — the Capital API, the backend that holds the realm's data and receives events from every village. Replaced the legacy admin-center on 2026-05-27.

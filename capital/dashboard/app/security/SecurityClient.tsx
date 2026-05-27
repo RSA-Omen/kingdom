@@ -119,7 +119,7 @@ export function SecurityClient() {
         )}
 
         <p className="mt-4 text-[10px] text-[var(--color-text-tertiary)]">
-          Audited: admin-center backend · frontend · mcp-server · kingdom dashboard ·{" "}
+          Audited: capital api · capital mcp · kingdom dashboard ·{" "}
           {new Date(data.timestamp).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}
         </p>
       </div>

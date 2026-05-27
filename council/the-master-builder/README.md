@@ -11,7 +11,7 @@
 
 ## Data sources
 
-- `/home/lauchlandupreez/admin-center/data/app-registry.db` (read-only SQLite)
+- `/home/lauchlandupreez/Kingdom/capital/api/data/app-registry.db` (read-only SQLite — the Capital API's live DB, migrated from admin-center on 2026-05-27)
 - `gh issue list --repo RSA-Omen/kingdom` (via subprocess)
 - `~/Kingdom/TODO.md` (local file)
 

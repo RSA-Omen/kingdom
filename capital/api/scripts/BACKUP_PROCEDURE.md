@@ -1,18 +1,20 @@
-# Admin Center Database Backup Procedure
+# Capital API Database Backup Procedure
 
 ## Overview
-This document describes the backup and restore procedures for the Admin Center SQLite database (`app-registry.db`).
+This document describes the backup and restore procedures for the Capital API's SQLite database (`app-registry.db`).
+
+*Paths updated 2026-05-27 when the database moved from `~/admin-center/data/` to `~/Kingdom/capital/api/data/` as part of the admin-center decommission.*
 
 ## Database Location
-- **Database**: `/home/lauchlandupreez/admin-center/data/app-registry.db`
-- **Backup Directory**: `/home/lauchlandupreez/admin-center/data/backups/`
+- **Database**: `/home/lauchlandupreez/Kingdom/capital/api/data/app-registry.db`
+- **Backup Directory**: `/home/lauchlandupreez/Kingdom/capital/api/data/backups/`
 
 ## Manual Backup
 
 ### Creating a Backup
 Run the backup script:
 ```bash
-cd /home/lauchlandupreez/admin-center/backend
+cd /home/lauchlandupreez/Kingdom/capital/api
 python3 scripts/backup_database.py
 ```
 
@@ -24,7 +26,7 @@ The script will:
 
 ### Listing Available Backups
 ```bash
-ls -lah /home/lauchlandupreez/admin-center/data/backups/
+ls -lah /home/lauchlandupreez/Kingdom/capital/api/data/backups/
 ```
 
 ## Restore Procedure
@@ -32,7 +34,7 @@ ls -lah /home/lauchlandupreez/admin-center/data/backups/
 ### Restoring from a Backup
 1. List available backups:
 ```bash
-cd /home/lauchlandupreez/admin-center/backend
+cd /home/lauchlandupreez/Kingdom/capital/api
 python3 scripts/restore_database.py
 ```
 
@@ -49,7 +51,7 @@ python3 scripts/restore_database.py app-registry_backup_20260105_010323.db
 ### Verification After Restore
 After restoring, verify the database:
 ```bash
-python3 -c "import sqlite3; conn = sqlite3.connect('/home/lauchlandupreez/admin-center/data/app-registry.db'); tables = [r[0] for r in conn.execute('SELECT name FROM sqlite_master WHERE type=\"table\"').fetchall()]; print(f'Tables: {len(tables)}'); conn.close()"
+python3 -c "import sqlite3; conn = sqlite3.connect('/home/lauchlandupreez/Kingdom/capital/api/data/app-registry.db'); tables = [r[0] for r in conn.execute('SELECT name FROM sqlite_master WHERE type=\"table\"').fetchall()]; print(f'Tables: {len(tables)}'); conn.close()"
 ```
 
 ## Automated Backups (Cron Jobs)
@@ -57,7 +59,7 @@ python3 -c "import sqlite3; conn = sqlite3.connect('/home/lauchlandupreez/admin-
 ### Setting Up Automated Daily Backups
 Run the setup script:
 ```bash
-cd /home/lauchlandupreez/admin-center/backend/scripts
+cd /home/lauchlandupreez/Kingdom/capital/api/scripts
 ./setup_backup_cron.sh
 ```
 
@@ -87,7 +89,7 @@ crontab -l | grep -v backup_database.py | crontab -
 - Older backups are automatically cleaned up by the backup script
 - Manual cleanup can be performed if needed:
 ```bash
-cd /home/lauchlandupreez/admin-center/data/backups
+cd /home/lauchlandupreez/Kingdom/capital/api/data/backups
 # Remove backups older than 30 days
 find . -name "app-registry_backup_*.db" -type f -mtime +30 -delete
 ```
@@ -96,22 +98,22 @@ find . -name "app-registry_backup_*.db" -type f -mtime +30 -delete
 
 ### Verify Backup Integrity
 ```bash
-cd /home/lauchlandupreez/admin-center/data/backups
+cd /home/lauchlandupreez/Kingdom/capital/api/data/backups
 python3 -c "import sqlite3; conn = sqlite3.connect('latest_backup.db'); print('✓ Backup is valid'); tables = [r[0] for r in conn.execute('SELECT name FROM sqlite_master WHERE type=\"table\"').fetchall()]; print(f'Tables: {len(tables)}'); conn.close()"
 ```
 
 ### Compare Backup Sizes
 Compare backup file sizes to detect anomalies:
 ```bash
-ls -lh /home/lauchlandupreez/admin-center/data/backups/app-registry_backup_*.db
+ls -lh /home/lauchlandupreez/Kingdom/capital/api/data/backups/app-registry_backup_*.db
 ```
 
 ## Troubleshooting
 
 ### Backup Script Fails
 - Ensure Python 3 is installed: `python3 --version`
-- Check database file permissions: `ls -lah /home/lauchlandupreez/admin-center/data/app-registry.db`
-- Verify backup directory is writable: `ls -ld /home/lauchlandupreez/admin-center/data/backups`
+- Check database file permissions: `ls -lah /home/lauchlandupreez/Kingdom/capital/api/data/app-registry.db`
+- Verify backup directory is writable: `ls -ld /home/lauchlandupreez/Kingdom/capital/api/data/backups`
 
 ### Restore Fails
 - Ensure the backup file exists and is readable
@@ -128,14 +130,14 @@ ls -lh /home/lauchlandupreez/admin-center/data/backups/app-registry_backup_*.db
 
 ### Quick Backup Before Major Changes
 ```bash
-cd /home/lauchlandupreez/admin-center/backend
+cd /home/lauchlandupreez/Kingdom/capital/api
 python3 scripts/backup_database.py
 ```
 
 ### Quick Restore from Latest Backup
 ```bash
-cd /home/lauchlandupreez/admin-center/backend
-python3 scripts/restore_database.py $(basename $(readlink /home/lauchlandupreez/admin-center/data/backups/latest_backup.db))
+cd /home/lauchlandupreez/Kingdom/capital/api
+python3 scripts/restore_database.py $(basename $(readlink /home/lauchlandupreez/Kingdom/capital/api/data/backups/latest_backup.db))
 ```
 
 ## Best Practices

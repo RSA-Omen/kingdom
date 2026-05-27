@@ -20,7 +20,7 @@ import requests
 HOME = Path.home()
 DB_PATH = HOME / ".coin.db"
 KINGDOM_ENV = HOME / ".kingdom.env"
-APP_REGISTRY_DB = Path("/home/lauchlandupreez/admin-center/data/app-registry.db")
+APP_REGISTRY_DB = HOME / "Kingdom" / "capital" / "api" / "data" / "app-registry.db"
 
 
 # ---------------------------------------------------------------------------

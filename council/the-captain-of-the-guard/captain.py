@@ -131,9 +131,11 @@ class CaptainIndex:
 class CaptainChecker:
     def __init__(self, index: CaptainIndex):
         self.index = index
+        # 2026-05-27: admin-center decommissioned; Capital API + MCP now live in Kingdom repo
         self.known_projects = {
-            "admin-center/backend": Path.home() / "admin-center" / "backend",
-            "admin-center/frontend": Path.home() / "admin-center" / "frontend",
+            "capital/api": Path.home() / "Kingdom" / "capital" / "api",
+            "capital/mcp": Path.home() / "Kingdom" / "capital" / "mcp",
+            "capital/dashboard": Path.home() / "Kingdom" / "capital" / "dashboard",
             "Kingdom": Path.home() / "Kingdom",
         }
 

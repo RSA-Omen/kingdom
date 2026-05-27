@@ -70,7 +70,7 @@ async function main() {
       console.log('   Run without --dry-run to apply fixes.');
     } else {
       console.log('✨ Repair complete!');
-      console.log(`   ${summary.succeeded} resolution file(s) created in admin-center/data/dependency-resolutions/`);
+      console.log(`   ${summary.succeeded} resolution file(s) created in capital/api/data/dependency-resolutions/`);
       console.log('   These will appear in the next weekly report.');
     }
     console.log('═══════════════════════════════════════════════════════');

@@ -44,9 +44,11 @@ TELEGRAM_ENV_FALLBACK = HOME / "telegram_notify_service" / ".env"
 #   2026-05-14: added Interceptor AU (L01) + ZA (L02), split from single interceptor-app.
 #   2026-05-14: added PDF Removal API + Web. Local API kept pending review.
 #   2026-05-15: added Bender (Pronto Xi keystroke automation service).
+#   2026-05-27: admin-center decommissioned — "Admin Center API" renamed to "Capital API"
+#                (same port 5001, now served by kingdom-capital-api container from Kingdom source).
 VILLAGES = {
     "Gekko Tracks": "http://localhost:8002/health",
-    "Admin Center API": "http://localhost:5001/health",
+    "Capital API": "http://localhost:5001/health",
     "Open WebUI": "http://localhost:3005/health",
     "Local API": "http://localhost:8080/health",
     "Interceptor AU": "http://localhost:8001/health",
@@ -58,44 +60,36 @@ VILLAGES = {
 }
 
 # npm projects to audit for dependency vulnerabilities
+# 2026-05-27: admin-center sub-projects removed (decommissioned); source now lives in
+# capital/api and capital/mcp under the Kingdom repo.
 COMPONENTS = {
-    "Admin Center Backend": HOME / "admin-center/backend",
-    "Admin Center Frontend": HOME / "admin-center/frontend",
-    "Admin Center MCP Server": HOME / "admin-center/mcp-server",
+    "Capital API": KINGDOM_DIR / "capital/api",
+    "Capital MCP": KINGDOM_DIR / "capital/mcp",
     "Kingdom Dashboard": KINGDOM_DIR / "capital/dashboard",
 }
 
 # Maps component name → village slug (must match github-repos.json)
 COMPONENT_VILLAGE = {
-    "Admin Center Backend": "admin-center",
-    "Admin Center Frontend": "admin-center",
-    "Admin Center MCP Server": "admin-center",
+    "Capital API": "kingdom",
+    "Capital MCP": "kingdom",
     "Kingdom Dashboard": "kingdom",
 }
 
 # Fix config: how to fix, verify, and redeploy each component
 COMPONENT_FIX_CONFIG = {
-    "Admin Center Backend": {
-        "git_root": HOME / "admin-center",
-        "subdir": "backend",
+    "Capital API": {
+        "git_root": KINGDOM_DIR,
+        "subdir": "capital/api",
         "build_cmd": ["npm", "run", "build"],
-        "github_repo": "RSA-Omen/Admin-Center",
-        "docker_compose_dir": HOME / "admin-center",
-        "docker_service": "admin-center-backend",
+        "github_repo": "RSA-Omen/kingdom",
+        "docker_compose_dir": KINGDOM_DIR,
+        "docker_service": "capital-api",
     },
-    "Admin Center Frontend": {
-        "git_root": HOME / "admin-center",
-        "subdir": "frontend",
-        "build_cmd": ["npm", "run", "build"],
-        "github_repo": "RSA-Omen/Admin-Center",
-        "docker_compose_dir": HOME / "admin-center",
-        "docker_service": "admin-center-frontend",
-    },
-    "Admin Center MCP Server": {
-        "git_root": HOME / "admin-center",
-        "subdir": "mcp-server",
+    "Capital MCP": {
+        "git_root": KINGDOM_DIR,
+        "subdir": "capital/mcp",
         "build_cmd": None,
-        "github_repo": "RSA-Omen/Admin-Center",
+        "github_repo": "RSA-Omen/kingdom",
         "docker_compose_dir": None,
         "docker_service": None,
     },
@@ -118,10 +112,9 @@ UPSTREAM_BLOCKERS = [
         "description": "PostCSS XSS inside Next.js (GHSA-qx2v-qp2m-jg93)",
         "blocking_package": "next",
         "min_version": "16.3.0",
-        "affected_components": ["Admin Center Frontend", "Kingdom Dashboard"],
+        "affected_components": ["Kingdom Dashboard"],
         "advisory": "https://github.com/advisories/GHSA-qx2v-qp2m-jg93",
         "github_issues": {
-            "admin-center": 3,
             "kingdom": 27,
         },
     },

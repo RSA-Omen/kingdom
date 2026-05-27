@@ -99,7 +99,9 @@ def humanise_commit(msg: str) -> str:
 # Updated by /kingdom-checkpoint at the end of each work session.
 # One plain-English entry per completed feature. Replace with current week's work.
 RECENT_ADDITIONS = [
-    "NetBird audit — removed all NetBird overlay addresses from internal service communications; the Kingdom and admin-center now use local DNS (gekkosystems.local) for server-to-server calls so infrastructure monitoring is not dependent on the VPN",
+    "Capital API — the Kingdom now owns its own backend. The legacy admin-center service has been retired; its source moved into Kingdom/capital/api, the live database moved into Kingdom/capital/api/data, and the running container was swapped from admin-center-backend to kingdom-capital-api in a 3-second cutover. No requests dropped, all 19 routes verified",
+    "NetBird audit — removed all NetBird overlay addresses from internal service communications; the Kingdom now uses local DNS (gekkosystems.local) for server-to-server calls so infrastructure monitoring is not dependent on the VPN",
+    "Council agents reoriented — Lord Chamberlain, Master of Coin, Master Builder, Steward, and Captain of the Guard all updated to read from the new Capital API location instead of admin-center. The dashboard security audit and Scriptorium wiki also reflect the new home",
 ]
 
 

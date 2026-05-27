@@ -11,7 +11,7 @@ export default function SecurityPage() {
           Dependency Vulnerabilities
         </h1>
         <p className="mt-3 text-base text-[var(--color-text-secondary)] max-w-2xl leading-relaxed">
-          Live npm audit across admin-center&apos;s backend, frontend, and MCP server, and the Kingdom dashboard itself.
+          Live npm audit across the Capital API, the Capital MCP server, and the Kingdom dashboard.
           Severity, fix status, and advisory links for every finding.
         </p>
       </header>

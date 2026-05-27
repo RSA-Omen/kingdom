@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 The Lord Chamberlain — Relations with subjects.
-Surfaces friction, error pain points, and usage abandonment from the admin-center DB.
+Surfaces friction, error pain points, and usage abandonment from the Capital API's DB.
 """
 
 import os
@@ -14,7 +14,8 @@ import requests
 
 HOME = Path.home()
 DB_PATH = HOME / ".chamberlain.db"
-REGISTRY_DB = Path("/home/lauchlandupreez/admin-center/data/app-registry.db")
+# Capital API's live SQLite DB (migrated from ~/admin-center/data/ on 2026-05-27)
+REGISTRY_DB = HOME / "Kingdom" / "capital" / "api" / "data" / "app-registry.db"
 KINGDOM_ENV = HOME / ".kingdom.env"
 TELEGRAM_ENV_FALLBACK = HOME / "telegram_notify_service" / ".env"
 

@@ -23,10 +23,10 @@ type ComponentResult = {
 
 const STEWARD_DB = path.join(process.env.HOME!, ".steward-health.db");
 
+// 2026-05-27: admin-center decommissioned; Capital API + MCP now live in Kingdom repo.
 const COMPONENTS = [
-  { name: "Admin Center Backend", path: process.env.HOME + "/admin-center/backend" },
-  { name: "Admin Center Frontend", path: process.env.HOME + "/admin-center/frontend" },
-  { name: "Admin Center MCP Server", path: process.env.HOME + "/admin-center/mcp-server" },
+  { name: "Capital API", path: process.env.HOME + "/Kingdom/capital/api" },
+  { name: "Capital MCP", path: process.env.HOME + "/Kingdom/capital/mcp" },
   { name: "Kingdom Dashboard", path: process.env.HOME + "/Kingdom/capital/dashboard" },
 ];
 
