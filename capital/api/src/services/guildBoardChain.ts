@@ -365,11 +365,65 @@ function buildIncidentChain(incidentId: string): ChainData {
   };
 }
 
+// ─── Chain-notes enrichment ───────────────────────────────────────────────────
+
+type ChainNoteRow = {
+  id: number;
+  author: string;
+  text: string;
+  created_at: number; // Unix epoch seconds
+};
+
+/** Fetch any locally-stored enrichment notes for an item. */
+function fetchChainNotes(itemId: string): ChainNoteRow[] {
+  try {
+    return (db as any)
+      .getDb()
+      .prepare(
+        'SELECT id, author, text, created_at FROM chain_notes WHERE item_id = ? ORDER BY created_at ASC',
+      )
+      .all(itemId) as ChainNoteRow[];
+  } catch {
+    return [];
+  }
+}
+
+/** Convert a chain_notes row into a cloud ChainNode. */
+function chainNoteToNode(note: ChainNoteRow): ChainNode {
+  const date = fmtDate(new Date(note.created_at * 1000).toISOString());
+  return {
+    shape: 'cloud',
+    state: 'comms',
+    title: truncate(note.text, 90),
+    subtitle: `${date} · ${note.author} (enriched)`,
+  };
+}
+
+/** Merge enrichment notes into an existing nodes array by timestamp position. */
+function mergeEnrichmentNotes(nodes: ChainNode[], notes: ChainNoteRow[]): ChainNode[] {
+  if (notes.length === 0) return nodes;
+  // Append enrichment notes before the terminal "Done / Resolved" node (if dim)
+  const terminal = nodes[nodes.length - 1];
+  const isTerminal = terminal?.state === 'dim';
+  const body = isTerminal ? nodes.slice(0, -1) : nodes;
+  const tail = isTerminal ? [terminal] : [];
+  const noteNodes = notes.map(chainNoteToNode);
+  return [...body, ...noteNodes, ...tail];
+}
+
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 export async function buildChain(id: string): Promise<ChainData> {
+  let chain: ChainData;
   if (id.startsWith('incident:')) {
-    return buildIncidentChain(id.slice('incident:'.length));
+    chain = buildIncidentChain(id.slice('incident:'.length));
+  } else {
+    chain = await buildAsanaChain(id);
   }
-  return buildAsanaChain(id);
+
+  // Overlay any enrichment notes written via POST /chain/:id/note
+  const notes = fetchChainNotes(id);
+  chain.nodes = mergeEnrichmentNotes(chain.nodes, notes);
+
+  return chain;
 }

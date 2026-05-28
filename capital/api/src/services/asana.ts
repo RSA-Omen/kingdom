@@ -140,6 +140,22 @@ export async function getTaskStories(taskGid: string): Promise<AsanaStory[]> {
 }
 
 /**
+ * Post a comment to an Asana task. Returns the created story GID.
+ */
+export async function addTaskComment(taskGid: string, text: string): Promise<string> {
+  const resp = await fetch(`${ASANA_BASE_URL}/tasks/${taskGid}/stories`, {
+    method: 'POST',
+    headers: { ...authHeaders(), 'Content-Type': 'application/json' },
+    body: JSON.stringify({ data: { text } }),
+  });
+  if (!resp.ok) {
+    throw new Error(`Asana ${resp.status} posting comment on ${taskGid}: ${await resp.text()}`);
+  }
+  const body = await resp.json() as { data?: { gid?: string } };
+  return body.data?.gid ?? '';
+}
+
+/**
  * Health-check the PAT. Returns true if 200, false on 401/403.
  * Other errors bubble up — they're not PAT problems.
  */

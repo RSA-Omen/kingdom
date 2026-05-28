@@ -43,6 +43,8 @@ admin-center/
 
 # Per-machine Claude Code state (worktrees, settings.local.json, etc.)
 .claude/
+# But track project-wide commands (Claude Code slash skills)
+!.claude/commands/
 
 # Runtime cache written by the Hand of the King for the dashboard
 .hand-snapshot.json
