@@ -314,17 +314,32 @@ def run_cycle(conn: sqlite3.Connection, lc_tag_gid: str, cf_cache: dict) -> None
         # 11. Mark processed in Capital DB (best-effort)
         mark_processed(conn, task_gid, classification, confidence)
 
-        # 12. Telegram notification (best-effort)
+        # 12. Telegram notification — action-only (see feedback_telegram_action_only)
+        # Routine Medium/Low-priority triages live on the Guild Board; the king
+        # is pinged only when there's something they need to act on or look at.
         project_name = PROJECT_NAMES.get(project_gid, "") if project_gid else "My Tasks"
         section_name = SECTION_NAMES.get(section_gid, "") if section_gid else "Recently Assigned"
-        tg_text = (
-            f"📋 Lord Chamberlain triaged a task\n\n"
-            f"*{task_name}*\n"
-            f"Classification: {classification} (confidence: {confidence})\n"
-            f"Priority: {priority_name}\n"
-            f"Routing: {project_name} → {section_name}"
+        is_actionable = (
+            priority_name == "High"
+            or classification in ("bug", "unclear")
         )
-        send_telegram(tg_text)
+        if is_actionable:
+            reason = (
+                "High priority" if priority_name == "High"
+                else "bug — needs your attention" if classification == "bug"
+                else "unclear — needs your judgement"
+            )
+            tg_text = (
+                f"📋 Lord Chamberlain — action needed ({reason})\n\n"
+                f"*{task_name}*\n"
+                f"Classification: {classification} (confidence: {confidence})\n"
+                f"Priority: {priority_name}\n"
+                f"Routing: {project_name} → {section_name}"
+            )
+            send_telegram(tg_text)
+            log.info("Telegram sent (actionable): %s", task_gid)
+        else:
+            log.info("Telegram skipped (routine): %s — %s/%s", task_gid, classification, priority_name)
 
         new_count += 1
         log.info(
