@@ -5,6 +5,7 @@ import { GroupHeader } from "@/components/kingdom/guild-board/GroupHeader";
 import { Ornament } from "@/components/kingdom/guild-board/Ornament";
 import { QueueSidebar } from "@/components/kingdom/guild-board/QueueSidebar";
 import { StatsStrip } from "@/components/kingdom/guild-board/StatsStrip";
+import { Toast } from "@/components/kingdom/guild-board/Toast";
 import { TriageItem } from "@/components/kingdom/guild-board/TriageItem";
 import {
   ATTENTION_ITEMS,
@@ -12,24 +13,29 @@ import {
   STATS,
   VILLAGE_SIDEBAR,
 } from "@/components/kingdom/guild-board/mock-data";
+import { CLOSED_ITEMS } from "@/components/kingdom/guild-board/mock-closed";
 import type { DeskItem, ViewFilter } from "@/components/kingdom/guild-board/types";
 
 /* ─── filter helpers ─── */
 
-function applyViewFilter(items: DeskItem[], view: ViewFilter, group: "attention" | "flight") {
+function applyViewFilter(
+  items: DeskItem[],
+  view: ViewFilter,
+  group: "attention" | "flight" | "closed",
+) {
   switch (view) {
     case "all":
-      return items;
+      return group === "closed" ? [] : items;
     case "projects":
-      return items.filter((i) => i.type === "project");
+      return group === "closed" ? [] : items.filter((i) => i.type === "project");
     case "bugs":
-      return items.filter((i) => i.type === "bug");
+      return group === "closed" ? [] : items.filter((i) => i.type === "bug");
     case "incidents":
-      return items.filter((i) => i.type === "incident");
+      return group === "closed" ? [] : items.filter((i) => i.type === "incident");
     case "attention":
       return group === "attention" ? items : [];
     case "closed":
-      return [];
+      return group === "closed" ? items : [];
     default:
       return items;
   }
@@ -37,7 +43,6 @@ function applyViewFilter(items: DeskItem[], view: ViewFilter, group: "attention"
 
 function applyVillageFilter(items: DeskItem[], villageId: string | null) {
   if (!villageId) return items;
-  // Map sidebar village ids to the village strings used on items.
   const labelMap = Object.fromEntries(VILLAGE_SIDEBAR.map((v) => [v.id, v.label]));
   const label = labelMap[villageId];
   if (!label) return items;
@@ -49,6 +54,10 @@ function applyVillageFilter(items: DeskItem[], villageId: string | null) {
 export default function GuildBoardPage() {
   const [view, setView] = useState<ViewFilter>("all");
   const [village, setVillage] = useState<string | null>(null);
+  const [toast, setToast] = useState<string | null>(null);
+  const [closedOpen, setClosedOpen] = useState(false);
+
+  const flash = (m: string) => setToast(m);
 
   const attention = useMemo(
     () => applyVillageFilter(applyViewFilter(ATTENTION_ITEMS, view, "attention"), village),
@@ -58,8 +67,13 @@ export default function GuildBoardPage() {
     () => applyVillageFilter(applyViewFilter(FLIGHT_ITEMS, view, "flight"), village),
     [view, village],
   );
+  const closedItems = useMemo(
+    () => applyVillageFilter(applyViewFilter(CLOSED_ITEMS, view, "closed"), village),
+    [view, village],
+  );
 
   const today = new Date().toISOString().slice(0, 10);
+  const showClosedItems = closedOpen || view === "closed";
 
   return (
     <div className="flex flex-col gap-6">
@@ -108,9 +122,15 @@ export default function GuildBoardPage() {
           </div>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <BoardButton kind="bug">+ New bug</BoardButton>
-          <BoardButton kind="incident">+ New incident</BoardButton>
-          <BoardButton kind="project">+ New project</BoardButton>
+          <BoardButton kind="bug" onClick={() => flash("New bug — Phase C will create an Asana task")}>
+            + New bug
+          </BoardButton>
+          <BoardButton kind="incident" onClick={() => flash("New incident — Phase C will alert Telegram + open Asana")}>
+            + New incident
+          </BoardButton>
+          <BoardButton kind="project" onClick={() => flash("New project — Phase C will spin up an Asana project")}>
+            + New project
+          </BoardButton>
         </div>
       </header>
 
@@ -139,7 +159,11 @@ export default function GuildBoardPage() {
             ) : (
               <div>
                 {attention.map((it) => (
-                  <TriageItem key={it.id} item={it} />
+                  <TriageItem
+                    key={it.id}
+                    item={it}
+                    onClick={() => flash(`Open “${it.title}” — Phase C drills into the project chain`)}
+                  />
                 ))}
               </div>
             )}
@@ -157,22 +181,30 @@ export default function GuildBoardPage() {
             ) : (
               <div>
                 {flight.map((it) => (
-                  <TriageItem key={it.id} item={it} />
+                  <TriageItem
+                    key={it.id}
+                    item={it}
+                    onClick={() => flash(`Open “${it.title}” — Phase C drills into the project chain`)}
+                  />
                 ))}
               </div>
             )}
 
-            {/* collapsed closed */}
-            <div
-              className="flex items-center gap-3"
+            {/* Closed — collapsible */}
+            <button
+              type="button"
+              onClick={() => setClosedOpen((o) => !o)}
+              className="w-full flex items-center gap-3 cursor-pointer transition-colors"
               style={{
                 padding: "14px 20px",
                 color: "var(--color-text-secondary)",
                 fontSize: 12,
                 background: "rgba(0,0,0,0.18)",
-                cursor: "not-allowed",
+                border: 0,
+                textAlign: "left",
               }}
-              title="Phase B will wire closed items"
+              onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(0,0,0,0.28)")}
+              onMouseLeave={(e) => (e.currentTarget.style.background = "rgba(0,0,0,0.18)")}
             >
               <div
                 style={{
@@ -196,12 +228,30 @@ export default function GuildBoardPage() {
                 {STATS.closed}
               </div>
               <div className="ml-auto" style={{ color: "var(--color-text-secondary)" }}>
-                this quarter · ▼ expand
+                this quarter · {showClosedItems ? "▲ collapse" : "▼ expand"}
               </div>
-            </div>
+            </button>
+
+            {showClosedItems && (
+              <div>
+                {closedItems.length === 0 ? (
+                  <EmptyRow message="No closed items match this filter." />
+                ) : (
+                  closedItems.map((it) => (
+                    <TriageItem
+                      key={it.id}
+                      item={it}
+                      onClick={() => flash(`Open “${it.title}” — Phase C shows the post-mortem chain`)}
+                    />
+                  ))
+                )}
+              </div>
+            )}
           </div>
         </main>
       </div>
+
+      <Toast message={toast} onClose={() => setToast(null)} />
     </div>
   );
 }
@@ -226,14 +276,17 @@ function EmptyRow({ message }: { message: string }) {
 function BoardButton({
   kind,
   children,
+  onClick,
 }: {
   kind: "bug" | "incident" | "project";
   children: React.ReactNode;
+  onClick?: () => void;
 }) {
   if (kind === "project") {
     return (
       <button
         type="button"
+        onClick={onClick}
         className="cursor-pointer transition-colors"
         style={{
           background: "var(--color-accent)",
@@ -257,12 +310,12 @@ function BoardButton({
     return (
       <button
         type="button"
+        onClick={onClick}
         className="cursor-pointer transition-colors"
         style={{
           background: "transparent",
           color: "var(--color-danger)",
-          border:
-            "1px solid color-mix(in srgb, var(--color-danger) 45%, transparent)",
+          border: "1px solid color-mix(in srgb, var(--color-danger) 45%, transparent)",
           font: "500 12px/1 var(--font-sans)",
           padding: "8px 12px",
           borderRadius: 6,
@@ -279,10 +332,10 @@ function BoardButton({
       </button>
     );
   }
-  // bug
   return (
     <button
       type="button"
+      onClick={onClick}
       className="cursor-pointer transition-colors"
       style={{
         background: "transparent",
