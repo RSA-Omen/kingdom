@@ -1,5 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { buildFeed } from '../services/guildBoardFeed';
+import { buildChain } from '../services/guildBoardChain';
 
 const router = Router();
 
@@ -15,6 +16,23 @@ router.get('/feed', async (_req: Request, res: Response) => {
   } catch (err: any) {
     console.error('[guild-board] feed build failed:', err);
     res.status(500).json({ ok: false, error: err.message || 'feed build failed' });
+  }
+});
+
+// GET /api/guild-board/chain/:id — lifecycle chain for a single item.
+// id is either an Asana task GID or "incident:{id}".
+router.get('/chain/:id', async (req: Request, res: Response) => {
+  const { id } = req.params;
+  if (!id) {
+    return res.status(400).json({ ok: false, error: 'id required' });
+  }
+  try {
+    const chain = await buildChain(id);
+    res.set('Cache-Control', 'public, max-age=30');
+    res.json(chain);
+  } catch (err: any) {
+    console.error('[guild-board] chain build failed:', err);
+    res.status(500).json({ ok: false, error: err.message || 'chain build failed' });
   }
 });
 

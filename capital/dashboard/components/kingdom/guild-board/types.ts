@@ -62,3 +62,44 @@ export type SidebarItem = {
   label: string;
   count: number;
 };
+
+// ─── Chain view types ─────────────────────────────────────────────────────────
+
+export type ChainNodeShape = "diamond" | "circle" | "cloud";
+export type ChainNodeState = "done" | "waiting" | "comms" | "dim";
+
+export type ChainSubtreeItem = {
+  glyph?: string;
+  label: string;
+  date?: string;
+  tone?: "comms";
+};
+
+export type ChainNode = {
+  shape: ChainNodeShape;
+  state: ChainNodeState;
+  title: string;
+  subtitle?: string;
+  desc?: string;
+  inlinePill?: string;
+  subtree?: { label: string; items: ChainSubtreeItem[] };
+};
+
+export type ChainMeta = {
+  title: string;
+  type: EntityType;
+  status: string;
+  stakeholder?: string;
+  village: string;
+  started: string;
+  lastComms?: string;
+  stuckDays?: number;
+  stuckContext?: string;
+};
+
+export type ChainData = {
+  ok: boolean;
+  taskGid: string;
+  meta: ChainMeta;
+  nodes: ChainNode[];
+};
