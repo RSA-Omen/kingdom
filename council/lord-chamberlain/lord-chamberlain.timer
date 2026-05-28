@@ -1,0 +1,10 @@
+[Unit]
+Description=Lord Chamberlain — triage poll every 5 minutes
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+Unit=lord-chamberlain.service
+
+[Install]
+WantedBy=timers.target
