@@ -9,6 +9,9 @@ __pycache__/
 node_modules/
 dist/
 build/
+.next/
+# Next.js auto-generated
+capital/dashboard/next-env.d.ts
 
 # Secrets and credentials
 .bash_history

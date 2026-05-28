@@ -35,6 +35,10 @@
   --color-danger: #f87171;
   --color-info: #60a5fa;
 
+  /* Guild Board entity colours */
+  --color-bug: #fb923c;       /* orange — bugs (feature degraded, core working) */
+  --color-waiting: #c084fc;   /* purple — waiting on external comms / sign-off */
+
   /* Hex grid */
   --color-glow: rgba(129, 230, 217, 0.35);
   --color-hex-fill: rgba(129, 230, 217, 0.03);
