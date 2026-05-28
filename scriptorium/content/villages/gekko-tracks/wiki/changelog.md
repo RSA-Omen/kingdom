@@ -10,3 +10,4 @@ Auto-maintained by the village-checkpoint skill (Gekko Standard §15.8). Each ch
 - **2026-05-27** — [feat(notifications): Telegram batch-summary alert + email log API](/villages/gekko-tracks/changelog/2026-05-27-246433b.html) (`246433b`)
 - **2026-05-28** — [fix(receipts): stop misidentifying \$ as ZAR; default display currency to \$](/villages/gekko-tracks/changelog/2026-05-28-3188ac7.html) (`3188ac7`)
 - **2026-05-28** — [fix(receipts): stop misidentifying $ as ZAR; default display currency to $](/villages/gekko-tracks/changelog/2026-05-28-b31374e.html) (`b31374e`)
+- **2026-05-28** — [fix(receipts): add currency override dropdown to cardholder dashboard](/villages/gekko-tracks/changelog/2026-05-28-4caee88.html) (`4caee88`)
