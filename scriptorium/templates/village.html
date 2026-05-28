@@ -260,5 +260,23 @@
 </main>
 
 <script src="/scriptorium.js"></script>
+<script type="module">
+  import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs';
+  mermaid.initialize({
+    startOnLoad: true,
+    theme: 'base',
+    themeVariables: {
+      background: '#0d1117',
+      primaryColor: '#0d2d2a',
+      primaryTextColor: '#e2e8f0',
+      primaryBorderColor: '#81e6d9',
+      lineColor: '#81e6d9',
+      secondaryColor: '#0a1628',
+      tertiaryColor: '#111827',
+      edgeLabelBackground: '#0d1117',
+      fontSize: '14px'
+    }
+  });
+</script>
 </body>
 </html>

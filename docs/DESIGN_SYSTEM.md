@@ -1,283 +1,280 @@
-# Newsroom Design System
+# Kingdom Design System
 
-The visual and interaction language for the Newsroom dashboard, Telegraph editions, and any future Gekko-internal UI.
+The visual and interaction language for the Kingdom dashboard, the CI Desk, Telegraph editions, and any Gekko-internal UI.
 
-**Tone:** clean SaaS, calm, professional. The kingdom is a *conceptual* layer — used in language, iconography, and information architecture — but never decorative. No parchment, no faux-medieval typography, no ornate borders. Think Linear, Notion, Vercel — but with the soul of a kingdom.
-
----
-
-## Principles
-
-1. **Calm over busy.** Generous whitespace. One primary action per surface. The operator should be able to scan a page and immediately know what matters.
-2. **Reusable over bespoke.** If it appears twice, it's a component. If it appears once, it's still probably a component.
-3. **Information density when it earns it.** The matrix view (apps × concerns) is dense by necessity — but everything else breathes.
-4. **One primary accent.** Everything else neutral. The accent is reserved for primary actions and active state.
-5. **The kingdom shows through language, not chrome.** "The Curator" labels appear in copy. Agent names label notifications. The dashboard talks about "villages" and "the Capital." But the visual style is just clean SaaS — no fantasy textures.
-6. **Dark mode is first-class.** This is a developer-facing tool used at 6am with coffee. Both modes must feel intentional.
+**Tone:** clean SaaS, calm, professional. The kingdom is a *conceptual* layer — used in language, iconography, and information architecture — but never decorative. No parchment, no faux-medieval typography, no ornate borders. Think Linear, Notion, Vercel — but darker, and with soul.
 
 ---
 
-## Design tokens
+## Theme — Void Teal
 
-### Colors
+The Kingdom runs dark-first. One accent colour: **teal**. Everything else is near-black and slate.
 
-**Neutral scale (greys)** — the primary palette. Tailwind's `neutral` or `zinc` scale. Use these for ~90% of all surfaces, text, and borders.
+> **Why Void Teal?** The king works at 6am. The screen shouldn't fight back.
+> Teal reads as "active system" — calm, technical, alive. It is reserved for primary actions,
+> active state, and key data points. Nothing else competes with it.
 
-**Primary accent** — `indigo-600` (light mode) / `indigo-400` (dark mode).
-- Used for: primary CTA buttons, active nav state, links, focus rings, key data points (e.g. the "time saved" number on dashboards).
-- Not used for: incidental icons, decoration, secondary buttons.
+### Core palette
 
-**Semantic colors** — used sparingly, only when they communicate state:
-| Purpose | Light | Dark |
+| Token | Value | Use |
 |---|---|---|
-| Healthy / success | `emerald-600` | `emerald-400` |
-| Warning / degraded | `amber-600` | `amber-400` |
-| Critical / error | `rose-600` | `rose-400` |
-| Info / neutral signal | `sky-600` | `sky-400` |
+| `--bg` | `#050510` | Page background (void — near-black with blue undertone) |
+| `--surface` | `#0d0d1a` | Sidebar, toolbar backgrounds |
+| `--card` | `#111122` | Cards, panels |
+| `--card-hover` | `#181830` | Card hover state |
+| `--bg-elev-2` | `#1a1a2e` | Elevated surfaces (modals, tooltips interior) |
+| `--border` | `rgba(148,163,184,0.08)` | Default dividers |
+| `--border-strong` | `rgba(148,163,184,0.15)` | Card outlines, focused inputs |
+| `--teal` | `#81e6d9` | **Primary accent — use sparingly** |
+| `--teal-deep` | `#4fd1c5` | Teal buttons (hover state) |
+| `--teal-bright` | `#b2f5ea` | Teal button pressed / highlight |
+| `--teal-glow` | `rgba(129,230,217,0.12)` | Active nav background |
+| `--teal-glow-soft` | `rgba(129,230,217,0.06)` | Hover background |
+| `--teal-tint-bg` | `rgba(129,230,217,0.04)` | Very subtle teal wash |
 
-**Backgrounds:**
-| Layer | Light | Dark |
+### Text scale
+
+| Token | Value | Use |
 |---|---|---|
-| Page | `neutral-50` | `neutral-950` |
-| Surface (card) | `white` | `neutral-900` |
-| Surface (elevated) | `white` | `neutral-800` |
-| Subtle (zebra, hover) | `neutral-100` | `neutral-800/50` |
+| `--text-strong` | `#f1f5f9` | Headlines, labels, active items |
+| `--text` | `#cbd5e1` | Body text |
+| `--text-muted` | `#94a3b8` | Secondary labels |
+| `--text-dim` | `#64748b` | Captions, timestamps |
+| `--text-faint` | `#475569` | Placeholders, disabled |
 
-**Text:**
-| Use | Light | Dark |
+### Entity type colours
+
+Every ticket, project, bug, or incident carries one of three type colours. These are the only non-teal accent colours used in the Kingdom.
+
+| Entity | Colour | Hex | Use |
+|---|---|---|---|
+| **Project** | Teal | `#81e6d9` | Ongoing work, features, initiatives |
+| **Bug** | Orange | `#fb923c` | Feature degraded, core unaffected |
+| **Incident** | Red | `#f87171` | Service down or severely impaired |
+
+### Node status colours (chain view)
+
+| Status | Colour | Hex |
 |---|---|---|
-| Primary | `neutral-900` | `neutral-50` |
-| Secondary | `neutral-600` | `neutral-400` |
-| Tertiary / hint | `neutral-500` | `neutral-500` |
+| Done | Green | `#4ade80` |
+| Active / in progress | Amber | `#fbbf24` |
+| Waiting on stakeholder | Purple | `#c084fc` |
+| Blocked | Red | `#f87171` |
+| Not started / dim | Slate | `#475569` |
+| Scope addition | Blue | `#60a5fa` |
 
-### Spacing
+---
 
-Tailwind's default 4px grid. **Use only these spacing values:** `1, 2, 3, 4, 6, 8, 12, 16, 24` (= 4, 8, 12, 16, 24, 32, 48, 64, 96 px).
-Don't invent intermediate values. If a layout needs spacing that isn't in this set, use the next one up.
+## Design principles
 
-**Rhythm:**
-- Card internal padding: `p-6` (24px) standard, `p-8` (32px) for primary cards
-- Section gap (between cards): `gap-4` or `gap-6`
-- Page padding: `px-8 py-10` (page level), tighter on mobile
+1. **Calm over busy.** Generous whitespace. One primary action per surface. The operator should scan and immediately know what matters.
+2. **Reusable over bespoke.** If it appears twice, it's a component.
+3. **Information density when it earns it.** The chain view is dense by necessity — everything else breathes.
+4. **One primary accent.** Teal is reserved for primary actions and active state. Orange (bug) and red (incident) exist only to communicate entity type. Nothing else is colourful.
+5. **The kingdom shows through language, not chrome.** "Villages," "The Capital," "the Hand of the King" appear in copy. The visual style is just clean dark SaaS.
+6. **Dark mode is first-class.** This system does not have a light mode. Dark is the design.
 
-### Radius
+---
 
-**Use 4 (`rounded`) and 8 (`rounded-lg`) only.**
-- `rounded` (4px) — small interactive elements (buttons, inputs, badges, chips)
-- `rounded-lg` (8px) — cards, surfaces, modals, dropdowns
+## Typography
 
-No `rounded-xl`, `rounded-2xl`, no fully circular elements except avatars.
+| Stack | Font | Fallback |
+|---|---|---|
+| Body / UI | Inter | `ui-sans-serif, system-ui` |
+| Code / mono | JetBrains Mono | `ui-monospace, monospace` |
 
-### Shadows
+**Scale (use only these):** `text-xs` (10–11px), `text-sm` (12–13px), `text-base` (14px), `text-lg` (16px), `text-xl` (18px), `text-2xl` (22px), `text-3xl` (28px).
 
-**Subtle, not floating.** The shadow communicates layer, not levitation.
+**Weights:** 400 (normal), 500 (medium), 600 (semibold), 700 (bold for numerics only). Never 800+.
 
-| Use | Class |
+**Mono is used for:** IDs, timestamps, code, serial numbers, counts in badges, keyboard shortcuts.
+
+---
+
+## Spacing
+
+Tailwind's 4px grid. **Permitted values:** `1 2 3 4 6 8 10 12 16 20 24 32`. Don't invent intermediates.
+
+- Card internal padding: `p-4` dense · `p-5` standard · `p-6` relaxed
+- Section gap between cards: `gap-3` or `gap-4`
+- Page padding: `px-8 py-10` on desktop
+
+---
+
+## Radius
+
+| Size | Value | Use |
+|---|---|---|
+| `--r-sm` | `6px` | Buttons, badges, chips, inputs |
+| `--r-md` | `8px` | Cards, dropdowns, tooltips |
+| `--r-lg` | `12px` | Panels, desk frames |
+| `--r-pill` | `999px` | Tags, filter chips, avatar pills |
+
+---
+
+## Shadows
+
+Shadows communicate depth, not drama. All shadows use near-black (`rgba(0,0,0,x)`) not grey.
+
+| Use | Definition |
 |---|---|
-| Resting card | `shadow-sm` |
-| Hover/elevated card | `shadow` |
-| Modal, dropdown, popover | `shadow-lg` |
-| Toast / floating element | `shadow-xl` |
-
-Never `shadow-2xl`. Never custom shadows.
-
-### Typography
-
-**Stack:**
-- Sans: Inter (system fallback: `ui-sans-serif`)
-- Mono: JetBrains Mono (system fallback: `ui-monospace`)
-
-**Scale:** Tailwind defaults. **Use only:** `text-xs`, `text-sm`, `text-base`, `text-lg`, `text-xl`, `text-2xl`, `text-3xl`. Skip `text-4xl+` outside marketing.
-
-**Weights:** `font-normal` (400), `font-medium` (500), `font-semibold` (600). Never bold (`700`).
-
-**Default body:** `text-sm` for dense surfaces (matrix, tables), `text-base` for reading surfaces (Telegraph article body).
-
-### Iconography
-
-- **Library:** `lucide-react` (already in Gekko's standard tooling).
-- **Default size:** 16px (`size-4`) inline, 20px (`size-5`) for primary actions, 24px (`size-6`) for empty-state illustrations.
-- **Stroke weight:** default (2). Don't change.
-- **Color:** inherit from text by default; semantic colors only when state-communicating.
-
-### Motion
-
-- **Duration:** `transition-all duration-150` for most interactions.
-- **Hover state:** subtle background shift, never scale or rotation.
-- **Page transitions:** none, beyond what Next.js does by default.
-- **Loading:** skeleton placeholders, not spinners (except for explicit "submitting" states ≤300ms).
-
----
-
-## Kingdom theme — where it shows up
-
-The kingdom analogy is **conceptual scaffolding**, not visual decoration. Here's where it surfaces:
-
-**In language and copy:**
-- "Villages" instead of "apps" or "services"
-- "The Capital" for platform-level views
-- "Bridges" for external-system integrations
-- "The Curator says…" / "The Mechanic noticed…" for agent attribution
-- "Telegraph — Daily Edition" for the morning digest
-
-**In iconography (subtle):**
-- Each agent has a single lucide icon paired with their name (e.g. The Curator → `library`, The Mechanic → `wrench`, The Scout → `binoculars`, The Foreman → `hard-hat`, The Firefighter → `flame`, The Inspector → `clipboard-check`, The Concierge → `concierge-bell`, The Caretaker → `broom`, The Quartermaster → `package`, The Architect → `compass`).
-- Villages get a generic `building-2` icon by default; specific apps may have their own.
-
-**Where it does NOT show up:**
-- No castle illustrations, no banners, no parchment, no scrolls
-- No medieval typography
-- No skeuomorphic textures
-- No fantasy color palette (gold, brown, deep red)
-
-If you want the Age-of-Empires/WoW-modern feel, it lives in the **information architecture** (the matrix is your "kingdom map") and in the **agent personas** (each has a voice and a beat) — not in the chrome.
-
----
-
-## Layout and navigation
-
-### App shell
-
-```
-┌────────────────────────────────────────────────────────────────────┐
-│  ⌂ Newsroom               Search...                     ☰  ☾  👤   │  ← top bar (h-14)
-├──────────┬─────────────────────────────────────────────────────────┤
-│          │                                                          │
-│  Sidebar │  Page content                                            │
-│  (w-64)  │                                                          │
-│          │                                                          │
-│ Front pg │                                                          │
-│ Villages │                                                          │
-│ Agents   │                                                          │
-│ Bridges  │                                                          │
-│ Standard │                                                          │
-│ Settings │                                                          │
-│          │                                                          │
-└──────────┴─────────────────────────────────────────────────────────┘
-```
-
-- **Top bar:** logo, global search, theme toggle, notifications, user menu.
-- **Sidebar:** persistent on desktop (≥lg), drawer on mobile. Width 256px (`w-64`). Subtle right border, no shadow.
-- **Page content:** `max-w-7xl mx-auto px-8 py-10`.
-
-### Primary nav (sidebar)
-
-| Section | Slug | What |
-|---|---|---|
-| **Front Page** | `/` | Telegraph Daily — morning digest, urgent items, today's work |
-| **Villages** | `/villages` | The matrix view — apps × concerns |
-| **Agents** | `/agents` | The team — what each agent did recently |
-| **Bridges** | `/bridges` | Power Automate, Copilot Studio, Pronto — external systems |
-| **Standard** | `/standard` | The Gekko Standard — compliance per village |
-| **Settings** | `/settings` | Operator settings, notification config, agent prefs |
+| Resting card | `0 1px 4px rgba(0,0,0,0.4)` |
+| Elevated card | `0 4px 12px -4px rgba(0,0,0,0.6)` |
+| Modal / popover | `0 16px 48px -16px rgba(0,0,0,0.8)` |
+| Teal glow (accent elements) | `0 0 12px rgba(129,230,217,0.2)` |
 
 ---
 
 ## Core components
 
-These are the building blocks. Every screen composes from these.
+### Chip / Badge
 
-### Card
-
-The fundamental container. `rounded-lg`, `shadow-sm`, `p-6`, `bg-white dark:bg-neutral-900`, optional border `border border-neutral-200 dark:border-neutral-800`.
+`border-radius: 999px`, `font-size: 10.5px`, `font-family: mono`, `font-weight: 600`, `letter-spacing: 0.02em`.
 
 Variants:
-- `Card` — default
-- `Card.Stat` — large headline number + label (e.g. "47 hours saved this week")
-- `Card.Section` — has header (title + optional action), body, optional footer
+- `chip-project` — teal tint, teal text
+- `chip-bug` — orange tint, orange text
+- `chip-incident` — red tint, red text
+- `chip-done` — green tint, green text
+- `chip-active` — amber tint, amber text
+- `chip-waiting` — purple tint, purple text
+- `chip-blocked` — red tint, red text
+- `chip-village` — indigo tint, indigo text
 
-### StatusDot
+### Buttons
 
-A 2px-wide colored circle indicating health. Sizes `sm` (8px) / `md` (10px). Colors map to semantic palette.
+| Variant | Background | Text | Use |
+|---|---|---|---|
+| Primary | `--teal-deep` → `--teal-bright` on hover | `--bg` | Single primary action per page |
+| Secondary | Transparent | `--text-muted` | Non-destructive secondary |
+| Ghost | Transparent | `--text-faint` | Toolbar, inline |
 
-### Badge / Chip
+All buttons: `border-radius: var(--r-sm)`, `font-size: 12px`, `font-weight: 600`.
 
-`rounded`, `text-xs`, `font-medium`, `px-2 py-0.5`. Variants: neutral (default), success, warning, danger, info.
+### Card / Surface
 
-### Button
+```css
+background: var(--card);
+border: 1px solid var(--border-strong);
+border-radius: var(--r-lg);
+```
 
-- `rounded`, `px-3 py-1.5` (sm) or `px-4 py-2` (md)
-- Variants: `primary` (indigo bg), `secondary` (neutral bg), `ghost` (transparent, hover bg-neutral-100), `destructive` (rose bg)
-- Always pair with optional leading icon
+Hover state adds `background: var(--card-hover)` and strengthens border slightly.
 
-### Matrix table
+### Sidebar filter pattern
 
-The **defining component** of this product. A grid of villages × concerns where each cell shows status.
+The sidebar is a filter, not navigation. Structure:
+- Section header: `10px mono uppercase tracking-widest --text-faint`
+- Item: `13px`, `--text-muted` default, `--teal` + `--teal-glow` background when active
+- Count badge: `11px mono --text-faint`, teal when active
 
-Specs:
-- Sticky first column (village name + icon)
-- Cells: status dot + value (e.g. "🟢 342" or "8.5h")
-- Click cell → opens drawer with detail
-- Click village name → village page
-- Click column header → filter/sort
+**Do not put metadata in the sidebar.** Stakeholders, assignees, and tags belong on the queue items themselves, not as sidebar filters — they create visual noise without earned value.
 
-### Agent card
+### Chain node
 
-Per-agent summary: icon, name, beat (one sentence), last-seen timestamp, count of recent findings. Click → agent page.
+The chain visualization is the defining component of the CI Desk. Rules:
 
-### Telegraph article
+- **Spine:** 2px vertical gradient line, teal-to-dim
+- **Phase node:** circle (22px), status colour fill + border
+- **Milestone node:** diamond (20px rotated square), status colour
+- **Comms node:** pill/cloud (22×14px), status colour — used for logged communication events
+- **Node label:** `13.5px semibold --text-strong`
+- **Node desc:** `12px --text-dim`
+- **Gap warning:** inline pill, red text + red border — auto-calculated from `due_date`
+- **Node actions (on hover):** `Edit · Log comms · Add node below` — appear only on hover, mono 10.5px
+- **Add-node inserter:** dashed teal rule with `+ insert node here` appears between nodes on hover
 
-A reading surface — wider line-length, larger leading, `prose` styles. Sections: front-page items, today's work, long read, classifieds. Each item has an attribution footer ("— The Foreman, 06:14").
+Sub-trees (branches):
+- Collapsed by default, summary badge shows count
+- Toggle button: `branch-toggle`, mono 11px, arrow rotates on open
+- Branch spine: 2px `rgba(148,163,184,0.12)` — visually subordinate to main spine
 
-### Empty state
+### Evolution timeline (Screen 04)
 
-Illustration (lucide icon, `size-12`, `text-neutral-400`), heading, one-line description, optional CTA.
-
-### Drawer / sheet
-
-Right-side slide-out for detail views. Width `w-[480px]` standard, `w-[640px]` for wide content. Uses `shadow-lg`.
-
-### Toast
-
-Bottom-right, `rounded-lg`, `shadow-xl`, with semantic accent border. Auto-dismiss 5s, manual close X.
+- One swimlane per village (not per type)
+- Left column: village name + activity badge counts (`3P 5B 1I`)
+- Right: `position:relative` track, height `80px`, markers positioned by `left: X%`
+- Marker anatomy: dot (16px circle) → 8px line → label text
+- Label colour maps to entity type
+- Popup appears **above** the marker (`bottom: calc(100% + 10px)`)
+- Merged tickets: dashed dot, strikethrough label, faded opacity
 
 ---
 
-## Component library
+## Layout — CI Desk
 
-**Use shadcn/ui as the base.** Install components as needed (don't pre-install all). Keep the registry default; only customize variants when the design tokens above require it.
+```
+┌────────────── Control bar (fixed top, pill) ───────────────────────┐
+│  ← Scriptorium  |  CI Desk  |  01 Queue  02 Project  03 Bug  04 Evo │
+└─────────────────────────────────────────────────────────────────────┘
 
-**Required from shadcn:**
-- `button`, `card`, `badge`, `dialog`, `dropdown-menu`, `sheet` (drawer), `toast` (sonner), `tabs`, `tooltip`, `input`, `label`, `select`, `switch`, `skeleton`, `avatar`, `command` (search palette)
+Queue screen:                     Chain screen:
+┌─────────────────────────────┐   ┌─────────────────────────────────┐
+│ ◀ Queue / [ticket title]    │   │ ◀ Queue / [ticket title]        │
+├──────────┬──────────────────┤   ├──────────┬──────────────────────┤
+│ Sidebar  │ Stats strip      │   │ Sidebar  │ chain title + legend  │
+│ Views    │ Tab bar          │   │ metadata │ ─────────────────     │
+│ Villages │ Queue list       │   │ alert    │ ● Kickoff milestone   │
+│          │ ─────────────    │   │ gh link  │ ○ Phase node          │
+│          │ Each row has:    │   │          │   └ sub-tree (toggle) │
+│          │ icon · title ·   │   │          │ ☁ Comms event         │
+│          │ chips · meta     │   │          │ ◇ Next milestone      │
+│          │ days · › chevron │   │          │                       │
+└──────────┴──────────────────┘   └──────────┴──────────────────────┘
+```
 
-**Do not use:**
-- `accordion` (collapsing UI fights scannability)
-- `carousel` (this is a tool, not a marketing page)
-- Any component with built-in animations beyond fade/slide
+---
 
-**Custom components** (live in `components/newsroom/`):
-- `Matrix` (the village-concern grid)
-- `StatCard`
-- `AgentCard`
-- `VillageCard`
-- `TelegraphArticle`
-- `StatusDot`
+## Kingdom theme — where it surfaces
+
+**In language and copy:**
+- "Villages" (not "apps" or "services")
+- "The Capital" (platform-level)
+- "Bridges" (external-system integrations)
+- "The Hand of the King" (the daily task list / matters view)
+- "The Scriptorium" (documentation and design demos)
+- Agent attribution: "The Steward noticed…", "The Herald published…"
+
+**In iconography:**
+- Each Royal Court agent has a single lucide icon paired with their name
+- Villages use `building-2` by default
+- The CI Desk uses: `flame` (incident), `bug` (bug), `hexagon` (project)
+
+**Where it does NOT show up:**
+- No castle illustrations, banners, parchment, scrolls
+- No medieval typography
+- No skeuomorphic textures
+- No fantasy colour palette (gold, brown, deep red)
 
 ---
 
 ## Accessibility
 
-- Color contrast ≥ AA in both modes.
-- Focus rings visible: `focus-visible:ring-2 focus-visible:ring-indigo-500`.
+- Contrast ≥ AA. Teal (#81e6d9) on `#050510` passes WCAG AA large text; used at ≥11px for chips.
+- Focus rings: `outline: 2px solid var(--teal); outline-offset: 2px`
+- Status communicated by colour **and** text/icon — never colour alone.
 - Every icon-only button has `aria-label`.
-- Status colors paired with text or icon — never color alone.
-- Keyboard-first: every action reachable via tab; `cmd-k` opens search.
+- Keyboard-first: all actions reachable via tab.
 
 ---
 
-## What this design system is NOT
+## Tech implementation
 
-- It's not a marketing site spec.
-- It's not a public product spec — this is internal tooling for a small team.
-- It's not a brand guideline — Gekko's brand lives elsewhere.
-- It's not exhaustive — when you need something new, decide once, document here, then use everywhere.
+| Layer | Choice |
+|---|---|
+| Framework | Next.js 16, React 19, TypeScript |
+| Styling | Tailwind CSS 4 (CSS-variable theming) |
+| Components | shadcn/ui + custom |
+| Icons | lucide-react (16px default, 20px primary actions) |
+| Fonts | Inter + JetBrains Mono (Google Fonts) |
+| Motion | `transition-all duration-150` — never scale/rotation on hover |
 
----
+**shadcn components in use:** `button`, `card`, `badge`, `dialog`, `dropdown-menu`, `sheet`, `toast` (sonner), `tabs`, `tooltip`, `input`, `select`, `command` (search palette).
 
-## Implementation
-
-- **Framework:** Next.js 16, React 19, TypeScript
-- **Styling:** Tailwind CSS 4 (CSS-variable based theming for dark mode)
-- **Components:** shadcn/ui, lucide-react
-- **Lives at:** `Platform/newsroom/dashboard/`
-- **Reuses (long-term):** the existing `~/admin-center/frontend/` may be replaced by this; for now they coexist
+**Custom components** (live in `components/kingdom/`):
+- `ChainView` — the spine + node visualization
+- `QueueItem` — desk queue row
+- `EvolutionTimeline` — per-village swimlane
+- `NodeActionBar` — hover actions on chain nodes
+- `GapWarning` — inline pill for overdue communication gaps
+- `BranchToggle` — collapsible sub-tree button

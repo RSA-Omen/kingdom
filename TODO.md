@@ -31,6 +31,11 @@ Each gets a `council/<role>/` subfolder when its build begins, not before. Names
 - [x] **The Captain of the Guard** — first responder to incidents; sounds the alarm, gathers facts, drafts the reply
 - [x] **The Master of Laws** — enforces the Gekko Standard; audits villages for compliance
 - [x] **The Lord Chamberlain** — relations with subjects (users); wellbeing, friction, complaints, abandoned flows
+  - [ ] [P1] **Phase 1** — Core triage loop: Asana poll, PAT health check, Claude classify, route, comment, `lc-triaged` tag, Capital DB, Telegram. PRD at `docs/council/lord-chamberlain.md`
+  - [ ] [P2] **Phase 2** — GitHub integration: search open + resolved + historical before creating; deduplication; regression flagging
+  - [ ] [P2] **Phase 3** — Re-triage trigger: `/retriage` comment detection, DB + tag cleanup, re-queue
+  - [ ] [P3] **Phase 4** — Paste-to-ticket: `POST /api/tickets/ingest`, dashboard `/tickets/new`, Telegram `/ticket`
+  - [ ] [P3] **Phase 5** — Reporting: dashboard inbound-queue card, Herald weekly digest entry
 - [x] **The Castellan** — keeps the castle clean; identifies abandoned wings, recommends archive or demolish
 - [x] **The Master Builder** — improves the platform itself; what gets ignored, what's missing
 - [x] **The Master of Coin** — finance; tracks costs, infrastructure spend, cost-per-app, Azure/Anthropic bills

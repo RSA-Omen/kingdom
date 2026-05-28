@@ -1,0 +1,1471 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>The Guild Board — Design Mockup · The Scriptorium</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+<style>
+
+/* ============================================================ Viewer */
+.viewer {
+  min-height: 100vh;
+  padding: 80px 24px 64px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+/* ============================================================ Control bar */
+.control-bar {
+  position: fixed; top: 16px; left: 50%; transform: translateX(-50%);
+  z-index: 100;
+  display: flex; align-items: center; gap: 4px;
+  background: rgba(10,10,24,0.86);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(148,163,184,0.18);
+  border-radius: 999px;
+  padding: 5px;
+  box-shadow: 0 12px 32px -16px rgba(0,0,0,0.8), 0 0 0 1px rgba(255,255,255,0.02) inset;
+  max-width: calc(100vw - 32px);
+}
+.cb-back {
+  display: flex; align-items: center; gap: 6px;
+  padding: 6px 14px; border-radius: 999px;
+  color: var(--text-muted); font-size: 12px; font-weight: 500;
+  text-decoration: none; transition: color .15s, background .15s; white-space: nowrap;
+}
+.cb-back:hover { color: var(--teal); background: var(--teal-glow-soft); }
+.cb-sep { width: 1px; height: 20px; background: rgba(148,163,184,.12); margin: 0 2px; }
+.cb-title { font-size: 13px; font-weight: 600; color: var(--text-strong); padding: 6px 12px; letter-spacing: -.01em; white-space: nowrap; }
+.cb-screens { display: flex; align-items: center; gap: 2px; }
+.cb-screen-btn {
+  padding: 6px 14px; border-radius: 999px; border: none;
+  background: transparent; color: var(--text-muted);
+  font-size: 12px; font-weight: 500; cursor: pointer;
+  transition: color .15s, background .15s; white-space: nowrap;
+  font-family: var(--font-body);
+}
+.cb-screen-btn:hover { color: var(--text); background: var(--teal-glow-soft); }
+.cb-screen-btn.active { background: var(--teal-glow); color: var(--teal); }
+
+/* ============================================================ Screens */
+.screen { display: none; width: 100%; max-width: 1060px; }
+.screen.active { display: block; }
+.screen-label {
+  font-family: var(--font-mono); font-size: 10px; text-transform: uppercase;
+  letter-spacing: .12em; color: var(--text-dim); text-align: center; margin-bottom: 16px;
+}
+.desk-frame {
+  background: var(--card); border: 1px solid var(--border-strong);
+  border-radius: var(--r-lg); overflow: hidden; box-shadow: var(--shadow-card);
+}
+
+/* ============================================================ Chips */
+.chip {
+  display: inline-flex; align-items: center;
+  padding: 1px 7px; border-radius: 999px;
+  font-size: 10.5px; font-weight: 600; font-family: var(--font-mono);
+  letter-spacing: .02em; border: 1px solid transparent; white-space: nowrap;
+}
+.chip-village  { background:rgba(99,102,241,.12); color:#a5b4fc; border-color:rgba(99,102,241,.2); }
+.chip-done     { background:rgba(74,222,128,.1);  color:#4ade80; border-color:rgba(74,222,128,.2); }
+.chip-active   { background:rgba(251,191,36,.1);  color:#fbbf24; border-color:rgba(251,191,36,.2); }
+.chip-waiting  { background:rgba(192,132,252,.1); color:#c084fc; border-color:rgba(192,132,252,.2); }
+.chip-blocked  { background:rgba(248,113,113,.1); color:#f87171; border-color:rgba(248,113,113,.2); }
+.chip-project  { background:rgba(129,230,217,.08);color:#81e6d9; border-color:rgba(129,230,217,.2); }
+.chip-incident { background:rgba(248,113,113,.08);color:#f87171; border-color:rgba(248,113,113,.2); }
+.chip-bug      { background:rgba(251,146,60,.1);  color:#fb923c; border-color:rgba(251,146,60,.25); }
+
+/* ============================================================ SCREEN 1: Queue */
+.queue-layout { display: grid; grid-template-columns: 220px 1fr; min-height: 640px; }
+.queue-sidebar { border-right: 1px solid var(--border); padding: 20px 0; background: var(--surface); }
+.sidebar-section { padding: 0 16px; margin-bottom: 24px; }
+.sidebar-label { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .12em; color: var(--text-faint); margin-bottom: 8px; font-family: var(--font-mono); }
+.sidebar-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 7px 12px; border-radius: var(--r-sm); cursor: pointer;
+  font-size: 13px; color: var(--text-muted); transition: all .12s; margin-bottom: 1px; text-decoration: none;
+}
+.sidebar-item:hover { background: var(--card-hover); color: var(--text); }
+.sidebar-item.active { background: var(--teal-glow); color: var(--teal); }
+.sidebar-count { font-size: 11px; font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--text-faint); }
+.sidebar-item.active .sidebar-count { color: var(--teal); opacity: .7; }
+
+.queue-main { display: flex; flex-direction: column; }
+.queue-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 24px; border-bottom: 1px solid var(--border); gap: 12px;
+}
+.queue-header-title { font-size: 15px; font-weight: 600; color: var(--text-strong); }
+.queue-header-sub { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+.queue-actions { display: flex; gap: 8px; }
+
+.btn-primary {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 14px; background: var(--teal-deep); color: var(--bg);
+  border: none; border-radius: var(--r-sm); font-size: 12px; font-weight: 600;
+  cursor: pointer; font-family: var(--font-body); transition: all .12s; white-space: nowrap;
+}
+.btn-primary:hover { background: var(--teal-bright); }
+.btn-secondary {
+  display: flex; align-items: center; gap: 6px;
+  padding: 7px 14px; background: transparent; color: var(--text-muted);
+  border: 1px solid var(--border-strong); border-radius: var(--r-sm);
+  font-size: 12px; font-weight: 500; cursor: pointer; font-family: var(--font-body); transition: all .12s; white-space: nowrap;
+}
+.btn-secondary:hover { color: var(--teal); border-color: var(--teal-glow); background: var(--teal-tint-bg); }
+
+.stats-strip { display: flex; border-bottom: 1px solid var(--border); background: var(--surface); }
+.stat-cell { flex: 1; padding: 14px 20px; border-right: 1px solid var(--border); }
+.stat-cell:last-child { border-right: none; }
+.stat-num { font-size: 20px; font-weight: 700; color: var(--text-strong); font-variant-numeric: tabular-nums; line-height: 1; }
+.stat-num.teal   { color: var(--teal); }
+.stat-num.orange { color: #fb923c; }
+.stat-num.warn   { color: #fbbf24; }
+.stat-num.danger { color: #f87171; }
+.stat-lbl { font-size: 10.5px; text-transform: uppercase; letter-spacing: .1em; color: var(--text-faint); font-weight: 600; font-family: var(--font-mono); margin-top: 3px; }
+
+.queue-tabs { display: flex; padding: 0 24px; border-bottom: 1px solid var(--border); background: var(--surface); }
+.queue-tab { padding: 11px 16px; font-size: 12.5px; font-weight: 500; color: var(--text-dim); cursor: pointer; border-bottom: 2px solid transparent; transition: all .12s; white-space: nowrap; }
+.queue-tab:hover { color: var(--text-muted); }
+.queue-tab.active { color: var(--teal); border-bottom-color: var(--teal); }
+
+.queue-list { flex: 1; }
+.queue-item {
+  display: flex; align-items: flex-start; gap: 16px;
+  padding: 15px 24px; border-bottom: 1px solid var(--divider); cursor: pointer; transition: background .1s;
+}
+.queue-item:hover { background: var(--card-hover); }
+.queue-item:last-child { border-bottom: none; }
+
+.item-icon {
+  width: 32px; height: 32px; border-radius: var(--r-sm);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px;
+}
+.item-icon.project  { background: rgba(129,230,217,.1); }
+.item-icon.incident { background: rgba(248,113,113,.1); }
+.item-icon.bug      { background: rgba(251,146,60,.1); }
+
+.item-body { flex: 1; min-width: 0; }
+.item-title { font-size: 13.5px; font-weight: 600; color: var(--text-strong); margin-bottom: 5px; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.item-meta { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.item-meta-text { font-size: 12px; color: var(--text-dim); }
+
+.item-right { flex-shrink: 0; text-align: right; }
+.item-days { font-size: 12px; font-family: var(--font-mono); color: var(--text-dim); white-space: nowrap; }
+.item-days.warn   { color: #fbbf24; }
+.item-days.danger { color: #f87171; font-weight: 600; }
+.item-days.ok     { color: #4ade80; }
+.item-phase { font-size: 11px; color: var(--text-faint); margin-top: 3px; white-space: nowrap; }
+.queue-item { cursor: pointer; }
+.queue-item::after {
+  content: '›'; font-size: 22px; line-height: 1; font-weight: 300;
+  color: var(--text-faint);
+  flex-shrink: 0; align-self: center; margin-left: 8px; padding-right: 2px;
+  opacity: 0; transition: opacity .12s, transform .15s;
+  transform: translateX(-5px);
+}
+.queue-item:hover::after {
+  opacity: 0.6;
+  transform: translateX(0);
+}
+
+/* ── Chain node interaction affordances ── */
+.chain-node-actions {
+  display: flex; align-items: center; gap: 6px;
+  margin-top: 7px; opacity: 0; transition: opacity .15s;
+}
+.chain-node:hover .chain-node-actions { opacity: 1; }
+.node-action-btn {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 9px; border-radius: var(--r-sm);
+  font-size: 10.5px; font-family: var(--font-mono); font-weight: 500;
+  color: var(--text-faint); background: var(--bg-elev-2);
+  border: 1px solid var(--border); cursor: pointer; transition: all .12s; white-space: nowrap;
+}
+.node-action-btn:hover { color: var(--teal); border-color: rgba(129,230,217,.3); background: var(--teal-tint-bg); }
+.node-action-btn.danger:hover { color: #f87171; border-color: rgba(248,113,113,.3); background: rgba(248,113,113,.04); }
+
+/* Add-node affordance between chain nodes */
+.chain-add-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 4px 0; margin-bottom: 4px; opacity: 0; transition: opacity .15s; cursor: pointer;
+}
+.chain-add-row:hover { opacity: 1 !important; }
+.chain-node:hover + .chain-add-row,
+.chain-add-row:hover { opacity: 0.6; }
+.chain-add-line { flex: 1; height: 1px; background: rgba(129,230,217,.15); border-radius: 1px; }
+.chain-add-btn {
+  font-size: 10px; font-family: var(--font-mono); color: rgba(129,230,217,.5);
+  background: rgba(129,230,217,.05); border: 1px dashed rgba(129,230,217,.2);
+  border-radius: var(--r-sm); padding: 2px 8px; white-space: nowrap; transition: all .12s;
+}
+.chain-add-row:hover .chain-add-btn { color: var(--teal); border-color: rgba(129,230,217,.4); background: rgba(129,230,217,.08); }
+
+/* Chain screen breadcrumb */
+.chain-breadcrumb {
+  display: flex; align-items: center; gap: 8px;
+  padding: 14px 20px 10px; border-bottom: 1px solid var(--border);
+  font-size: 12px; color: var(--text-faint); font-family: var(--font-mono);
+}
+.chain-bc-link { color: var(--text-dim); cursor: pointer; transition: color .12s; }
+.chain-bc-link:hover { color: var(--teal); }
+.chain-bc-sep { color: var(--text-faint); }
+.chain-bc-current { color: var(--text-muted); }
+
+/* ============================================================ SCREENS 2–3: Chain detail */
+.detail-layout { display: grid; grid-template-columns: 260px 1fr; min-height: 720px; }
+.detail-sidebar {
+  border-right: 1px solid var(--border); padding: 24px 20px;
+  background: var(--surface); display: flex; flex-direction: column; gap: 18px;
+}
+.detail-type-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 4px 10px; border-radius: 999px; font-size: 11px; font-weight: 600;
+  font-family: var(--font-mono); letter-spacing: .04em; margin-bottom: 4px;
+}
+.detail-type-chip.project  { background:rgba(129,230,217,.08); color:var(--teal); border:1px solid rgba(129,230,217,.2); }
+.detail-type-chip.incident { background:rgba(248,113,113,.08); color:#f87171; border:1px solid rgba(248,113,113,.2); }
+.detail-type-chip.bug      { background:rgba(251,146,60,.08); color:#fb923c; border:1px solid rgba(251,146,60,.25); }
+
+.detail-title { font-size: 17px; font-weight: 700; color: var(--text-strong); line-height: 1.3; margin: 0; }
+.detail-subtitle { font-size: 12px; color: var(--text-dim); margin-top: 4px; }
+
+.meta-block { display: flex; flex-direction: column; gap: 10px; }
+.meta-row   { display: flex; flex-direction: column; gap: 2px; }
+.meta-key   { font-size: 10px; text-transform: uppercase; letter-spacing: .12em; color: var(--text-faint); font-weight: 600; font-family: var(--font-mono); }
+.meta-val   { font-size: 12.5px; color: var(--text-muted); }
+.meta-val strong { color: var(--text-strong); font-weight: 600; }
+
+.divider { height: 1px; background: var(--border); }
+
+.alert-box { background:rgba(192,132,252,.06); border:1px solid rgba(192,132,252,.25); border-radius:var(--r-md); padding:12px 14px; }
+.alert-box.danger  { background:rgba(248,113,113,.06); border-color:rgba(248,113,113,.25); }
+.alert-box.orange  { background:rgba(251,146,60,.06); border-color:rgba(251,146,60,.3); }
+.alert-box-title   { font-size:11px; font-weight:600; font-family:var(--font-mono); text-transform:uppercase; letter-spacing:.1em; color:#c084fc; margin-bottom:5px; }
+.alert-box.danger  .alert-box-title { color:#f87171; }
+.alert-box.orange  .alert-box-title { color:#fb923c; }
+.alert-box-body    { font-size:12px; color:var(--text-muted); line-height:1.5; }
+
+.gh-link {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 12px; background: var(--card-hover);
+  border: 1px solid var(--border-strong); border-radius: var(--r-sm);
+  font-size: 12px; color: var(--text-muted); text-decoration: none; transition: all .12s;
+}
+.gh-link:hover { color: var(--teal); border-color: var(--teal-glow); background: var(--teal-tint-bg); }
+.gh-link-num { font-family: var(--font-mono); color: var(--text-faint); margin-left: auto; }
+
+/* ============================================================ Chain visualization */
+.chain-area { padding: 28px 32px 48px; overflow: auto; }
+.chain-title-row {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 28px; flex-wrap: wrap; gap: 12px;
+}
+.chain-title-text { font-size: 13px; font-weight: 600; color: var(--text-strong); text-transform: uppercase; letter-spacing: .08em; font-family: var(--font-mono); }
+.chain-legend { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+.legend-item { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--text-dim); }
+.legend-dot  { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+.legend-diamond { width: 10px; height: 10px; transform: rotate(45deg); border-radius: 2px; flex-shrink: 0; }
+.legend-cloud { width: 16px; height: 10px; border-radius: 999px; flex-shrink: 0; }
+.ld-done    { background: #4ade80; opacity: .85; }
+.ld-active  { background: #fbbf24; opacity: .85; }
+.ld-waiting { background: #c084fc; opacity: .85; }
+.ld-blocked { background: #f87171; opacity: .85; }
+.ld-bug     { background: #fb923c; opacity: .85; }
+.ld-dim     { background: #475569; }
+
+/* Chain nodes */
+.chain { position: relative; padding-left: 56px; min-width: 420px; }
+.chain-spine-line {
+  position: absolute; left: 20px; top: 16px; bottom: 16px;
+  width: 2px; border-radius: 1px;
+  background: linear-gradient(to bottom, rgba(129,230,217,.3) 0%, rgba(129,230,217,.12) 60%, rgba(71,85,105,.3) 100%);
+}
+.chain-spine-line.bug     { background: linear-gradient(to bottom, rgba(251,146,60,.4) 0%, rgba(74,222,128,.3) 80%, transparent 100%); }
+.chain-spine-line.incident{ background: linear-gradient(to bottom, rgba(248,113,113,.4) 0%, rgba(74,222,128,.3) 80%, transparent 100%); }
+
+.chain-node { position: relative; margin-bottom: 0; padding-bottom: 22px; }
+.chain-node:last-child { padding-bottom: 0; }
+
+.node-icon-wrap { position: absolute; left: -56px; top: 0; width: 42px; display: flex; align-items: center; justify-content: center; }
+.node-circle  { width: 22px; height: 22px; border-radius: 50%; border: 2px solid; position: relative; z-index: 1; }
+.node-diamond { width: 20px; height: 20px; transform: rotate(45deg); border: 2px solid; border-radius: 3px; position: relative; z-index: 1; }
+.node-cloud   { width: 22px; height: 14px; border-radius: 999px; border: 2px solid; position: relative; z-index: 1; }
+
+.node-done    { border-color: #4ade80; background: rgba(74,222,128,.12); }
+.node-active  { border-color: #fbbf24; background: rgba(251,191,36,.12); }
+.node-waiting { border-color: #c084fc; background: rgba(192,132,252,.12); }
+.node-blocked { border-color: #f87171; background: rgba(248,113,113,.12); }
+.node-bug     { border-color: #fb923c; background: rgba(251,146,60,.12); }
+.node-dim     { border-color: #475569; background: rgba(71,85,105,.08); }
+
+.node-content { min-height: 24px; display: flex; flex-direction: column; justify-content: center; }
+.node-label {
+  font-size: 13.5px; font-weight: 600; color: var(--text-strong);
+  line-height: 1.3; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+}
+.node-label.dim { color: var(--text-faint); font-weight: 500; }
+.node-desc  { font-size: 12px; color: var(--text-dim); margin-top: 3px; line-height: 1.45; }
+.node-meta-row { display: flex; align-items: center; gap: 10px; margin-top: 5px; flex-wrap: wrap; }
+.node-date  { font-size: 11px; font-family: var(--font-mono); color: var(--text-faint); }
+.node-gap-warning { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; color: #f87171; background: rgba(248,113,113,.08); border: 1px solid rgba(248,113,113,.25); padding: 1px 7px; border-radius: 999px; }
+.node-gap-waiting { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; color: #c084fc; background: rgba(192,132,252,.08); border: 1px solid rgba(192,132,252,.25); padding: 1px 7px; border-radius: 999px; }
+
+.milestone-card { background: var(--bg-elev-2); border: 1px solid rgba(129,230,217,.15); border-radius: var(--r-md); padding: 10px 14px; margin-top: 6px; max-width: 460px; }
+.milestone-card.dim   { border-color: rgba(71,85,105,.3); background: rgba(71,85,105,.04); }
+.milestone-card.orange{ border-color: rgba(251,146,60,.2); }
+.milestone-card-text  { font-size: 12px; color: var(--text-dim); line-height: 1.5; }
+.milestone-card.dim  .milestone-card-text { color: var(--text-faint); }
+
+/* ── Collapsible branch ── */
+.branch-toggle {
+  display: inline-flex; align-items: center; gap: 5px;
+  margin-top: 8px;
+  padding: 4px 10px; background: var(--bg-elev-2);
+  border: 1px solid var(--border-strong); border-radius: var(--r-sm);
+  font-size: 11px; font-weight: 500; color: var(--text-dim);
+  cursor: pointer; transition: all .12s; user-select: none; font-family: var(--font-mono);
+}
+.branch-toggle:hover { color: var(--teal); border-color: rgba(129,230,217,.3); background: var(--teal-tint-bg); }
+.branch-toggle .arrow { transition: transform .2s; display: inline-block; }
+.branch-toggle.open .arrow { transform: rotate(180deg); }
+
+.chain-branch {
+  margin-left: 0; margin-top: 10px; padding-left: 36px;
+  position: relative; display: none; /* collapsed by default */
+  animation: branchIn .18s ease;
+}
+.chain-branch.open { display: block; }
+
+@keyframes branchIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: translateY(0); } }
+
+.chain-branch::before {
+  content: ''; position: absolute; left: 0; top: 0; bottom: 16px;
+  width: 2px; background: rgba(148,163,184,.12); border-radius: 1px;
+}
+.chain-branch-node { position: relative; padding-bottom: 14px; }
+.chain-branch-node:last-child { padding-bottom: 0; }
+.branch-node-icon { position: absolute; left: -36px; top: 0; width: 28px; display: flex; align-items: center; justify-content: center; }
+.node-circle-sm { width: 16px; height: 16px; border-radius: 50%; border: 2px solid; }
+.node-cloud-sm  { width: 18px; height: 11px; border-radius: 999px; border: 2px solid; }
+.branch-label { font-size: 12.5px; font-weight: 500; color: var(--text-muted); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.branch-label.dim { color: var(--text-faint); }
+.branch-meta  { font-size: 11px; color: var(--text-faint); margin-top: 2px; font-family: var(--font-mono); }
+.branch-meta.warn { color: #f87171; }
+
+/* ── Tooltip ── */
+[data-tip] { position: relative; }
+[data-tip]:hover::after {
+  content: attr(data-tip);
+  position: absolute; left: 0; top: calc(100% + 6px);
+  white-space: pre-line; z-index: 200;
+  background: rgba(10,10,24,.96); border: 1px solid var(--border-strong);
+  border-radius: var(--r-md); padding: 8px 12px;
+  font-size: 11.5px; color: var(--text-muted); line-height: 1.55;
+  max-width: 280px; pointer-events: none;
+  box-shadow: 0 8px 24px -8px rgba(0,0,0,.8);
+}
+
+/* ============================================================ SCREEN 4: Evolution */
+.evo-layout { padding: 28px 32px; }
+.evo-header { margin-bottom: 24px; }
+.evo-title { font-size: 22px; font-weight: 700; color: var(--text-strong); }
+.evo-sub   { font-size: 13px; color: var(--text-dim); margin-top: 4px; }
+
+.evo-stats {
+  display: flex; gap: 0; margin-bottom: 28px;
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); overflow: hidden;
+}
+.evo-stat { flex: 1; padding: 14px 20px; border-right: 1px solid var(--border); }
+.evo-stat:last-child { border-right: none; }
+.evo-stat-num { font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1; }
+.evo-stat-lbl { font-size: 10.5px; text-transform: uppercase; letter-spacing: .1em; color: var(--text-faint); font-weight: 600; font-family: var(--font-mono); margin-top: 3px; }
+
+.evo-legend {
+  display: flex; gap: 20px; margin-bottom: 20px; flex-wrap: wrap;
+}
+.evo-legend-item { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--text-dim); }
+.evo-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+.evo-dot.project  { background: rgba(129,230,217,.8); box-shadow: 0 0 6px rgba(129,230,217,.3); }
+.evo-dot.incident { background: rgba(248,113,113,.85); box-shadow: 0 0 6px rgba(248,113,113,.3); }
+.evo-dot.bug      { background: rgba(251,146,60,.85); box-shadow: 0 0 6px rgba(251,146,60,.3); }
+
+/* Timeline container */
+.timeline-wrap {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md);
+  overflow-x: auto; margin-bottom: 24px;
+}
+.timeline-inner { min-width: 840px; padding: 24px 32px; }
+/* Taller tracks to fit dot + line + label */
+.lane-track { height: 80px !important; }
+
+.timeline-axis {
+  display: flex; gap: 0;
+  border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 20px;
+}
+.timeline-month {
+  flex: 1; min-width: 60px; font-size: 10.5px; font-family: var(--font-mono);
+  color: var(--text-faint); text-transform: uppercase; letter-spacing: .08em;
+  text-align: center;
+}
+.timeline-month.now { color: var(--teal); }
+
+/* Swimlane */
+.timeline-lane {
+  position: relative; margin-bottom: 28px;
+}
+.timeline-lane:last-child { margin-bottom: 0; }
+.lane-label {
+  font-size: 11px; font-weight: 600; color: var(--text-muted); margin-bottom: 10px;
+  text-transform: uppercase; letter-spacing: .08em; font-family: var(--font-mono);
+}
+.lane-track {
+  position: relative; height: 48px;
+  background: rgba(255,255,255,.02); border-radius: 6px;
+}
+
+/* Vertical month grid lines */
+.lane-track::before {
+  content: ''; position: absolute; inset: 0;
+  background: repeating-linear-gradient(to right,
+    transparent 0,
+    transparent calc(100% / 12 - 1px),
+    rgba(148,163,184,.06) calc(100% / 12 - 1px),
+    rgba(148,163,184,.06) calc(100% / 12)
+  );
+  border-radius: 6px;
+  pointer-events: none;
+}
+
+/* Event markers */
+.evo-marker {
+  position: absolute; top: 10px;
+  display: flex; flex-direction: column; align-items: center;
+  cursor: pointer; z-index: 2;
+  transform: translateX(-50%);
+}
+.evo-marker-dot {
+  width: 16px; height: 16px; border-radius: 50%; border: 2px solid;
+  transition: transform .15s, box-shadow .15s; flex-shrink: 0;
+}
+.evo-marker:hover .evo-marker-dot { transform: scale(1.35); }
+.evo-marker-dot.project  { background: rgba(129,230,217,.2); border-color: #81e6d9; box-shadow: 0 0 8px rgba(129,230,217,.3); }
+.evo-marker-dot.incident { background: rgba(248,113,113,.2); border-color: #f87171; box-shadow: 0 0 8px rgba(248,113,113,.3); }
+.evo-marker-dot.bug      { background: rgba(251,146,60,.2);  border-color: #fb923c; box-shadow: 0 0 8px rgba(251,146,60,.3); }
+
+.evo-marker-line {
+  width: 1px; height: 8px;
+  background: rgba(148,163,184,.18);
+  flex-shrink: 0;
+}
+.evo-marker-label {
+  font-size: 10px; font-family: var(--font-mono);
+  white-space: nowrap; text-align: center;
+  max-width: 90px; overflow: hidden; text-overflow: ellipsis;
+  line-height: 1.3; letter-spacing: .02em;
+}
+.evo-marker-label.project  { color: rgba(129,230,217,.75); }
+.evo-marker-label.incident { color: rgba(248,113,113,.75); }
+.evo-marker-label.bug      { color: rgba(251,146,60,.8); }
+.evo-marker-label.waiting  { color: rgba(192,132,252,.8); }
+.evo-marker-label.merged   { color: rgba(251,146,60,.4); text-decoration: line-through; }
+
+/* Merge connector */
+.evo-merge-line {
+  position: absolute; top: 50%; height: 2px;
+  background: rgba(248,113,113,.3);
+  transform: translateY(-50%); z-index: 1;
+  border-top: 2px dashed rgba(248,113,113,.35);
+}
+
+/* Event popup card */
+.evo-popup {
+  display: none; position: absolute; bottom: calc(100% + 10px);
+  left: 50%; transform: translateX(-50%);
+  width: 220px; z-index: 50;
+  background: var(--card); border: 1px solid var(--border-strong);
+  border-radius: var(--r-md); padding: 12px 14px;
+  box-shadow: 0 16px 48px -16px rgba(0,0,0,.8), 0 0 0 1px rgba(255,255,255,.02) inset;
+  pointer-events: none;
+}
+.evo-marker:hover .evo-popup { display: block; }
+.evo-popup-type { font-size: 10px; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 5px; }
+.evo-popup-title { font-size: 13px; font-weight: 600; color: var(--text-strong); line-height: 1.3; margin-bottom: 4px; }
+.evo-popup-meta  { font-size: 11px; color: var(--text-dim); font-family: var(--font-mono); }
+
+/* Lane name column */
+.lane-name-cell {
+  height: 80px; display: flex; flex-direction: column;
+  justify-content: center; gap: 5px;
+}
+.lane-name {
+  font-size: 12px; font-weight: 600; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: .07em; font-family: var(--font-mono);
+  line-height: 1.2;
+}
+.lane-name-cell:hover .lane-name { color: var(--teal); }
+.lane-badges { display: flex; gap: 4px; flex-wrap: wrap; }
+.lane-badge {
+  font-size: 9.5px; font-family: var(--font-mono); font-weight: 700;
+  padding: 1px 5px; border-radius: 999px; letter-spacing: .04em; border: 1px solid transparent;
+}
+.lane-badge.project  { background:rgba(129,230,217,.1); color:rgba(129,230,217,.85); border-color:rgba(129,230,217,.2); }
+.lane-badge.bug      { background:rgba(251,146,60,.1);  color:rgba(251,146,60,.85);  border-color:rgba(251,146,60,.25); }
+.lane-badge.incident { background:rgba(248,113,113,.1); color:rgba(248,113,113,.8);  border-color:rgba(248,113,113,.2); }
+
+/* Detail panel below timeline */
+.evo-detail {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md);
+  padding: 20px 24px;
+}
+.evo-detail-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+.evo-detail-title  { font-size: 16px; font-weight: 700; color: var(--text-strong); }
+.evo-detail-grid   { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.evo-detail-card {
+  background: var(--card); border: 1px solid var(--border); border-radius: var(--r-md);
+  padding: 12px 14px; cursor: pointer; transition: all .12s;
+}
+.evo-detail-card:hover { border-color: var(--border-strong); background: var(--card-hover); }
+.evo-detail-card-type { font-size: 10px; font-family: var(--font-mono); text-transform: uppercase; letter-spacing: .1em; margin-bottom: 5px; }
+.evo-detail-card-title { font-size: 13px; font-weight: 600; color: var(--text-strong); line-height: 1.3; margin-bottom: 4px; }
+.evo-detail-card-meta  { font-size: 11px; color: var(--text-dim); }
+.merged-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 10px; font-family: var(--font-mono);
+  color: #f87171; background: rgba(248,113,113,.08); border: 1px solid rgba(248,113,113,.2);
+  padding: 1px 6px; border-radius: 999px;
+}
+
+</style>
+</head>
+<body>
+
+<!-- Control bar -->
+<div class="control-bar">
+  <a class="cb-back" href="index.html">
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11L5 7l4-4"/></svg>
+    Scriptorium
+  </a>
+  <div class="cb-sep"></div>
+  <div class="cb-title">The Guild Board</div>
+  <div class="cb-sep"></div>
+  <div class="cb-screens">
+    <button class="cb-screen-btn active" onclick="showScreen(0)">01 The Board</button>
+    <button class="cb-screen-btn" onclick="showScreen(1)">02 Quest chain</button>
+    <button class="cb-screen-btn" onclick="showScreen(2)">03 Bug chain</button>
+    <button class="cb-screen-btn" onclick="showScreen(3)">04 Guild history</button>
+  </div>
+</div>
+
+<div class="viewer">
+
+<!-- ═══════════════════════════════════════════════════════════
+     SCREEN 1: Queue
+     ═══════════════════════════════════════════════════════════ -->
+<div class="screen active" id="screen-0">
+  <div class="screen-label">Screen 01 — The Board · all open quests</div>
+  <div class="desk-frame">
+    <div class="queue-layout">
+
+      <div class="queue-sidebar">
+        <div class="sidebar-section">
+          <div class="sidebar-label">Views</div>
+          <a class="sidebar-item active"><span>⬡ All open</span><span class="sidebar-count">12</span></a>
+          <a class="sidebar-item"><span>◆ Projects</span><span class="sidebar-count">6</span></a>
+          <a class="sidebar-item"><span>🐛 Bugs</span><span class="sidebar-count" style="color:#fb923c">4</span></a>
+          <a class="sidebar-item"><span>⚡ Incidents</span><span class="sidebar-count" style="color:#f87171">2</span></a>
+          <a class="sidebar-item"><span>⏰ Needs attention</span><span class="sidebar-count" style="color:#f87171">3</span></a>
+          <a class="sidebar-item"><span>✓ Closed</span><span class="sidebar-count">26</span></a>
+        </div>
+        <div class="sidebar-section">
+          <div class="sidebar-label">Villages</div>
+          <a class="sidebar-item"><span>Gekko Tracks</span><span class="sidebar-count">5</span></a>
+          <a class="sidebar-item"><span>AP Process</span><span class="sidebar-count">2</span></a>
+          <a class="sidebar-item"><span>Bender</span><span class="sidebar-count">2</span></a>
+          <a class="sidebar-item"><span>Interceptor</span><span class="sidebar-count">2</span></a>
+          <a class="sidebar-item"><span>Timesheet Bot</span><span class="sidebar-count">1</span></a>
+        </div>
+      </div>
+
+      <div class="queue-main">
+        <div class="queue-header">
+          <div>
+            <div class="queue-header-title">The Board</div>
+            <div class="queue-header-sub">12 quests posted · 3 need your attention</div>
+          </div>
+          <div class="queue-actions">
+            <button class="btn-secondary">+ New bug</button>
+            <button class="btn-secondary" style="color:#f87171;border-color:rgba(248,113,113,.3)">+ New incident</button>
+            <button class="btn-primary">+ New project</button>
+          </div>
+        </div>
+
+        <div class="stats-strip">
+          <div class="stat-cell"><div class="stat-num teal">6</div><div class="stat-lbl">Projects</div></div>
+          <div class="stat-cell"><div class="stat-num orange">4</div><div class="stat-lbl">Bugs</div></div>
+          <div class="stat-cell"><div class="stat-num danger">2</div><div class="stat-lbl">Incidents</div></div>
+          <div class="stat-cell"><div class="stat-num warn">3</div><div class="stat-lbl">Waiting &gt;14d</div></div>
+          <div class="stat-cell"><div class="stat-num" style="color:var(--text-dim)">26</div><div class="stat-lbl">Closed all time</div></div>
+        </div>
+
+        <div class="queue-tabs">
+          <div class="queue-tab active">All (12)</div>
+          <div class="queue-tab">Projects (6)</div>
+          <div class="queue-tab">Bugs (4)</div>
+          <div class="queue-tab">Incidents (2)</div>
+          <div class="queue-tab">Closed</div>
+        </div>
+
+        <div class="queue-list">
+
+          <!-- BUG: Receipt import -->
+          <div class="queue-item" onclick="showScreen(2)">
+            <div class="item-icon bug">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <circle cx="8" cy="8" r="5.5" stroke="#fb923c" stroke-width="1.2"/>
+                <path d="M8 5.5v3" stroke="#fb923c" stroke-width="1.4" stroke-linecap="round"/>
+                <circle cx="8" cy="10.5" r=".8" fill="#fb923c"/>
+              </svg>
+            </div>
+            <div class="item-body">
+              <div class="item-title">
+                Gekko Tracks — Receipt import fails on JPG files
+                <span class="chip chip-bug">BUG</span>
+                <span class="chip chip-active">OPEN</span>
+                <span class="chip chip-village">Gekko Tracks</span>
+              </div>
+              <div class="item-meta">
+                <span class="item-meta-text">Feature broken · core app unaffected</span>
+                <span class="item-meta-text">·</span>
+                <span class="item-meta-text">GitHub: <span style="color:var(--teal);font-family:var(--font-mono);font-size:11px">#51</span></span>
+                <span class="item-meta-text">·</span>
+                <span class="item-meta-text">Reported: 2026-05-24</span>
+              </div>
+            </div>
+            <div class="item-right">
+              <div class="item-days warn">3d open</div>
+              <div class="item-phase">Investigating</div>
+            </div>
+          </div>
+
+          <!-- PROJECT: AP Process -->
+          <div class="queue-item" onclick="showScreen(1)">
+            <div class="item-icon project">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M8 1L15 5v6L8 15 1 11V5L8 1z" stroke="#81e6d9" stroke-width="1.2" fill="none"/>
+                <circle cx="8" cy="8" r="2.5" stroke="#81e6d9" stroke-width="1" fill="none"/>
+              </svg>
+            </div>
+            <div class="item-body">
+              <div class="item-title">
+                AP Process — Accounts Payable Module
+                <span class="chip chip-project">PROJECT</span>
+                <span class="chip chip-waiting">WAITING</span>
+                <span class="chip chip-village">AP Process</span>
+              </div>
+              <div class="item-meta">
+                <span class="item-meta-text">Stakeholder: <strong style="color:var(--text-muted)">Barry</strong></span>
+                <span class="item-meta-text">·</span>
+                <span class="item-meta-text">Phase: Testing · Last comms: 2026-04-14</span>
+              </div>
+            </div>
+            <div class="item-right">
+              <div class="item-days danger">43d waiting</div>
+              <div class="item-phase">2 follow-ups sent</div>
+            </div>
+          </div>
+
+          <!-- BUG: Timesheet bot double-submit -->
+          <div class="queue-item">
+            <div class="item-icon bug">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <circle cx="8" cy="8" r="5.5" stroke="#fb923c" stroke-width="1.2"/>
+                <path d="M8 5.5v3" stroke="#fb923c" stroke-width="1.4" stroke-linecap="round"/>
+                <circle cx="8" cy="10.5" r=".8" fill="#fb923c"/>
+              </svg>
+            </div>
+            <div class="item-body">
+              <div class="item-title">
+                Timesheet Bot — double-submit on slow connection
+                <span class="chip chip-bug">BUG</span>
+                <span class="chip chip-active">IN PROGRESS</span>
+                <span class="chip chip-village">Timesheet Bot</span>
+              </div>
+              <div class="item-meta">
+                <span class="item-meta-text">Race condition on button click · GitHub: <span style="color:var(--teal);font-family:var(--font-mono);font-size:11px">#38</span></span>
+              </div>
+            </div>
+            <div class="item-right">
+              <div class="item-days">6d open</div>
+              <div class="item-phase">Fix in review</div>
+            </div>
+          </div>
+
+          <!-- INCIDENT: Interceptor routing -->
+          <div class="queue-item">
+            <div class="item-icon incident">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M8 2L14 13H2L8 2z" stroke="#f87171" stroke-width="1.2" fill="none"/>
+                <line x1="8" y1="6" x2="8" y2="10" stroke="#f87171" stroke-width="1.2" stroke-linecap="round"/>
+                <circle cx="8" cy="12" r=".8" fill="#f87171"/>
+              </svg>
+            </div>
+            <div class="item-body">
+              <div class="item-title">
+                Interceptor — NextCloud routing broken on new URL format
+                <span class="chip chip-incident">INCIDENT</span>
+                <span class="chip chip-active">IN PROGRESS</span>
+                <span class="chip chip-village">Interceptor</span>
+              </div>
+              <div class="item-meta">
+                <span class="item-meta-text">Service partially degraded · GitHub: <span style="color:var(--teal);font-family:var(--font-mono);font-size:11px">#47</span></span>
+                <span class="item-meta-text">·</span>
+                <span class="item-meta-text">Raised: 2026-05-24</span>
+              </div>
+            </div>
+            <div class="item-right">
+              <div class="item-days warn">3d open</div>
+              <div class="item-phase">Investigating</div>
+            </div>
+          </div>
+
+          <!-- BUG: Gekko Tracks search -->
+          <div class="queue-item">
+            <div class="item-icon bug">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <circle cx="8" cy="8" r="5.5" stroke="#fb923c" stroke-width="1.2"/>
+                <path d="M8 5.5v3" stroke="#fb923c" stroke-width="1.4" stroke-linecap="round"/>
+                <circle cx="8" cy="10.5" r=".8" fill="#fb923c"/>
+              </svg>
+            </div>
+            <div class="item-body">
+              <div class="item-title">
+                Gekko Tracks — search returns stale results after job update
+                <span class="chip chip-bug">BUG</span>
+                <span class="chip chip-waiting">WAITING</span>
+                <span class="chip chip-village">Gekko Tracks</span>
+              </div>
+              <div class="item-meta">
+                <span class="item-meta-text">Cache invalidation issue · linked to PR #49</span>
+                <span class="item-meta-text">·</span>
+                <span class="item-meta-text">Waiting on Barry to verify fix</span>
+              </div>
+            </div>
+            <div class="item-right">
+              <div class="item-days warn">11d</div>
+              <div class="item-phase">Fix deployed — awaiting sign-off</div>
+            </div>
+          </div>
+
+          <!-- PROJECT: Bender Phase 2 -->
+          <div class="queue-item">
+            <div class="item-icon project">
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M8 1L15 5v6L8 15 1 11V5L8 1z" stroke="#81e6d9" stroke-width="1.2" fill="none"/>
+                <circle cx="8" cy="8" r="2.5" stroke="#81e6d9" stroke-width="1" fill="none"/>
+              </svg>
+            </div>
+            <div class="item-body">
+              <div class="item-title">
+                Bender — Pronto XI integration Phase 2
+                <span class="chip chip-project">PROJECT</span>
+                <span class="chip chip-active">IN PROGRESS</span>
+                <span class="chip chip-village">Bender</span>
+              </div>
+              <div class="item-meta">
+                <span class="item-meta-text">Stakeholder: Barry · Phase: Building · Last active: 2026-05-22</span>
+              </div>
+            </div>
+            <div class="item-right">
+              <div class="item-days">5d since update</div>
+              <div class="item-phase">On track</div>
+            </div>
+          </div>
+
+        </div><!-- /queue-list -->
+      </div>
+    </div>
+  </div>
+</div><!-- /screen 0 -->
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     SCREEN 2: Project chain — AP Process (collapsible subtrees)
+     ═══════════════════════════════════════════════════════════ -->
+<div class="screen" id="screen-1">
+  <div class="screen-label">Screen 02 — Quest chain · subtrees collapsed by default, click to expand</div>
+  <div class="desk-frame">
+    <div class="chain-breadcrumb">
+      <span class="chain-bc-link" onclick="showScreen(0)">← The Board</span>
+      <span class="chain-bc-sep">/</span>
+      <span class="chain-bc-current">AP Process — Accounts Payable Module</span>
+    </div>
+    <div class="detail-layout">
+
+      <div class="detail-sidebar">
+        <div>
+          <div class="detail-type-chip project">◆ Project</div>
+          <h2 class="detail-title">AP Process — Accounts Payable Module</h2>
+          <div class="detail-subtitle">Continuous improvement initiative</div>
+        </div>
+        <div class="divider"></div>
+        <div class="meta-block">
+          <div class="meta-row"><div class="meta-key">Status</div><div class="meta-val"><span class="chip chip-waiting">Waiting on stakeholder</span></div></div>
+          <div class="meta-row"><div class="meta-key">Current phase</div><div class="meta-val"><strong>Testing</strong></div></div>
+          <div class="meta-row"><div class="meta-key">Stakeholder</div><div class="meta-val"><strong>Barry</strong> — Finance</div></div>
+          <div class="meta-row"><div class="meta-key">Village</div><div class="meta-val"><strong>AP Process</strong></div></div>
+          <div class="meta-row"><div class="meta-key">Started</div><div class="meta-val">2026-01-15</div></div>
+          <div class="meta-row"><div class="meta-key">Last comms</div><div class="meta-val" style="color:#f87171">2026-04-14 · <strong style="color:#f87171">43 days ago</strong></div></div>
+        </div>
+        <div class="divider"></div>
+        <div class="alert-box">
+          <div class="alert-box-title">⏱ Waiting 43 days</div>
+          <div class="alert-box-body">System delivered for testing on <strong>2026-04-01</strong>. Two follow-ups sent. No testing begun. Reminder due <strong>2026-05-30</strong>.</div>
+        </div>
+        <div class="divider"></div>
+        <div class="meta-block">
+          <div class="meta-row"><div class="meta-key">Nodes</div><div class="meta-val">8 main · 7 in subtrees</div></div>
+          <div class="meta-row"><div class="meta-key">Communications</div><div class="meta-val">3 logged · 2 unanswered</div></div>
+        </div>
+      </div>
+
+      <div class="chain-area">
+        <div class="chain-title-row">
+          <div class="chain-title-text">Project chain</div>
+          <div class="chain-legend">
+            <div class="legend-item"><div class="legend-dot ld-done"></div>Done</div>
+            <div class="legend-item"><div class="legend-dot ld-waiting"></div>Waiting</div>
+            <div class="legend-item"><div class="legend-dot ld-dim"></div>Not started</div>
+            <div class="legend-item"><div class="legend-cloud ld-waiting"></div>Comms</div>
+          </div>
+        </div>
+
+        <div class="chain">
+          <div class="chain-spine-line"></div>
+
+          <!-- Milestone: kickoff -->
+          <div class="chain-node">
+            <div class="node-icon-wrap" style="top:2px"><div class="node-diamond node-done"></div></div>
+            <div class="node-content">
+              <div class="node-label">Project kickoff <span class="chip chip-done" style="font-size:10px">milestone</span></div>
+              <div class="node-meta-row"><span class="node-date">2026-01-15</span></div>
+              <div class="milestone-card"><div class="milestone-card-text">AP Process scoped, stakeholders confirmed (Barry — Finance), village repository created.</div></div>
+            </div>
+          </div>
+
+          <!-- Phase: requirements -->
+          <div class="chain-node">
+            <div class="node-icon-wrap" style="top:3px"><div class="node-circle node-done"></div></div>
+            <div class="node-content">
+              <div class="node-label">Requirements gathering</div>
+              <div class="node-desc">Mapped all AP workflows, approval chains, Pronto XI field mapping.</div>
+              <div class="node-meta-row"><span class="node-date">2026-01-15 → 2026-02-10</span><span class="chip chip-done" style="font-size:10px">done</span></div>
+              <div class="chain-node-actions">
+                <button class="node-action-btn">✎ Edit</button>
+                <button class="node-action-btn">+ Log comms</button>
+                <button class="node-action-btn">⊕ Add node below</button>
+              </div>
+            </div>
+          </div>
+          <div class="chain-add-row"><div class="chain-add-line"></div><div class="chain-add-btn">+ insert node here</div><div class="chain-add-line"></div></div>
+
+          <!-- Phase: Build (with collapsible subtree) -->
+          <div class="chain-node">
+            <div class="node-icon-wrap" style="top:3px"><div class="node-circle node-done"></div></div>
+            <div class="node-content">
+              <div class="node-label">Build AP module</div>
+              <div class="node-desc">Core module including 3 sub-features.</div>
+              <div class="node-meta-row"><span class="node-date">2026-02-10 → 2026-04-01</span><span class="chip chip-done" style="font-size:10px">done</span></div>
+
+              <button class="branch-toggle"
+                data-tip="Receipt OCR integration (done 2026-03-20)&#10;Approval workflow (done 2026-03-28)&#10;Pronto XI export (done 2026-04-01)"
+                onclick="toggleBranch(this)">
+                <span class="arrow">▼</span> 3 features · click to expand
+              </button>
+              <div class="chain-branch">
+                <div class="chain-branch-node">
+                  <div class="branch-node-icon" style="top:2px"><div class="node-circle-sm node-done" style="background:rgba(96,165,250,.15);border-color:#60a5fa"></div></div>
+                  <div class="branch-label">Receipt OCR integration <span class="chip" style="background:rgba(96,165,250,.1);color:#60a5fa;border-color:rgba(96,165,250,.2);font-size:10px">feature</span></div>
+                  <div class="branch-meta">glm-ocr pipeline · done 2026-03-20</div>
+                </div>
+                <div class="chain-branch-node">
+                  <div class="branch-node-icon" style="top:2px"><div class="node-circle-sm node-done" style="background:rgba(96,165,250,.15);border-color:#60a5fa"></div></div>
+                  <div class="branch-label">Approval workflow <span class="chip" style="background:rgba(96,165,250,.1);color:#60a5fa;border-color:rgba(96,165,250,.2);font-size:10px">feature</span></div>
+                  <div class="branch-meta">2-stage approval · done 2026-03-28</div>
+                </div>
+                <div class="chain-branch-node" style="padding-bottom:0">
+                  <div class="branch-node-icon" style="top:2px"><div class="node-circle-sm node-done" style="background:rgba(96,165,250,.15);border-color:#60a5fa"></div></div>
+                  <div class="branch-label">Pronto XI export <span class="chip" style="background:rgba(96,165,250,.1);color:#60a5fa;border-color:rgba(96,165,250,.2);font-size:10px">feature</span></div>
+                  <div class="branch-meta">CSV export · done 2026-04-01</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Milestone: complete -->
+          <div class="chain-node">
+            <div class="node-icon-wrap" style="top:2px"><div class="node-diamond node-done"></div></div>
+            <div class="node-content">
+              <div class="node-label">Module complete — ready for testing <span class="chip chip-done" style="font-size:10px">milestone</span></div>
+              <div class="node-meta-row"><span class="node-date">2026-04-01</span></div>
+              <div class="milestone-card"><div class="milestone-card-text">All 3 features built and deployed to staging. Barry notified. Testing environment configured. User guide sent.</div></div>
+            </div>
+          </div>
+
+          <!-- Comms: first email -->
+          <div class="chain-node">
+            <div class="node-icon-wrap" style="top:5px"><div class="node-cloud node-done"></div></div>
+            <div class="node-content">
+              <div class="node-label" style="font-size:12.5px;font-weight:500;color:var(--text-muted)">Emailed Barry — testing kickoff <span class="chip chip-done" style="font-size:10px">comms</span></div>
+              <div class="node-meta-row"><span class="node-date">2026-04-01</span></div>
+            </div>
+          </div>
+
+          <!-- Phase: Testing (with collapsible comms subtree) -->
+          <div class="chain-node">
+            <div class="node-icon-wrap" style="top:3px"><div class="node-circle node-waiting"></div></div>
+            <div class="node-content">
+              <div class="node-label">Testing <span class="node-gap-warning">⚠ 43 days — no response</span></div>
+              <div class="node-desc">Waiting for Barry to begin user acceptance testing. Environment live for 43 days.</div>
+              <div class="node-meta-row"><span class="node-date">Entered: 2026-04-01</span><span class="node-gap-waiting">waiting on Barry</span></div>
+              <div class="chain-node-actions">
+                <button class="node-action-btn">+ Log comms</button>
+                <button class="node-action-btn">⏰ Set reminder</button>
+                <button class="node-action-btn">✎ Edit</button>
+              </div>
+
+              <button class="branch-toggle"
+                data-tip="Follow-up email sent 2026-04-14&#10;No response — gap flagged 2026-04-21 ⚠"
+                onclick="toggleBranch(this)">
+                <span class="arrow">▼</span> 2 comms · click to expand
+              </button>
+              <div class="chain-branch">
+                <div class="chain-branch-node">
+                  <div class="branch-node-icon" style="top:3px"><div class="node-cloud-sm node-waiting"></div></div>
+                  <div class="branch-label">Follow-up email sent</div>
+                  <div class="branch-meta">2026-04-14 · No reply received</div>
+                </div>
+                <div class="chain-branch-node" style="padding-bottom:0">
+                  <div class="branch-node-icon" style="top:3px"><div class="node-cloud-sm node-blocked"></div></div>
+                  <div class="branch-label" style="color:#f87171">No response — gap flagged <span class="node-gap-warning" style="font-size:10px">⚠</span></div>
+                  <div class="branch-meta warn">2026-04-21 · Reminder due 2026-05-30</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Phase: Onboarding (dim) -->
+          <div class="chain-node">
+            <div class="node-icon-wrap" style="top:3px"><div class="node-circle node-dim"></div></div>
+            <div class="node-content">
+              <div class="node-label dim">Onboarding</div>
+              <div class="node-meta-row"><span class="chip" style="background:rgba(71,85,105,.12);color:#64748b;border-color:rgba(71,85,105,.3);font-size:10px">blocked by Testing</span></div>
+            </div>
+          </div>
+
+          <!-- Milestone: Live (dim) -->
+          <div class="chain-node">
+            <div class="node-icon-wrap" style="top:2px"><div class="node-diamond node-dim"></div></div>
+            <div class="node-content">
+              <div class="node-label dim">Live <span class="chip" style="background:rgba(71,85,105,.12);color:#64748b;border-color:rgba(71,85,105,.3);font-size:10px">milestone · not reached</span></div>
+              <div class="milestone-card dim" style="margin-top:8px"><div class="milestone-card-text">System in production use. Onboarding complete. Training documented.</div></div>
+            </div>
+          </div>
+
+        </div><!-- /chain -->
+      </div><!-- /chain-area -->
+    </div>
+  </div>
+</div><!-- /screen 1 -->
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     SCREEN 3: Bug chain — Receipt import failure
+     ═══════════════════════════════════════════════════════════ -->
+<div class="screen" id="screen-2">
+  <div class="screen-label">Screen 03 — Bug chain · feature broken, core unaffected</div>
+  <div class="desk-frame">
+    <div class="chain-breadcrumb">
+      <span class="chain-bc-link" onclick="showScreen(0)">← The Board</span>
+      <span class="chain-bc-sep">/</span>
+      <span class="chain-bc-current">Gekko Tracks — Receipt import fails on JPG files</span>
+    </div>
+    <div class="detail-layout">
+
+      <div class="detail-sidebar">
+        <div>
+          <div class="detail-type-chip bug">🐛 Bug</div>
+          <h2 class="detail-title">Gekko Tracks — Receipt import fails on JPG files</h2>
+          <div class="detail-subtitle">Feature degraded · core app unaffected</div>
+        </div>
+        <div class="divider"></div>
+        <div class="meta-block">
+          <div class="meta-row"><div class="meta-key">Status</div><div class="meta-val"><span class="chip chip-active">Open · investigating</span></div></div>
+          <div class="meta-row"><div class="meta-key">Severity</div><div class="meta-val"><strong style="color:#fb923c">Medium</strong> — feature degraded</div></div>
+          <div class="meta-row"><div class="meta-key">Impact</div><div class="meta-val">JPG receipts only · PDF unaffected</div></div>
+          <div class="meta-row"><div class="meta-key">Village</div><div class="meta-val"><strong>Gekko Tracks</strong></div></div>
+          <div class="meta-row"><div class="meta-key">Reported by</div><div class="meta-val"><strong>Barry</strong> · 2026-05-24</div></div>
+          <div class="meta-row"><div class="meta-key">Open for</div><div class="meta-val"><strong style="color:#fbbf24">3 days</strong></div></div>
+        </div>
+        <div class="divider"></div>
+        <div class="alert-box orange">
+          <div class="alert-box-title">🐛 Feature degraded</div>
+          <div class="alert-box-body">This is <strong>not</strong> a service outage. Core Gekko Tracks functionality is fully operational. Only JPG receipt imports are affected. Tracked here + GitHub Issue #51.</div>
+        </div>
+        <div class="divider"></div>
+        <a class="gh-link" href="#">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor"><path d="M7 .5A6.5 6.5 0 00.5 7c0 2.87 1.86 5.3 4.44 6.16.32.06.44-.14.44-.3V11.7c-1.8.39-2.18-.87-2.18-.87-.3-.76-.73-1-.73-1-.6-.41.04-.4.04-.4.66.05 1 .68 1 .68.59 1 1.54.71 1.92.54.06-.42.23-.71.42-.87-1.44-.16-2.95-.72-2.95-3.2 0-.71.25-1.29.67-1.74-.07-.16-.29-.82.06-1.72 0 0 .55-.18 1.8.67A6.2 6.2 0 017 3.8c.55 0 1.1.07 1.62.21 1.25-.85 1.8-.67 1.8-.67.35.9.13 1.56.06 1.72.42.45.67 1.03.67 1.74 0 2.49-1.52 3.04-2.96 3.2.23.2.44.58.44 1.17v1.73c0 .17.12.36.44.3A6.5 6.5 0 007 .5z"/></svg>
+          GitHub Issue #51
+          <span class="gh-link-num">open</span>
+        </a>
+        <div class="divider"></div>
+        <div class="meta-block">
+          <div class="meta-key" style="margin-bottom:8px">Severity tiers</div>
+          <div style="font-size:11.5px;color:var(--text-dim);line-height:1.7">
+            <span style="color:#f87171">■</span> <strong style="color:var(--text-muted)">Incident</strong> — service down<br>
+            <span style="color:#fb923c">■</span> <strong style="color:#fb923c">Bug (this)</strong> — feature degraded<br>
+            <span style="color:var(--text-faint)">■</span> <span style="color:var(--text-faint)">Project</span> — initiative
+          </div>
+        </div>
+      </div>
+
+      <div class="chain-area">
+        <div class="chain-title-row">
+          <div class="chain-title-text">Bug chain</div>
+          <div class="chain-legend">
+            <div class="legend-item"><div class="legend-dot ld-bug"></div>Bug step</div>
+            <div class="legend-item"><div class="legend-dot ld-done"></div>Done</div>
+            <div class="legend-item"><div class="legend-dot ld-active"></div>In progress</div>
+            <div class="legend-item"><div class="legend-cloud ld-done"></div>Comms</div>
+          </div>
+        </div>
+
+        <div class="chain">
+          <div class="chain-spine-line bug"></div>
+
+          <!-- Trigger: bug reported -->
+          <div class="chain-node">
+            <div class="node-icon-wrap" style="top:2px"><div class="node-diamond node-bug"></div></div>
+            <div class="node-content">
+              <div class="node-label">Bug reported <span class="chip chip-bug" style="font-size:10px">trigger</span></div>
+              <div class="node-desc">Barry reported that JPG receipt imports are silently failing. PDF imports work. No error shown to the user — it just doesn't appear in the job record.</div>
+              <div class="node-meta-row"><span class="node-date">2026-05-24 10:30 CAT</span><span class="chip chip-bug" style="font-size:10px">MEDIUM severity</span></div>
+            </div>
+          </div>
+
+          <!-- Phase: triage -->
+          <div class="chain-node">
+            <div class="node-icon-wrap" style="top:3px"><div class="node-circle node-done"></div></div>
+            <div class="node-content">
+              <div class="node-label">Triaged — feature bug confirmed</div>
+              <div class="node-desc">Reproduced locally. JPGs accepted but silently dropped in the OCR pre-processor. PDFs unaffected. GitHub Issue #51 created.</div>
+              <div class="node-meta-row"><span class="node-date">2026-05-24 11:15 CAT</span><span class="chip chip-done" style="font-size:10px">done</span></div>
+            </div>
+          </div>
+
+          <!-- Phase: investigation (collapsible) -->
+          <div class="chain-node">
+            <div class="node-icon-wrap" style="top:3px"><div class="node-circle node-done"></div></div>
+            <div class="node-content">
+              <div class="node-label">Investigation</div>
+              <div class="node-desc">Traced to the OCR pre-processor rejecting JPG MIME type silently.</div>
+              <div class="node-meta-row"><span class="node-date">2026-05-24 → 2026-05-25</span><span class="chip chip-done" style="font-size:10px">done</span></div>
+              <button class="branch-toggle"
+                data-tip="Checked OCR pre-processor logs&#10;Reproduced with 5 JPG test files&#10;Found MIME type whitelist missing image/jpeg"
+                onclick="toggleBranch(this)">
+                <span class="arrow">▼</span> 3 steps · click to expand
+              </button>
+              <div class="chain-branch">
+                <div class="chain-branch-node">
+                  <div class="branch-node-icon" style="top:2px"><div class="node-circle-sm node-done"></div></div>
+                  <div class="branch-label">Checked OCR pre-processor logs</div>
+                  <div class="branch-meta">No error logged — silent drop at MIME validation</div>
+                </div>
+                <div class="chain-branch-node">
+                  <div class="branch-node-icon" style="top:2px"><div class="node-circle-sm node-done"></div></div>
+                  <div class="branch-label">Reproduced with 5 JPG test files</div>
+                  <div class="branch-meta">100% failure rate on JPG · 0% on PDF</div>
+                </div>
+                <div class="chain-branch-node" style="padding-bottom:0">
+                  <div class="branch-node-icon" style="top:2px"><div class="node-circle-sm node-done"></div></div>
+                  <div class="branch-label">Found root cause: MIME whitelist missing <code style="font-size:11px">image/jpeg</code></div>
+                  <div class="branch-meta">OCR service only accepts <code style="font-size:11px">application/pdf</code></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Milestone: root cause -->
+          <div class="chain-node">
+            <div class="node-icon-wrap" style="top:2px"><div class="node-diamond node-done"></div></div>
+            <div class="node-content">
+              <div class="node-label">Root cause confirmed <span class="chip chip-done" style="font-size:10px">milestone</span></div>
+              <div class="node-meta-row"><span class="node-date">2026-05-25 09:00 CAT</span></div>
+              <div class="milestone-card orange" style="margin-top:8px"><div class="milestone-card-text"><strong>OCR service MIME whitelist excludes <code>image/jpeg</code>.</strong> Added when PDF support was built; JPG was never included. Silent failure — no error surfaced to user. Fix is a 2-line change to the pre-processor config.</div></div>
+            </div>
+          </div>
+
+          <!-- Phase: fix (in progress) -->
+          <div class="chain-node">
+            <div class="node-icon-wrap" style="top:3px"><div class="node-circle node-active"></div></div>
+            <div class="node-content">
+              <div class="node-label">Apply fix</div>
+              <div class="node-desc">PR #52 open — adding <code style="font-size:11px">image/jpeg</code> to OCR MIME whitelist. In review.</div>
+              <div class="node-meta-row"><span class="node-date">Opened: 2026-05-26</span><span class="chip chip-active" style="font-size:10px">in review</span></div>
+            </div>
+          </div>
+
+          <!-- Phase: verify (not started) -->
+          <div class="chain-node">
+            <div class="node-icon-wrap" style="top:3px"><div class="node-circle node-dim"></div></div>
+            <div class="node-content">
+              <div class="node-label dim">Verify with Barry</div>
+              <div class="node-meta-row"><span class="chip" style="background:rgba(71,85,105,.12);color:#64748b;border-color:rgba(71,85,105,.3);font-size:10px">blocked by PR merge</span></div>
+            </div>
+          </div>
+
+          <!-- Milestone: resolved (not started) -->
+          <div class="chain-node">
+            <div class="node-icon-wrap" style="top:2px"><div class="node-diamond node-dim"></div></div>
+            <div class="node-content">
+              <div class="node-label dim">Bug resolved <span class="chip" style="background:rgba(71,85,105,.12);color:#64748b;border-color:rgba(71,85,105,.3);font-size:10px">milestone · not reached</span></div>
+              <div class="milestone-card dim" style="margin-top:8px"><div class="milestone-card-text">Fix deployed, Barry confirmed JPG imports working, GitHub Issue #51 closed.</div></div>
+            </div>
+          </div>
+
+        </div><!-- /chain -->
+      </div>
+    </div>
+  </div>
+</div><!-- /screen 2 -->
+
+
+<!-- ═══════════════════════════════════════════════════════════
+     SCREEN 4: System Evolution — all villages
+     ═══════════════════════════════════════════════════════════ -->
+<div class="screen" id="screen-3">
+  <div class="screen-label">Screen 04 — Guild history · one row per village · colour = quest type</div>
+  <div class="desk-frame">
+    <div class="evo-layout">
+
+      <div class="evo-header">
+        <div class="evo-title">Kingdom Evolution</div>
+        <div class="evo-sub">Every project, bug, and incident across all villages · 2026-01 to present</div>
+      </div>
+
+      <div class="evo-stats">
+        <div class="evo-stat"><div class="evo-stat-num" style="color:#81e6d9">9</div><div class="evo-stat-lbl">Projects</div></div>
+        <div class="evo-stat"><div class="evo-stat-num" style="color:#fb923c">6</div><div class="evo-stat-lbl">Bugs</div></div>
+        <div class="evo-stat"><div class="evo-stat-num" style="color:#f87171">3</div><div class="evo-stat-lbl">Incidents</div></div>
+        <div class="evo-stat"><div class="evo-stat-num" style="color:#4ade80">14</div><div class="evo-stat-lbl">Resolved</div></div>
+        <div class="evo-stat"><div class="evo-stat-num" style="color:#fbbf24">4</div><div class="evo-stat-lbl">Open now</div></div>
+        <div class="evo-stat"><div class="evo-stat-num" style="color:var(--text-muted)">5</div><div class="evo-stat-lbl">Villages</div></div>
+      </div>
+
+      <div class="evo-legend">
+        <div class="evo-legend-item"><div class="evo-dot project"></div> Project</div>
+        <div class="evo-legend-item"><div class="evo-dot bug"></div> Bug</div>
+        <div class="evo-legend-item"><div class="evo-dot incident"></div> Incident</div>
+        <div class="evo-legend-item"><div class="evo-dot" style="background:#c084fc;box-shadow:0 0 6px rgba(192,132,252,.3)"></div> Waiting / stalled</div>
+        <div style="font-size:11px;color:var(--text-faint);margin-left:8px">Hover marker to preview · click row label to drill down</div>
+      </div>
+
+      <div class="timeline-wrap">
+        <div class="timeline-inner">
+
+          <!-- Axis + lane grid -->
+          <div style="display:grid;grid-template-columns:148px 1fr;gap:0;margin-bottom:4px">
+            <div></div><!-- spacer aligns with lane labels -->
+            <div class="timeline-axis" style="border-bottom:none;padding-bottom:8px;margin-bottom:0">
+              <div class="timeline-month">Jan</div>
+              <div class="timeline-month">Feb</div>
+              <div class="timeline-month">Mar</div>
+              <div class="timeline-month">Apr</div>
+              <div class="timeline-month now">May ←now</div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:148px 1fr;gap:0;border-top:1px solid var(--border);padding-top:16px">
+
+            <!-- Left: village labels -->
+            <div style="display:flex;flex-direction:column;gap:16px;padding-right:16px;padding-top:16px">
+
+              <div class="lane-name-cell" title="Click to drill down" style="cursor:pointer">
+                <div class="lane-name">Gekko Tracks</div>
+                <div class="lane-badges">
+                  <span class="lane-badge project">3P</span>
+                  <span class="lane-badge bug">5B</span>
+                  <span class="lane-badge incident">1I</span>
+                </div>
+              </div>
+
+              <div class="lane-name-cell" title="Click to drill down" style="cursor:pointer">
+                <div class="lane-name">AP Process</div>
+                <div class="lane-badges">
+                  <span class="lane-badge project">1P</span>
+                </div>
+              </div>
+
+              <div class="lane-name-cell" title="Click to drill down" style="cursor:pointer">
+                <div class="lane-name">Bender</div>
+                <div class="lane-badges">
+                  <span class="lane-badge project">2P</span>
+                  <span class="lane-badge bug">1B</span>
+                </div>
+              </div>
+
+              <div class="lane-name-cell" title="Click to drill down" style="cursor:pointer">
+                <div class="lane-name">Interceptor</div>
+                <div class="lane-badges">
+                  <span class="lane-badge project">2P</span>
+                  <span class="lane-badge incident">1I</span>
+                </div>
+              </div>
+
+              <div class="lane-name-cell" title="Click to drill down" style="cursor:pointer">
+                <div class="lane-name">Timesheet Bot</div>
+                <div class="lane-badges">
+                  <span class="lane-badge project">1P</span>
+                  <span class="lane-badge bug">1B</span>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Right: tracks -->
+            <div style="display:flex;flex-direction:column;gap:16px">
+
+              <!-- ── Gekko Tracks ── -->
+              <div class="lane-track">
+                <div class="evo-marker" style="left:8%">
+                  <div class="evo-marker-dot project"></div>
+                  <div class="evo-marker-line"></div>
+                  <div class="evo-marker-label project">v1 Launch</div>
+                  <div class="evo-popup"><div class="evo-popup-type" style="color:#81e6d9">Project · DONE</div><div class="evo-popup-title">Gekko Tracks v1 Launch</div><div class="evo-popup-meta">2026-01-15 · Core deployment. Job management, routing, OCR.</div></div>
+                </div>
+                <div class="evo-marker" style="left:22%">
+                  <div class="evo-marker-dot bug" style="opacity:.55"></div>
+                  <div class="evo-marker-line"></div>
+                  <div class="evo-marker-label bug" style="opacity:.65">Job status</div>
+                  <div class="evo-popup"><div class="evo-popup-type" style="color:#fb923c">Bug · RESOLVED</div><div class="evo-popup-title">Job status not updating in real-time</div><div class="evo-popup-meta">2026-02-20 · WebSocket race. Resolved in 3 days.</div></div>
+                </div>
+                <div class="evo-marker" style="left:28%">
+                  <div class="evo-marker-dot project"></div>
+                  <div class="evo-marker-line"></div>
+                  <div class="evo-marker-label project">Onboard ×1</div>
+                  <div class="evo-popup"><div class="evo-popup-type" style="color:#81e6d9">Project · DONE</div><div class="evo-popup-title">Staff Onboarding Batch 1</div><div class="evo-popup-meta">2026-02-10 · 6 staff onboarded. Complete.</div></div>
+                </div>
+                <div class="evo-marker" style="left:40%">
+                  <div class="evo-marker-dot project" style="border-color:#c084fc;background:rgba(192,132,252,.2);box-shadow:0 0 8px rgba(192,132,252,.3)"></div>
+                  <div class="evo-marker-line"></div>
+                  <div class="evo-marker-label waiting">Onboard ×2 ⏱</div>
+                  <div class="evo-popup"><div class="evo-popup-type" style="color:#c084fc">Project · WAITING 57d</div><div class="evo-popup-title">Staff Onboarding Batch 2</div><div class="evo-popup-meta">2026-03-01 · System ready. Ellie hasn't started.</div></div>
+                </div>
+                <div class="evo-marker" style="left:49%">
+                  <div class="evo-marker-dot bug" style="opacity:.55"></div>
+                  <div class="evo-marker-line"></div>
+                  <div class="evo-marker-label bug" style="opacity:.65">Parts save</div>
+                  <div class="evo-popup"><div class="evo-popup-type" style="color:#fb923c">Bug · RESOLVED</div><div class="evo-popup-title">Parts list not saving on mobile</div><div class="evo-popup-meta">2026-03-15 · Safari input bug. 2 days.</div></div>
+                </div>
+                <div class="evo-marker" style="left:62%">
+                  <div class="evo-marker-dot bug" style="border-color:#c084fc;background:rgba(192,132,252,.2);box-shadow:0 0 8px rgba(192,132,252,.3)"></div>
+                  <div class="evo-marker-line"></div>
+                  <div class="evo-marker-label waiting">Stale search ⏱</div>
+                  <div class="evo-popup"><div class="evo-popup-type" style="color:#c084fc">Bug · WAITING</div><div class="evo-popup-title">Search returns stale results</div><div class="evo-popup-meta">2026-04-16 · Fix deployed. Barry hasn't confirmed.</div></div>
+                </div>
+                <div class="evo-marker" style="left:71%">
+                  <div class="evo-marker-dot bug" style="opacity:.35;border-style:dashed"></div>
+                  <div class="evo-marker-line" style="opacity:.35"></div>
+                  <div class="evo-marker-label merged">OCR ×2 →#43</div>
+                  <div class="evo-popup"><div class="evo-popup-type" style="color:#fb923c">Bug · <span class="merged-badge">merged → #43</span></div><div class="evo-popup-title">OCR timeout on large PDFs v2</div><div class="evo-popup-meta">2026-04-28 · Same root cause. Merged into incident.</div></div>
+                </div>
+                <div class="evo-marker" style="left:79%">
+                  <div class="evo-marker-dot incident" style="opacity:.6"></div>
+                  <div class="evo-marker-line"></div>
+                  <div class="evo-marker-label incident" style="opacity:.7">OCR pipeline</div>
+                  <div class="evo-popup"><div class="evo-popup-type" style="color:#f87171">Incident · RESOLVED</div><div class="evo-popup-title">OCR pipeline failure</div><div class="evo-popup-meta">2026-05-12 · All scans failing. Memory limit. Resolved 3d 5h.</div></div>
+                </div>
+                <div class="evo-marker" style="left:93%">
+                  <div class="evo-marker-dot bug"></div>
+                  <div class="evo-marker-line"></div>
+                  <div class="evo-marker-label bug">JPG import</div>
+                  <div class="evo-popup" style="right:0;left:auto;transform:none"><div class="evo-popup-type" style="color:#fb923c">Bug · OPEN</div><div class="evo-popup-title">Receipt import fails on JPG</div><div class="evo-popup-meta">2026-05-24 · 3 days. Fix in review PR #52.</div></div>
+                </div>
+              </div>
+
+              <!-- ── AP Process ── -->
+              <div class="lane-track">
+                <div class="evo-marker" style="left:8%">
+                  <div class="evo-marker-dot project"></div>
+                  <div class="evo-marker-line"></div>
+                  <div class="evo-marker-label project">AP module</div>
+                  <div class="evo-popup"><div class="evo-popup-type" style="color:#81e6d9">Project · IN PROGRESS</div><div class="evo-popup-title">AP Process — Accounts Payable Module</div><div class="evo-popup-meta">2026-01-15 · 3 features built. Testing stalled.</div></div>
+                </div>
+                <div class="evo-marker" style="left:64%">
+                  <div class="evo-marker-dot project" style="border-color:#c084fc;background:rgba(192,132,252,.2);box-shadow:0 0 8px rgba(192,132,252,.3)"></div>
+                  <div class="evo-marker-line"></div>
+                  <div class="evo-marker-label waiting">Testing ⏱</div>
+                  <div class="evo-popup"><div class="evo-popup-type" style="color:#c084fc">Project · WAITING 43d</div><div class="evo-popup-title">AP module — testing phase</div><div class="evo-popup-meta">2026-04-01 · Delivered to Barry. 2 follow-ups. No response.</div></div>
+                </div>
+              </div>
+
+              <!-- ── Bender ── -->
+              <div class="lane-track">
+                <div class="evo-marker" style="left:8%">
+                  <div class="evo-marker-dot project" style="opacity:.6"></div>
+                  <div class="evo-marker-line"></div>
+                  <div class="evo-marker-label project" style="opacity:.65">Phase 1</div>
+                  <div class="evo-popup"><div class="evo-popup-type" style="color:#81e6d9">Project · DONE</div><div class="evo-popup-title">Bender — Pronto XI Phase 1</div><div class="evo-popup-meta">2026-01-20 · Basic keystroke automation. Complete.</div></div>
+                </div>
+                <div class="evo-marker" style="left:31%">
+                  <div class="evo-marker-dot bug" style="opacity:.55"></div>
+                  <div class="evo-marker-line"></div>
+                  <div class="evo-marker-label bug" style="opacity:.65">Auth timeout</div>
+                  <div class="evo-popup"><div class="evo-popup-type" style="color:#fb923c">Bug · RESOLVED</div><div class="evo-popup-title">Bender auth session timeout</div><div class="evo-popup-meta">2026-02-28 · Pronto session expired mid-job. Fixed same day.</div></div>
+                </div>
+                <div class="evo-marker" style="left:58%">
+                  <div class="evo-marker-dot project"></div>
+                  <div class="evo-marker-line"></div>
+                  <div class="evo-marker-label project">Phase 2</div>
+                  <div class="evo-popup"><div class="evo-popup-type" style="color:#81e6d9">Project · IN PROGRESS</div><div class="evo-popup-title">Bender — Pronto XI Phase 2</div><div class="evo-popup-meta">2026-04-01 · Extended automation. Building. On track.</div></div>
+                </div>
+              </div>
+
+              <!-- ── Interceptor ── -->
+              <div class="lane-track">
+                <div class="evo-marker" style="left:2%">
+                  <div class="evo-marker-dot project" style="opacity:.6"></div>
+                  <div class="evo-marker-line"></div>
+                  <div class="evo-marker-label project" style="opacity:.65">v1 Deploy</div>
+                  <div class="evo-popup"><div class="evo-popup-type" style="color:#81e6d9">Project · DONE</div><div class="evo-popup-title">Interceptor v1 Deployment</div><div class="evo-popup-meta">2026-01-05 · NextCloud routing. Legacy Pronto URL support.</div></div>
+                </div>
+                <div class="evo-marker" style="left:28%">
+                  <div class="evo-marker-dot project" style="opacity:.6"></div>
+                  <div class="evo-marker-line"></div>
+                  <div class="evo-marker-label project" style="opacity:.65">URL v2</div>
+                  <div class="evo-popup"><div class="evo-popup-type" style="color:#81e6d9">Project · DONE</div><div class="evo-popup-title">Interceptor — URL schema v2</div><div class="evo-popup-meta">2026-02-20 · New implied-link format. Complete.</div></div>
+                </div>
+                <div class="evo-marker" style="left:91%">
+                  <div class="evo-marker-dot incident"></div>
+                  <div class="evo-marker-line"></div>
+                  <div class="evo-marker-label incident">Routing down</div>
+                  <div class="evo-popup" style="right:0;left:auto;transform:none"><div class="evo-popup-type" style="color:#f87171">Incident · OPEN</div><div class="evo-popup-title">NextCloud routing broken on new URLs</div><div class="evo-popup-meta">2026-05-24 · 3 days. Investigating. GitHub #47.</div></div>
+                </div>
+              </div>
+
+              <!-- ── Timesheet Bot ── -->
+              <div class="lane-track">
+                <div class="evo-marker" style="left:8%">
+                  <div class="evo-marker-dot project" style="opacity:.6"></div>
+                  <div class="evo-marker-line"></div>
+                  <div class="evo-marker-label project" style="opacity:.65">Launch</div>
+                  <div class="evo-popup"><div class="evo-popup-type" style="color:#81e6d9">Project · DONE</div><div class="evo-popup-title">Timesheet Bot — Initial deployment</div><div class="evo-popup-meta">2026-01-20 · Teams reminder bot. Deployed.</div></div>
+                </div>
+                <div class="evo-marker" style="left:84%">
+                  <div class="evo-marker-dot bug"></div>
+                  <div class="evo-marker-line"></div>
+                  <div class="evo-marker-label bug">Double submit</div>
+                  <div class="evo-popup"><div class="evo-popup-type" style="color:#fb923c">Bug · IN PROGRESS</div><div class="evo-popup-title">Double-submit on slow connection</div><div class="evo-popup-meta">2026-05-20 · Race condition. Fix in PR review.</div></div>
+                </div>
+              </div>
+
+            </div><!-- /tracks -->
+          </div><!-- /grid -->
+
+        </div><!-- /timeline-inner -->
+      </div><!-- /timeline-wrap -->
+
+      <!-- Recent events summary -->
+      <div class="evo-detail">
+        <div class="evo-detail-header">
+          <div style="font-size:13px;font-weight:600;color:var(--text-strong)">Recent activity — all villages</div>
+          <span style="font-size:12px;color:var(--text-dim)">Last 30 days · click any row to open chain view</span>
+        </div>
+        <div class="evo-detail-grid" style="grid-template-columns:repeat(4,1fr)">
+          <div class="evo-detail-card" style="border-color:rgba(248,113,113,.2)">
+            <div class="evo-detail-card-type" style="color:#f87171">INCIDENT · OPEN</div>
+            <div class="evo-detail-card-title">Interceptor routing broken</div>
+            <div class="evo-detail-card-meta">Interceptor · 2026-05-24 · 3d</div>
+          </div>
+          <div class="evo-detail-card" style="border-color:rgba(251,146,60,.3)">
+            <div class="evo-detail-card-type" style="color:#fb923c">BUG · OPEN</div>
+            <div class="evo-detail-card-title">Receipt import fails on JPG</div>
+            <div class="evo-detail-card-meta">Gekko Tracks · 2026-05-24 · 3d</div>
+          </div>
+          <div class="evo-detail-card" style="border-color:rgba(251,146,60,.2)">
+            <div class="evo-detail-card-type" style="color:#fb923c">BUG · IN REVIEW</div>
+            <div class="evo-detail-card-title">Double-submit on slow connection</div>
+            <div class="evo-detail-card-meta">Timesheet Bot · 2026-05-20 · 7d</div>
+          </div>
+          <div class="evo-detail-card" style="border-color:rgba(248,113,113,.15)">
+            <div class="evo-detail-card-type" style="color:#f87171">INCIDENT · RESOLVED</div>
+            <div class="evo-detail-card-title">OCR pipeline failure</div>
+            <div class="evo-detail-card-meta">Gekko Tracks · 2026-05-12 · 3d 5h</div>
+          </div>
+          <div class="evo-detail-card" style="border-color:rgba(192,132,252,.3)">
+            <div class="evo-detail-card-type" style="color:#c084fc">BUG · WAITING</div>
+            <div class="evo-detail-card-title">Stale search results</div>
+            <div class="evo-detail-card-meta">Gekko Tracks · 2026-04-16 · 11d waiting</div>
+          </div>
+          <div class="evo-detail-card" style="border-color:rgba(192,132,252,.3)">
+            <div class="evo-detail-card-type" style="color:#c084fc">PROJECT · WAITING 43d</div>
+            <div class="evo-detail-card-title">AP module — Testing phase</div>
+            <div class="evo-detail-card-meta">AP Process · 2026-04-01 · Barry</div>
+          </div>
+          <div class="evo-detail-card">
+            <div class="evo-detail-card-type" style="color:#81e6d9">PROJECT · BUILDING</div>
+            <div class="evo-detail-card-title">Bender Phase 2</div>
+            <div class="evo-detail-card-meta">Bender · 2026-04-01 · On track</div>
+          </div>
+          <div class="evo-detail-card" style="border-color:rgba(192,132,252,.3)">
+            <div class="evo-detail-card-type" style="color:#c084fc">PROJECT · WAITING 57d</div>
+            <div class="evo-detail-card-title">Staff Onboarding Batch 2</div>
+            <div class="evo-detail-card-meta">Gekko Tracks · 2026-03-01 · Ellie</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /evo-layout -->
+  </div><!-- /desk-frame -->
+</div><!-- /screen 3 -->
+
+</div><!-- /viewer -->
+
+<script>
+function showScreen(idx) {
+  document.querySelectorAll('.screen').forEach((s,i) => s.classList.toggle('active', i===idx));
+  document.querySelectorAll('.cb-screen-btn').forEach((b,i) => b.classList.toggle('active', i===idx));
+}
+
+function toggleBranch(btn) {
+  const node = btn.closest('.chain-node');
+  const branch = node.querySelector('.chain-branch');
+  if (!branch) return;
+  const open = branch.classList.toggle('open');
+  btn.classList.toggle('open', open);
+  if (open) {
+    btn.innerHTML = '<span class="arrow">▼</span> collapse';
+  } else {
+    // restore original label from data
+    const orig = btn.dataset.orig || btn.innerHTML;
+    if (!btn.dataset.orig) btn.dataset.orig = btn.innerHTML;
+    btn.innerHTML = btn.dataset.orig;
+    // re-inject arrow
+    btn.innerHTML = '<span class="arrow">▼</span> ' + btn.textContent.trim().replace(/^▼\s*/, '');
+  }
+}
+
+// Store original labels before any clicks
+document.querySelectorAll('.branch-toggle').forEach(btn => {
+  btn.dataset.orig = btn.innerHTML;
+});
+</script>
+
+</body>
+</html>

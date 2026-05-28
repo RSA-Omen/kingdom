@@ -219,6 +219,13 @@ def render_wiki_sections(village, villages_by_slug):
         text = resolve_wikilinks(text, villages_by_slug)
         body_html = md.convert(text)
         md.reset()
+        # Mermaid: rewrite <code class="language-mermaid"> blocks to <pre class="mermaid">
+        body_html = re.sub(
+            r'<pre><code class="language-mermaid">(.*?)</code></pre>',
+            lambda m: f'<pre class="mermaid">{m.group(1)}</pre>',
+            body_html,
+            flags=re.DOTALL,
+        )
         sections.append({
             "name": page["name"],
             "anchor": page["name"],
