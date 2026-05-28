@@ -209,8 +209,10 @@ function buildAsanaDeskItem(
 ): DeskItem {
   const sectionGid = sectionGidOf(task);
   const village = (sectionGid && SECTION_TO_VILLAGE[sectionGid]) || 'Unrouted';
+  const isTriaged = !!processedAt;
   const type = entityTypeFromClassification(classification);
-  const status = (statusValueOf(task) || 'OPEN').toUpperCase();
+  const rawStatus = statusValueOf(task);
+  const status = isTriaged ? (rawStatus || 'OPEN').toUpperCase() : 'UNTRIAGED';
   const priority = priorityValueOf(task);
 
   const created = task.created_at;
@@ -220,14 +222,20 @@ function buildAsanaDeskItem(
   // Age is based on most recent activity — modified time
   const seconds = ageSeconds(modified || created);
   const { age, ageTone } = compactAge(seconds);
-  const ageLabel = isWaiting ? 'waiting' : 'open';
+  const ageLabel = isWaiting ? 'waiting' : isTriaged ? 'open' : 'awaiting triage';
 
-  // Note: surface priority as a hint when set
-  const note = priority ? `${priority} priority` : undefined;
-  const noteTone: 'red' | 'default' | undefined =
-    seconds >= 14 * 86400 && isWaiting ? 'red' : undefined;
+  // Note: for triaged tasks surface priority; for untriaged surface a clear flag
+  let note: string | undefined;
+  let noteTone: 'red' | 'default' | undefined;
+  if (!isTriaged) {
+    note = 'awaiting Lord Chamberlain — needs triage';
+    noteTone = 'red';
+  } else if (priority) {
+    note = `${priority} priority`;
+    noteTone = priority === 'High' ? 'red' : undefined;
+  }
 
-  // Lifecycle: created → triaged → now → future
+  // Lifecycle: created → (triaged) → now → future
   const events: LifecycleEvent[] = [];
   if (created) {
     events.push({
@@ -247,11 +255,11 @@ function buildAsanaDeskItem(
   }
   events.push({
     kind: 'now',
-    tone: isWaiting ? T.waiting : toneOf(type),
+    tone: isWaiting ? T.waiting : isTriaged ? toneOf(type) : T.waiting,
     title: status,
     date: 'today',
   });
-  events.push({ kind: 'future', title: 'Done' });
+  events.push({ kind: 'future', title: isTriaged ? 'Done' : 'Triage' });
 
   return {
     id: task.gid,
@@ -263,28 +271,96 @@ function buildAsanaDeskItem(
     noteTone,
     age,
     ageLabel,
-    ageTone,
+    ageTone: !isTriaged && seconds > 3600 ? 'amber' : ageTone,
     events,
   };
 }
 
-function buildIncidentDeskItem(row: {
+type IncidentRow = {
   id: string;
   village: string;
   message: string;
   severity: string;
   created_at: number;
   status: string;
-}): DeskItem {
-  const seconds = ageSeconds(row.created_at);
+};
+
+type IncidentGroup = {
+  representative: IncidentRow;
+  count: number;
+  firstSeen: number; // unix seconds — oldest occurrence
+  lastSeen: number; // unix seconds — most recent
+  worstSeverity: string;
+};
+
+/**
+ * Normalize an error message into a fingerprint so the same error reported
+ * multiple times collapses into one row.
+ *
+ * Strips numbers/IDs/timestamps and trims to first 60 chars.
+ */
+function fingerprint(village: string, message: string): string {
+  const norm = message
+    .toLowerCase()
+    .replace(/[0-9a-f]{8}-([0-9a-f]{4}-){3}[0-9a-f]{12}/g, '<uuid>')
+    .replace(/\b\d{3,}\b/g, '<n>')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 60);
+  return `${village}::${norm}`;
+}
+
+function severityRank(s: string): number {
+  return { critical: 3, error: 2, warning: 1, info: 0 }[s] ?? 0;
+}
+
+function groupIncidents(rows: IncidentRow[]): IncidentGroup[] {
+  const groups = new Map<string, IncidentGroup>();
+  for (const r of rows) {
+    const fp = fingerprint(r.village, r.message);
+    const existing = groups.get(fp);
+    if (!existing) {
+      groups.set(fp, {
+        representative: r,
+        count: 1,
+        firstSeen: r.created_at,
+        lastSeen: r.created_at,
+        worstSeverity: r.severity,
+      });
+    } else {
+      existing.count += 1;
+      existing.firstSeen = Math.min(existing.firstSeen, r.created_at);
+      existing.lastSeen = Math.max(existing.lastSeen, r.created_at);
+      if (severityRank(r.severity) > severityRank(existing.worstSeverity)) {
+        existing.worstSeverity = r.severity;
+        existing.representative = r;
+      }
+    }
+  }
+  return Array.from(groups.values());
+}
+
+function buildIncidentDeskItem(group: IncidentGroup): DeskItem {
+  const { representative: row, count, lastSeen, firstSeen, worstSeverity } = group;
+  const seconds = ageSeconds(lastSeen);
   const { age, ageTone } = compactAge(seconds);
+  const isCritical = worstSeverity === 'critical';
+  const isFrequent = count >= 3;
+
+  // Note: severity + count (e.g. "error · ×3")
+  const note = count > 1 ? `${worstSeverity} · ×${count}` : worstSeverity;
+  const noteTone: 'red' | 'default' | undefined =
+    isCritical || isFrequent ? 'red' : undefined;
+
+  // Age tone: red if frequent or critical, else default
+  const tone: AgeTone = isCritical || isFrequent ? 'red' : ageTone;
 
   const events: LifecycleEvent[] = [
     {
       kind: 'milestone',
       tone: T.incident,
-      title: 'Reported',
-      date: new Date(row.created_at * 1000).toISOString().slice(0, 10),
+      title: count > 1 ? `First seen (×${count})` : 'Reported',
+      date: new Date(firstSeen * 1000).toISOString().slice(0, 10),
     },
     { kind: 'now', tone: T.incident, title: row.status.toUpperCase(), date: 'today' },
     { kind: 'future', title: 'Resolved' },
@@ -296,26 +372,51 @@ function buildIncidentDeskItem(row: {
     village: row.village,
     title: row.message.slice(0, 120),
     status: row.status.toUpperCase(),
-    note: row.severity,
-    noteTone: row.severity === 'critical' ? 'red' : undefined,
+    note,
+    noteTone,
     age,
     ageLabel: 'open',
-    ageTone,
+    ageTone: tone,
     events,
   };
 }
 
 // ─── Bucketing rules ──────────────────────────────────────────────────────
 
+/**
+ * Attention rules (the king's "do these first" list):
+ *
+ *   Asana:
+ *     - UNTRIAGED + older than ~1h → attention (Lord Chamberlain dropped it)
+ *     - High priority → attention
+ *     - WAITING + age red (>14d) → attention
+ *     - REVIEW status → attention
+ *
+ *   Incidents (already deduped):
+ *     - worstSeverity = critical → attention
+ *     - count ≥ 3 → attention (frequent = louder than once-off)
+ *     - everything else → flight
+ */
 function isAttention(item: DeskItem): boolean {
-  // Incidents always need attention while open
-  if (item.type === 'incident') return true;
-  // Waiting status + >7d → attention
+  // Untriaged Asana — the king needs to know LC is behind
+  if (item.status === 'UNTRIAGED' && item.ageTone !== 'mid') return true;
+
+  // High-priority Asana
+  if (item.note?.startsWith('High priority')) return true;
+
+  // Incidents: critical or frequent (red noteTone is set when so)
+  if (item.type === 'incident') {
+    return item.noteTone === 'red';
+  }
+
+  // Waiting-style status + old
   const statusLooksWaiting =
     item.status.includes('WAITING') || item.status === 'REVIEW';
   if (statusLooksWaiting && item.ageTone === 'red') return true;
-  // Anything red (>=14d) regardless of status
+
+  // Anything aged out
   if (item.ageTone === 'red') return true;
+
   return false;
 }
 
@@ -383,16 +484,19 @@ export async function buildFeed(): Promise<FeedResponse> {
     return emptyFeed('asana-fetch-error');
   }
 
-  const triagedTasks = asanaTasks.filter(hasLcTag);
+  // We pull ALL incomplete tasks from Recently Assigned, not just lc-triaged.
+  // Untriaged tasks should still surface — they're work the king needs to see
+  // even before Lord Chamberlain has classified them.
   const triageMap = fetchTriageMap();
-
-  const asanaItems: DeskItem[] = triagedTasks.map((task) => {
+  const asanaItems: DeskItem[] = asanaTasks.map((task) => {
     const tr = triageMap.get(task.gid);
     return buildAsanaDeskItem(task, tr?.classification, tr?.processedAt);
   });
+  const triagedCount = asanaTasks.filter(hasLcTag).length;
 
   // 3. Capital DB errors → incidents (critical + error severity, open, last 7 days)
   let incidentItems: DeskItem[] = [];
+  let rawIncidentCount = 0;
   try {
     const sevenDaysAgo = Math.floor(Date.now() / 1000) - 7 * 86400;
     const rows = (db as any)
@@ -404,17 +508,11 @@ export async function buildFeed(): Promise<FeedResponse> {
            AND severity IN ('critical', 'error')
            AND created_at > ?
          ORDER BY created_at DESC
-         LIMIT 20`,
+         LIMIT 200`,
       )
-      .all(sevenDaysAgo) as Array<{
-      id: string;
-      village: string;
-      message: string;
-      severity: string;
-      status: string;
-      created_at: number;
-    }>;
-    incidentItems = rows.map(buildIncidentDeskItem);
+      .all(sevenDaysAgo) as IncidentRow[];
+    rawIncidentCount = rows.length;
+    incidentItems = groupIncidents(rows).map(buildIncidentDeskItem);
   } catch (err) {
     console.warn('[guild-board] errors query failed:', err);
   }
@@ -437,8 +535,8 @@ export async function buildFeed(): Promise<FeedResponse> {
     generatedAt: new Date().toISOString(),
     source: {
       asanaTasksFetched: asanaTasks.length,
-      asanaTasksTriaged: triagedTasks.length,
-      incidentsFromCapital: incidentItems.length,
+      asanaTasksTriaged: triagedCount,
+      incidentsFromCapital: rawIncidentCount,
     },
     stats,
     ageDistribution,
