@@ -6,9 +6,9 @@ export const revalidate = 30;
 
 export async function GET(
   _req: Request,
-  { params }: { params: { id: string } },
+  { params }: { params: Promise<{ id: string }> },
 ) {
-  const { id } = params;
+  const { id } = await params;
   try {
     const res = await fetch(`${BACKEND}/api/guild-board/chain/${encodeURIComponent(id)}`, {
       next: { revalidate: 30 },
