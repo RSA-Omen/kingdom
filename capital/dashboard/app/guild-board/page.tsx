@@ -146,7 +146,7 @@ export default function GuildBoardPage() {
           setActiveVillage={setVillage}
         />
 
-        <main className="flex-1 flex flex-col gap-[18px] min-w-0">
+        <div className="flex-1 flex flex-col gap-[18px] min-w-0">
           <div className="surface overflow-hidden p-0">
             <GroupHeader
               label="Needs attention"
@@ -248,7 +248,7 @@ export default function GuildBoardPage() {
               </div>
             )}
           </div>
-        </main>
+        </div>
       </div>
 
       <Toast message={toast} onClose={() => setToast(null)} />
