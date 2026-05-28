@@ -9,6 +9,9 @@ __pycache__/
 node_modules/
 dist/
 build/
+.next/
+# Next.js auto-generated
+capital/dashboard/next-env.d.ts
 
 # Secrets and credentials
 .bash_history
@@ -43,6 +46,9 @@ admin-center/
 
 # Runtime cache written by the Hand of the King for the dashboard
 .hand-snapshot.json
+
+# Lord Chamberlain runtime cache — Asana custom-field enum GIDs, refreshed daily
+council/lord-chamberlain/.cf_cache.json
 
 # Capital API runtime data — live SQLite DB, WAL files, backups
 capital/api/data/

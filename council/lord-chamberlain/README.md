@@ -2,7 +2,7 @@
 
 **Beat:** Convert every inbound Digital work request into a triaged, routed, enriched Asana task.
 
-**Status:** PRD finalised 2026-05-28 — Phase 1 build next.
+**Status:** Phase 1 complete 2026-05-28 — awaiting ANTHROPIC_API_KEY in `~/Kingdom/.env` to go live.
 
 **Full PRD:** `docs/council/lord-chamberlain.md`  
 **Scriptorium:** http://gvdi-30:8095/villages/kingdom.html#lord-chamberlain  
@@ -30,7 +30,7 @@ Operator can trigger re-triage by commenting `/retriage` on any task.
 
 ## Build phases
 
-- [ ] **Phase 1** — Core triage loop (Asana poll, Claude classify, route, comment, tag, DB, Telegram)
+- [x] **Phase 1** — Core triage loop (Asana poll, Claude classify, route, comment, tag, DB, Telegram)
 - [ ] **Phase 2** — GitHub integration (search first, create second)
 - [ ] **Phase 3** — Re-triage trigger (`/retriage` comment detection)
 - [ ] **Phase 4** — Paste-to-ticket (Capital API endpoint + dashboard UI + Telegram command)

@@ -1,0 +1,11 @@
+[Unit]
+Description=Lord Chamberlain — Digital ticket triage agent
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/lauchlandupreez/Kingdom
+EnvironmentFile=/home/lauchlandupreez/Kingdom/.env
+EnvironmentFile=/home/lauchlandupreez/.kingdom.env
+ExecStart=/home/lauchlandupreez/Kingdom/.venv/bin/python /home/lauchlandupreez/Kingdom/council/lord-chamberlain/chamberlain.py
+StandardOutput=journal
+StandardError=journal

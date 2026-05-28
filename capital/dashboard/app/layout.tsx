@@ -56,6 +56,7 @@ function Sidebar() {
       heading: "The Capital",
       items: [
         { label: "Throne Room", slug: "/" },
+        { label: "Guild Board", slug: "/guild-board" },
         { label: "Matters", slug: "/matters" },
         { label: "Telegraph", slug: "/telegraph" },
       ],
