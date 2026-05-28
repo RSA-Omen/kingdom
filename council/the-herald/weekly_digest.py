@@ -99,9 +99,9 @@ def humanise_commit(msg: str) -> str:
 # Updated by /kingdom-checkpoint at the end of each work session.
 # One plain-English entry per completed feature. Replace with current week's work.
 RECENT_ADDITIONS = [
-    "Lord Chamberlain — PRD finalised for the Kingdom's ticket triage agent. Every Digital work request will flow through one pipeline: SharePoint form or operator paste → Asana task → Claude classifies (bug/feature/support/internal-tool/it-request/rd-idea/unclear) → routed to the right Asana section → GitHub issue created for code-related items (search first, create second) → Telegram notification. Operator can re-triage any task by commenting /retriage. Asana connectivity confirmed, all GIDs mapped. Phase 1 build ready to begin",
-    "Scriptorium — Mermaid diagram support added to all village wiki pages; Lord Chamberlain system architecture added as a full demo page under the Kingdom village",
-    "Asana integration — confirmed API connectivity to Gekko Systems workspace, mapped all Digital and IT Support project sections and custom field GIDs, confirmed My Tasks polling endpoint",
+    "The Lord Chamberlain (Phase 1) — built and tested against live Asana. Every 5 min polls My Tasks → Recently Assigned, Claude classifies each new task (bug / feature / support / internal-tool / it-request / rd-idea / unclear), routes to the right Digital or IT Support section, sets Priority + Task Status custom fields, tags `lc-triaged`, posts a structured triage comment, and pings Telegram. Routing keywords correctly hit OLGA / Carbon Scout / ILR / Gaia / Internal Systems. systemd timer installed but disabled pending Guild Board wiring.",
+    "The Guild Board (Phase A) — the king's single pane of glass at `/guild-board`. Pixel-faithful build of the CI Desk design (Queue Triage variant) in Void Teal. Sidebar filters by view + village, mini lifecycle bars per item, hover states, toast feedback on every interactive target. Mock data shaped to real schemas so Phase B is just data wiring. Fixed a silent React-19 hydration bug where nested `<main>` tags killed all interactivity without a console error.",
+    "Asana integration — confirmed API connectivity to Gekko Systems workspace, mapped all Digital and IT Support project sections and custom field enum GIDs (cached for 24h in `.cf_cache.json`), `lc-triaged` tag created.",
 ]
 
 

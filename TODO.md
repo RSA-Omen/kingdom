@@ -31,7 +31,7 @@ Each gets a `council/<role>/` subfolder when its build begins, not before. Names
 - [x] **The Captain of the Guard** — first responder to incidents; sounds the alarm, gathers facts, drafts the reply
 - [x] **The Master of Laws** — enforces the Gekko Standard; audits villages for compliance
 - [x] **The Lord Chamberlain** — relations with subjects (users); wellbeing, friction, complaints, abandoned flows
-  - [ ] [P1] **Phase 1** — Core triage loop: Asana poll, PAT health check, Claude classify, route, comment, `lc-triaged` tag, Capital DB, Telegram. PRD at `docs/council/lord-chamberlain.md`
+  - [x] [P1] **Phase 1** — Core triage loop: Asana poll, PAT health check, Claude classify, route, comment, `lc-triaged` tag, Capital DB, Telegram. PRD at `docs/council/lord-chamberlain.md` *(2026-05-28 — built, tested against live Asana, systemd timer installed but disabled pending Guild Board wiring)*
   - [ ] [P2] **Phase 2** — GitHub integration: search open + resolved + historical before creating; deduplication; regression flagging
   - [ ] [P2] **Phase 3** — Re-triage trigger: `/retriage` comment detection, DB + tag cleanup, re-queue
   - [ ] [P3] **Phase 4** — Paste-to-ticket: `POST /api/tickets/ingest`, dashboard `/tickets/new`, Telegram `/ticket`
@@ -48,6 +48,15 @@ Each gets a `council/<role>/` subfolder when its build begins, not before. Names
 - [ ] [P2] Section structure: Front Page (urgent/new), Today's Work (todos), The Long Read (system self-reflection), Arts & Tech (AI/IT news), Classifieds (feedback/requests)
 - [x] [P2] Delivery: Telegram (primary) *(web edition and email still pending)*
 - [x] [P2] Morning ritual: deliver around 06:00 CAT before the king wakes
+
+## The Guild Board — the king's single pane of glass
+
+The operator's command centre. Pulls from Asana (Lord Chamberlain's triaged tasks), Capital DB (errors as incidents), and GitHub (multi-repo open issues). Three views: Queue · Chain · Evolution. Lives at `/guild-board` on the Kingdom dashboard. Design bundle from claude.ai/design; CI Desk variant. Theme: Void Teal.
+
+- [x] [P1] **Phase A** — Queue Triage visual shell at `/guild-board` *(2026-05-28)* — pixel-faithful to the CI Desk design, mock data shaped to real schemas, sidebar filters + lifecycle bars + toast on every interactive target. Fixed silent React hydration failure from nested `<main>`.
+- [ ] [P1] **Phase B** — wire real data: Asana (Lord Chamberlain classified tasks), Capital DB errors → incidents, single source of truth for village list (Steward's `VILLAGES` dict)
+- [ ] [P2] **Phase C** — GitHub multi-repo feed, Chain drill-in view, Evolution timeline, working "+ New X" modals
+- [ ] [P2] Drafting agent — a Royal Court role that picks up `bug`/`feature` items from the board, spawns Claude Code in a worktree, and attaches a draft solution / demo back to the task. Probably belongs to The Smith or Master Builder; decide roster placement before building.
 
 ## The Gekko Standard — what every village must meet
 
