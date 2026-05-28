@@ -19,6 +19,7 @@ import errorsRouter from './routes/errors';
 import checkpointsRouter from './routes/checkpoints';
 import todosRouter from './routes/todos';
 import githubSyncRouter from './routes/githubSync';
+import guildBoardRouter from './routes/guildBoard';
 import { healthService } from './services/health';
 import { schedulerService } from './services/scheduler';
 import { db } from './models/database';
@@ -100,6 +101,9 @@ app.use('/api/todos', todosRouter);
 
 // Bureau endpoint (no auth required - for n8n, Open WebUI, AI agents)
 app.use('/api/bureau', bureauRouter);
+
+// Guild Board feed (no auth required - read-only aggregation for the king's dashboard)
+app.use('/api/guild-board', guildBoardRouter);
 
 // Error handling
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {

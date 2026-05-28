@@ -8,6 +8,9 @@ type QueueSidebarProps = {
   setActiveView: (id: string) => void;
   activeVillage: string | null;
   setActiveVillage: (id: string | null) => void;
+  /** Optional overrides — falls back to mock if not provided (used by Phase A shell only). */
+  viewItems?: SidebarItem[];
+  villageItems?: SidebarItem[];
 };
 
 function SectionRows({
@@ -88,12 +91,14 @@ export function QueueSidebar({
   setActiveView,
   activeVillage,
   setActiveVillage,
+  viewItems = VIEW_SIDEBAR,
+  villageItems = VILLAGE_SIDEBAR,
 }: QueueSidebarProps) {
   return (
     <aside style={{ width: 200, flexShrink: 0, paddingTop: 2 }}>
       <SectionRows
         title="Views"
-        items={VIEW_SIDEBAR}
+        items={viewItems}
         active={activeView}
         setActive={(id) => {
           setActiveView(id);
@@ -102,7 +107,7 @@ export function QueueSidebar({
       />
       <SectionRows
         title="Villages"
-        items={VILLAGE_SIDEBAR}
+        items={villageItems}
         active={activeVillage}
         setActive={(id) => setActiveVillage(id === activeVillage ? null : id)}
       />
