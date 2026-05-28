@@ -7,6 +7,7 @@ import { QueueSidebar } from "./QueueSidebar";
 import { StatsStripFromFeed } from "./StatsStripFromFeed";
 import { Toast } from "./Toast";
 import { TriageItem } from "./TriageItem";
+import { ChainView } from "./ChainView";
 import type { DeskItem, ViewFilter } from "./types";
 
 export type GuildBoardData = {
@@ -63,13 +64,18 @@ function applyVillageFilter(
 
 /* ─── page ─── */
 
+type SelectedItem = { id: string; title: string; village: string } | null;
+
 export function GuildBoardClient({ data }: { data: GuildBoardData }) {
   const [view, setView] = useState<ViewFilter>("all");
   const [village, setVillage] = useState<string | null>(null);
   const [toast, setToast] = useState<string | null>(null);
   const [closedOpen, setClosedOpen] = useState(false);
+  const [selected, setSelected] = useState<SelectedItem>(null);
 
   const flash = (m: string) => setToast(m);
+  const openChain = (item: DeskItem) =>
+    setSelected({ id: item.id, title: item.title, village: item.village });
 
   const attention = useMemo(
     () =>
@@ -123,6 +129,18 @@ export function GuildBoardClient({ data }: { data: GuildBoardData }) {
     { id: "attention", label: "Needs attention", count: data.attention.length },
     { id: "closed", label: "Closed", count: data.closed.length },
   ];
+
+  // ── Chain drill-in ──
+  if (selected) {
+    return (
+      <ChainView
+        itemId={selected.id}
+        itemTitle={selected.title}
+        itemVillage={selected.village}
+        onBack={() => setSelected(null)}
+      />
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6">
@@ -245,9 +263,7 @@ export function GuildBoardClient({ data }: { data: GuildBoardData }) {
                   <TriageItem
                     key={it.id}
                     item={it}
-                    onClick={() =>
-                      flash(`Open “${it.title}” — Phase C drills into the project chain`)
-                    }
+                    onClick={() => openChain(it)}
                   />
                 ))}
               </div>
@@ -269,9 +285,7 @@ export function GuildBoardClient({ data }: { data: GuildBoardData }) {
                   <TriageItem
                     key={it.id}
                     item={it}
-                    onClick={() =>
-                      flash(`Open “${it.title}” — Phase C drills into the project chain`)
-                    }
+                    onClick={() => openChain(it)}
                   />
                 ))}
               </div>
@@ -333,9 +347,7 @@ export function GuildBoardClient({ data }: { data: GuildBoardData }) {
                     <TriageItem
                       key={it.id}
                       item={it}
-                      onClick={() =>
-                        flash(`Open “${it.title}” — Phase C shows the post-mortem chain`)
-                      }
+                      onClick={() => openChain(it)}
                     />
                   ))
                 )}

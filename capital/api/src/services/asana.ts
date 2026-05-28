@@ -93,6 +93,52 @@ export async function getMyRecentlyAssigned(
   return body.data ?? [];
 }
 
+export type AsanaStory = {
+  gid: string;
+  type: 'system' | 'comment';
+  resource_subtype: string;
+  text: string;
+  created_at: string;
+  created_by?: { gid: string; name?: string };
+};
+
+export async function getTaskDetails(taskGid: string): Promise<AsanaTask> {
+  const params = new URLSearchParams({
+    opt_fields: [
+      'gid', 'name', 'notes', 'completed', 'created_at', 'modified_at',
+      'tags', 'tags.gid', 'tags.name',
+      'memberships', 'memberships.project', 'memberships.project.gid',
+      'memberships.project.name', 'memberships.section',
+      'memberships.section.gid', 'memberships.section.name',
+      'custom_fields', 'custom_fields.gid', 'custom_fields.name',
+      'custom_fields.enum_value', 'custom_fields.enum_value.gid',
+      'custom_fields.enum_value.name', 'custom_fields.display_value',
+      'custom_fields.type', 'assignee', 'assignee.gid', 'assignee.name',
+    ].join(','),
+  });
+  const url = `${ASANA_BASE_URL}/tasks/${taskGid}?${params}`;
+  const resp = await fetch(url, { headers: authHeaders() });
+  if (!resp.ok) {
+    throw new Error(`Asana ${resp.status} fetching task ${taskGid}: ${await resp.text()}`);
+  }
+  const body = (await resp.json()) as { data: AsanaTask };
+  return body.data;
+}
+
+export async function getTaskStories(taskGid: string): Promise<AsanaStory[]> {
+  const params = new URLSearchParams({
+    opt_fields: 'gid,type,resource_subtype,text,created_at,created_by.name',
+    limit: '100',
+  });
+  const url = `${ASANA_BASE_URL}/tasks/${taskGid}/stories?${params}`;
+  const resp = await fetch(url, { headers: authHeaders() });
+  if (!resp.ok) {
+    throw new Error(`Asana ${resp.status} fetching stories for ${taskGid}: ${await resp.text()}`);
+  }
+  const body = (await resp.json()) as { data: AsanaStory[] };
+  return body.data ?? [];
+}
+
 /**
  * Health-check the PAT. Returns true if 200, false on 401/403.
  * Other errors bubble up — they're not PAT problems.
