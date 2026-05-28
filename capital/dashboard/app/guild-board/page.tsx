@@ -23,22 +23,20 @@ function applyViewFilter(
   view: ViewFilter,
   group: "attention" | "flight" | "closed",
 ) {
-  switch (view) {
-    case "all":
-      return group === "closed" ? [] : items;
-    case "projects":
-      return group === "closed" ? [] : items.filter((i) => i.type === "project");
-    case "bugs":
-      return group === "closed" ? [] : items.filter((i) => i.type === "bug");
-    case "incidents":
-      return group === "closed" ? [] : items.filter((i) => i.type === "incident");
-    case "attention":
-      return group === "attention" ? items : [];
-    case "closed":
-      return group === "closed" ? items : [];
-    default:
-      return items;
-  }
+  // Attention-only view: zero out non-attention groups
+  if (view === "attention") return group === "attention" ? items : [];
+
+  // Closed-only view: zero out open groups, show all closed
+  if (view === "closed") return group === "closed" ? items : [];
+
+  // For all other views (all / projects / bugs / incidents) the same type
+  // filter applies to every group, including closed. The operator can expand
+  // the Closed section while filtering by type and see closed bugs etc.
+  if (view === "all") return items;
+  if (view === "projects") return items.filter((i) => i.type === "project");
+  if (view === "bugs") return items.filter((i) => i.type === "bug");
+  if (view === "incidents") return items.filter((i) => i.type === "incident");
+  return items;
 }
 
 function applyVillageFilter(items: DeskItem[], villageId: string | null) {
