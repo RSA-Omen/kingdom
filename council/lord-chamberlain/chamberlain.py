@@ -291,13 +291,13 @@ def run_cycle(conn: sqlite3.Connection, lc_tag_gid: str, cf_cache: dict) -> None
             classification, f"{task_name} {task.get('notes', '')}"
         )
 
-        # 7. Update custom fields (best-effort)
-        if priority_gid and status_gid:
-            asana.update_task_fields(task_gid, priority_gid, status_gid)
-
-        # 8. Move to section (best-effort, skip for unclear)
+        # 7. Move to section first so custom fields are in scope (best-effort, skip for unclear)
         if project_gid and section_gid:
             asana.move_task_to_section(task_gid, project_gid, section_gid)
+
+        # 8. Update custom fields (best-effort — requires task to be in the right project)
+        if priority_gid and status_gid:
+            asana.update_task_fields(task_gid, priority_gid, status_gid)
 
         # 9. Add lc-triaged tag
         asana.add_tag(task_gid, lc_tag_gid)
