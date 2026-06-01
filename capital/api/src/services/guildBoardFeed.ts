@@ -283,6 +283,8 @@ type IncidentRow = {
   severity: string;
   created_at: number;
   status: string;
+  occurrence_count: number;
+  last_seen_at: number | null;
 };
 
 type IncidentGroup = {
@@ -319,18 +321,20 @@ function groupIncidents(rows: IncidentRow[]): IncidentGroup[] {
   for (const r of rows) {
     const fp = fingerprint(r.village, r.message);
     const existing = groups.get(fp);
+    const rowCount = r.occurrence_count ?? 1;
+    const rowLastSeen = r.last_seen_at ?? r.created_at;
     if (!existing) {
       groups.set(fp, {
         representative: r,
-        count: 1,
+        count: rowCount,
         firstSeen: r.created_at,
-        lastSeen: r.created_at,
+        lastSeen: rowLastSeen,
         worstSeverity: r.severity,
       });
     } else {
-      existing.count += 1;
+      existing.count += rowCount;
       existing.firstSeen = Math.min(existing.firstSeen, r.created_at);
-      existing.lastSeen = Math.max(existing.lastSeen, r.created_at);
+      existing.lastSeen = Math.max(existing.lastSeen, rowLastSeen);
       if (severityRank(r.severity) > severityRank(existing.worstSeverity)) {
         existing.worstSeverity = r.severity;
         existing.representative = r;
@@ -502,7 +506,7 @@ export async function buildFeed(): Promise<FeedResponse> {
     const rows = (db as any)
       .getDb()
       .prepare(
-        `SELECT id, village, message, severity, status, created_at
+        `SELECT id, village, message, severity, status, created_at, occurrence_count, last_seen_at
          FROM errors
          WHERE status = 'open'
            AND severity IN ('critical', 'error')

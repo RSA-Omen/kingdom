@@ -16,14 +16,26 @@ router.post('/', (req: Request, res: Response) => {
     return res.status(400).json({ error: 'severity must be critical, error, warning, or info' });
   }
 
+  const now = Math.floor(Date.now() / 1000);
+  const dbInstance = (db as any).getDb();
+
+  const existing = dbInstance.prepare(
+    "SELECT id FROM errors WHERE village = ? AND message = ? AND status = 'open' LIMIT 1"
+  ).get(village, message) as { id: string } | undefined;
+
+  if (existing) {
+    dbInstance.prepare(
+      'UPDATE errors SET occurrence_count = occurrence_count + 1, last_seen_at = ? WHERE id = ?'
+    ).run(now, existing.id);
+    return res.status(200).json({ id: existing.id, received_at: new Date(now * 1000).toISOString(), deduplicated: true });
+  }
+
   const id = randomUUID();
-  const created_at = Math.floor(Date.now() / 1000);
+  dbInstance.prepare(
+    'INSERT INTO errors (id, village, message, stack, severity, status, created_at, occurrence_count, last_seen_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
+  ).run(id, village, message, stack || null, severity, 'open', now, 1, now);
 
-  (db as any).getDb().prepare(
-    'INSERT INTO errors (id, village, message, stack, severity, status, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)'
-  ).run(id, village, message, stack || null, severity, 'open', created_at);
-
-  res.status(201).json({ id, received_at: new Date(created_at * 1000).toISOString() });
+  res.status(201).json({ id, received_at: new Date(now * 1000).toISOString() });
 });
 
 // GET /api/errors — fetch errors with optional filters
