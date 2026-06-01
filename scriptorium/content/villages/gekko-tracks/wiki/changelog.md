@@ -12,3 +12,4 @@ Auto-maintained by the village-checkpoint skill (Gekko Standard §15.8). Each ch
 - **2026-05-28** — [fix(receipts): stop misidentifying $ as ZAR; default display currency to $](/villages/gekko-tracks/changelog/2026-05-28-b31374e.html) (`b31374e`)
 - **2026-05-28** — [fix(receipts): add currency override dropdown to cardholder dashboard](/villages/gekko-tracks/changelog/2026-05-28-4caee88.html) (`4caee88`)
 - **2026-05-29** — [fix(batches): partial submission sub-batch now inherits finance batch as parent](/villages/gekko-tracks/changelog/2026-05-29-bc63c0d.html) (`bc63c0d`)
+- **2026-06-01** — [chore(data): remove tracked test receipt files from git](/villages/gekko-tracks/changelog/2026-06-01-552a810.html) (`552a810`)
