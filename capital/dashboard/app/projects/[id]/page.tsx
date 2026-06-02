@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState, use } from "react";
 
-const API = process.env.NEXT_PUBLIC_API_BASE || "http://localhost:5001";
+const API = ""; // routes proxied via app/api/projects/[id]/
 
 interface Subtask {
   id: string;

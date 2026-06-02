@@ -7,8 +7,12 @@ import { syncProject } from '../services/projectSync';
 const router = Router();
 
 function parseAsanaGid(input: string): string | null {
-  const match = input.match(/(\d{16,})/);
-  return match ? match[1] : null;
+  // Prefer /task/{GID} from a full Asana URL
+  const taskMatch = input.match(/\/task\/(\d+)/);
+  if (taskMatch) return taskMatch[1];
+  // Fallback: bare numeric GID
+  const bareMatch = input.match(/^(\d+)$/);
+  return bareMatch ? bareMatch[1] : null;
 }
 
 const TODAY = () => new Date().toISOString().split('T')[0];

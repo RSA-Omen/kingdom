@@ -99,7 +99,7 @@ def humanise_commit(msg: str) -> str:
 # Updated by /kingdom-checkpoint at the end of each work session.
 # One plain-English entry per completed feature. Replace with current week's work.
 RECENT_ADDITIONS = [
-    "Company Projects tracker — board-approved Asana projects are now enrolled in the Kingdom by pasting a task URL. The dashboard shows each project's phase progress, overdue indicators, latest comment, and attached files — all synced from Asana every 15 minutes without anyone having to open Asana.",
+    "Company Projects tracker — 12 board-approved initiatives (Drawing Packs, Transmitall, Gaia, Sales Unification, and more) are now tracked live at /projects on the Kingdom dashboard. Each shows phase progress, overdue indicators, the latest comment, and attached files — synced automatically from Asana every 15 minutes.",
 ]
 
 
