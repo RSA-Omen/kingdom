@@ -99,7 +99,7 @@ def humanise_commit(msg: str) -> str:
 # Updated by /kingdom-checkpoint at the end of each work session.
 # One plain-English entry per completed feature. Replace with current week's work.
 RECENT_ADDITIONS = [
-    "Capital API error deduplication — the same error reported multiple times by a village now updates a single row instead of creating new rows. The `occurrence_count` and `last_seen_at` columns track how often and how recently an error has fired. The Guild Board's incident feed now reads these counts directly, so the '×4' badge on an incident card reflects the true repeat count rather than how many rows happened to survive the fingerprint grouping.",
+    "Company Projects tracker — board-approved Asana projects are now enrolled in the Kingdom by pasting a task URL. The dashboard shows each project's phase progress, overdue indicators, latest comment, and attached files — all synced from Asana every 15 minutes without anyone having to open Asana.",
 ]
 
 

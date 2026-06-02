@@ -49,6 +49,12 @@ Each gets a `council/<role>/` subfolder when its build begins, not before. Names
 - [x] [P2] Delivery: Telegram (primary) *(web edition and email still pending)*
 - [x] [P2] Morning ritual: deliver around 06:00 CAT before the king wakes
 
+## Company Projects tracker
+
+Asana tasks-as-projects enrolled by the king, deep-synced every 15 minutes (subtasks as phases, comments thread, attachments). Lives at `/projects` on the Kingdom dashboard.
+
+- [x] [P1] **Built 2026-06-02** — migration `024_projects.sql` (4 tables), Asana subtask/attachment fetchers, `projectSync.ts` service, `/api/projects` CRUD + enroll route, `/projects` list page (enroll form, progress bars, overdue badges), `/projects/[id]` detail page (phase checklist, comments thread, attachments, sync/unenroll actions). Sidebar wired. 15-min periodic sync starts with the API container.
+
 ## The Guild Board — the king's single pane of glass
 
 The operator's command centre. Pulls from Asana (Lord Chamberlain's triaged tasks), Capital DB (errors as incidents), and GitHub (multi-repo open issues). Three views: Queue · Chain · Evolution. Lives at `/guild-board` on the Kingdom dashboard. Design bundle from claude.ai/design; CI Desk variant. Theme: Void Teal.
