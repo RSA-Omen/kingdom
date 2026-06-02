@@ -20,8 +20,10 @@ import checkpointsRouter from './routes/checkpoints';
 import todosRouter from './routes/todos';
 import githubSyncRouter from './routes/githubSync';
 import guildBoardRouter from './routes/guildBoard';
+import projectsRouter from './routes/projects';
 import { healthService } from './services/health';
 import { schedulerService } from './services/scheduler';
+import { startProjectSync, stopProjectSync } from './services/projectSync';
 import { db } from './models/database';
 
 dotenv.config();
@@ -105,6 +107,9 @@ app.use('/api/bureau', bureauRouter);
 // Guild Board feed (no auth required - read-only aggregation for the king's dashboard)
 app.use('/api/guild-board', guildBoardRouter);
 
+// Projects registry (no auth required - king's internal project tracker)
+app.use('/api/projects', projectsRouter);
+
 // Error handling
 app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
   console.error('Error:', err);
@@ -127,6 +132,9 @@ app.listen(PORT, () => {
   
   // Start scheduler service (for dependency checks)
   schedulerService.start();
+
+  // Start project sync (15-minute Asana deep-sync for enrolled projects)
+  startProjectSync();
 });
 
 // Graceful shutdown
@@ -134,6 +142,7 @@ process.on('SIGTERM', () => {
   console.log('SIGTERM received, shutting down gracefully');
   healthService.stopPeriodicChecks();
   schedulerService.stop();
+  stopProjectSync();
   process.exit(0);
 });
 
@@ -141,6 +150,7 @@ process.on('SIGINT', () => {
   console.log('SIGINT received, shutting down gracefully');
   healthService.stopPeriodicChecks();
   schedulerService.stop();
+  stopProjectSync();
   process.exit(0);
 });
 
