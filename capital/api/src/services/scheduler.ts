@@ -568,6 +568,27 @@ class SchedulerService {
       } else {
         console.log('[Scheduler] Checkpoint events table already exists');
       }
+
+      // Check for projects table (migration 024)
+      const projectsTableExists = dbInstance.prepare(`
+        SELECT name FROM sqlite_master
+        WHERE type='table' AND name='projects'
+      `).get();
+
+      if (!projectsTableExists) {
+        console.log('[Scheduler] Running migration 024_projects.sql...');
+        const migrationPath = join(migrationsDir, '024_projects.sql');
+
+        if (existsSync(migrationPath)) {
+          const migrationSQL = readFileSync(migrationPath, 'utf-8');
+          dbInstance.exec(migrationSQL);
+          console.log('[Scheduler] Migration 024 completed');
+        } else {
+          console.warn(`[Scheduler] Migration file not found at ${migrationPath}`);
+        }
+      } else {
+        console.log('[Scheduler] Projects table already exists');
+      }
     } catch (error: any) {
       console.error('[Scheduler] Error running migrations:', error);
     }
