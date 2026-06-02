@@ -57,6 +57,7 @@ function Sidebar() {
       items: [
         { label: "Throne Room", slug: "/" },
         { label: "Guild Board", slug: "/guild-board" },
+        { label: "Projects", slug: "/projects" },
         { label: "Matters", slug: "/matters" },
         { label: "Telegraph", slug: "/telegraph" },
       ],

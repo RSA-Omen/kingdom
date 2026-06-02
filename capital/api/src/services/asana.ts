@@ -155,6 +155,49 @@ export async function addTaskComment(taskGid: string, text: string): Promise<str
   return body.data?.gid ?? '';
 }
 
+export type AsanaSubtask = {
+  gid: string;
+  name: string;
+  completed: boolean;
+  due_on: string | null;
+};
+
+export type AsanaAttachment = {
+  gid: string;
+  name: string;
+  download_url: string | null;
+  view_url: string | null;
+  created_at: string;
+};
+
+export async function getTaskSubtasks(taskGid: string): Promise<AsanaSubtask[]> {
+  const params = new URLSearchParams({
+    opt_fields: 'gid,name,completed,due_on',
+    limit: '100',
+  });
+  const url = `${ASANA_BASE_URL}/tasks/${taskGid}/subtasks?${params}`;
+  const resp = await fetch(url, { headers: authHeaders() });
+  if (!resp.ok) {
+    throw new Error(`Asana ${resp.status} fetching subtasks for ${taskGid}: ${await resp.text()}`);
+  }
+  const body = (await resp.json()) as { data: AsanaSubtask[] };
+  return body.data ?? [];
+}
+
+export async function getTaskAttachments(taskGid: string): Promise<AsanaAttachment[]> {
+  const params = new URLSearchParams({
+    opt_fields: 'gid,name,download_url,view_url,created_at',
+    limit: '100',
+  });
+  const url = `${ASANA_BASE_URL}/tasks/${taskGid}/attachments?${params}`;
+  const resp = await fetch(url, { headers: authHeaders() });
+  if (!resp.ok) {
+    throw new Error(`Asana ${resp.status} fetching attachments for ${taskGid}: ${await resp.text()}`);
+  }
+  const body = (await resp.json()) as { data: AsanaAttachment[] };
+  return body.data ?? [];
+}
+
 /**
  * Health-check the PAT. Returns true if 200, false on 401/403.
  * Other errors bubble up — they're not PAT problems.
